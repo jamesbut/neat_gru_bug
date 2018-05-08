@@ -15,7 +15,7 @@
   <!-- *************** -->
   <controllers>
 
-    <neat_gru_footbot_controller id="neat_gru_footbot_controller" library="src/argos/src/controllers/libneat_gru_footbot.so">
+    <neat_gru_footbot_controller id="neat_gru_footbot_controller" library="src/argos/src/controllers/libneat_gru_footbot_controller.so">
       <actuators>
         <differential_steering implementation="default"/>
       </actuators>
@@ -38,8 +38,8 @@
   <!-- * Loop functions * -->
   <!-- ****************** -->
 
-  <!-- <loop_functions library="src/argos/src/loop_functions/libmaster_loop_function.so"
-                  label="master_loop_function"/> -->
+  <loop_functions library="src/argos/src/loop_functions/libmaster_loop_function.so"
+                  label="master_loop_function"/>
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
@@ -80,14 +80,14 @@
 <box id="wall_4" size="0.1,14,0.5" movable="false">
 <body position="-7,0,0" orientation="0,0,0"/>
 </box>
-<!-- <foot-bot id="bot0">
-<body position="0,0,0" orientation="0,0,0" />
+<foot-bot id="bot0">
+<body position="-4,-4,0" orientation="0,0,0" />
 <controller config="neat_gru_footbot_controller"/>
-</foot-bot> -->
-<!-- <foot-bot id="bot1">
+</foot-bot>
+<foot-bot id="bot1">
 <body position="4,4,0" orientation="0,0,0" />
 <controller config="neat_gru_footbot_controller"/>
-</foot-bot> -->
+</foot-bot>
 </arena>
 
   <!-- ******************* -->
@@ -116,12 +116,12 @@
         Check 'argos3 -q qt-opengl' for more help.
     -->
 <!--Turn of GUI by commenting qt-opengl-->
-    <!-- <qt-opengl>
+    <qt-opengl>
      <camera>
         <placement idx="0" position="-5.5,-5.5,3" look_at="-4,-4,0" lens_focal_length="20" />
       </camera>
-      <user_functions library="libidloop.so"
-                      label="id_qtuser_functions" />
-    </qt-opengl> -->
+      <!-- <user_functions library="libidloop.so"
+                      label="id_qtuser_functions" /> -->
+    </qt-opengl>
   </visualization>
 </argos-configuration>

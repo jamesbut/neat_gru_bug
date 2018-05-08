@@ -25,10 +25,18 @@ include_directories(${catkin_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_D
 # Set ARGoS link dir
 link_directories(${ARGOS_LIBRARY_DIRS})
 
+# Set NEAT includes
+set(EXT_LIB_INCLUDES
+    ${CMAKE_SOURCE_DIR}/lib/)
+
 add_subdirectory(src/controllers)
-#add_subdirectory(src/loop_functions)
+add_subdirectory(src/loop_functions)
 
 add_library(argos_simulation SHARED src/argos_simulation.cpp)
+
+target_include_directories(argos_simulation PUBLIC
+   ${EXT_LIB_INCLUDES}
+   )
 
 target_link_libraries(argos_simulation
   argos3core_simulator

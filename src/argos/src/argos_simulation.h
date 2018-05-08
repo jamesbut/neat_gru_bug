@@ -1,6 +1,8 @@
 #ifndef ARGOS_SIMULATION_H
 #define ARGOS_SIMULATION_H
 
+#include <NEAT_GRU/include/organism.h>
+
 class ARGoS_simulation {
 
 public:
@@ -8,7 +10,7 @@ public:
    ARGoS_simulation();
    ~ARGoS_simulation();
 
-   void run();
+   void run(NEAT::Organism &org);
 
 private:
 

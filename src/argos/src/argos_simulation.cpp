@@ -17,7 +17,7 @@ ARGoS_simulation::ARGoS_simulation() {
 
 ARGoS_simulation::~ARGoS_simulation() {}
 
-void ARGoS_simulation::run() {
+void ARGoS_simulation::run(NEAT::Organism &org) {
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
    cSimulator.Reset();

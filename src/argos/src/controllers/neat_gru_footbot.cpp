@@ -7,7 +7,7 @@
 /****************************************/
 /****************************************/
 
-NEATGRUFootbot::NEATGRUFootbot() :
+NEATGRUFootbotController::NEATGRUFootbotController() :
       m_pcWheels(NULL),
       m_pcProximity(NULL),
       m_pcRangeBearing(NULL),
@@ -67,7 +67,7 @@ NEATGRUFootbot::NEATGRUFootbot() :
 
 }
 
-void NEATGRUFootbot::Init(TConfigurationNode& t_node) {
+void NEATGRUFootbotController::Init(TConfigurationNode& t_node) {
 
   // Get sensor/actuator handles
   m_pcWheels = GetActuator<CCI_DifferentialSteeringActuator>("differential_steering");
@@ -85,184 +85,184 @@ void NEATGRUFootbot::Init(TConfigurationNode& t_node) {
 
 }
 
-void NEATGRUFootbot::ControlStep() {
+void NEATGRUFootbotController::ControlStep() {
 
-  if(GetId()=="bot0")
-    {
-
-      /* Get readings from proximity sensor */
-      const CCI_FootBotProximitySensor::TReadings& tProxReads = m_pcProximity->GetReadings();
-
-      // Get readings from range and bearing sensor
-      const CCI_RangeAndBearingSensor::TReadings& tRabReads = m_pcRangeBearing->GetReadings();
-
-      //Include inputs for both the range and the bearing
-      for(int i = 0; i < tRabReads.size(); i++) {
-         net_inputs[(i*2)+1] = mapValueIntoRange(tRabReads[i].Range,
-                                            RANGE_SENSOR_LOWER_BOUND, RANGE_SENSOR_UPPER_BOUND,
-                                            NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
-
-         if(BEARING_SENSOR_ON) {
-            //Bearing sensor 1-0.5-1
-
-            //   net_inputs[(i*2)+2] = mapValueIntoRange(tRabReads[i].HorizontalBearing.GetValue(),
-            //                                       BEARING_SENSOR_LOWER_BOUND, BEARING_SENSOR_UPPER_BOUND,
-            //                                       NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
-
-            //Bearing sensor 1-0-1
-
-            //net_inputs[(i*2)+2] = mapHorizontalAngle(tRabReads[i].HorizontalBearing.GetValue());
-
-            //Bearing sensor - left and right bearing sensors
-
-            double bearing = tRabReads[i].HorizontalBearing.GetValue();
-            double left_bearing_angle, right_bearing_angle;
-
-            //Get the angular distances for each of the bearing sensors and normalise
-            if(bearing < 0) {
-               left_bearing_angle = mapValueIntoRange(abs(bearing),
-                                                      0, 2*M_PI,
-                                                      NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
-               right_bearing_angle = 1 - left_bearing_angle;
-            } else {
-               right_bearing_angle = mapValueIntoRange(bearing,
-                                                      0, 2*M_PI,
-                                                      NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
-               left_bearing_angle = 1 - right_bearing_angle;
-            }
-
-            //std::cout << right_bearing_angle << std::endl;
-            net_inputs[(i*2)+2] = right_bearing_angle;
-            net_inputs[(i*2)+3] = left_bearing_angle;
-
-         } else {
-
-            //Take previous angular velocity as input
-            net_inputs[(i*2)+2] = prev_ang_vel;
-
-            //If it is the first time step, set the previous ranges to the
-            //same as the first range rather than 0, otherwise the derivative
-            //makes it seem like the range has instantly changed.
-            if(first_time_step) {
-
-               range_tminus1 = net_inputs[1];
-               range_tminus2 = net_inputs[1];
-
-               first_time_step = false;
-
-            }
-
-            //Take first derivative of range as input
-            net_inputs[(i*2)+3] = net_inputs[1] - range_tminus1;
-
-            //Take second derivative of range as input
-            net_inputs[(i*2)+4] = (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2);
-
-            std::cout << "R: " << net_inputs[1] << std::endl;
-            std::cout << "Rt-1: " << range_tminus1 << std::endl;
-            std::cout << "Rt-2: " << range_tminus2 << std::endl;
-            std::cout << "R1deriv: " << net_inputs[1] - range_tminus1 << std::endl;
-            std::cout << "R2deriv: " << (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2) << std::endl;
-            std::cout << "----------------" << std::endl;
-
-         }
-      }
-
-      //std::cout << net_inputs.size() << std::endl;
-
-      //Proximity sensor inputs
-      if(PROX_SENSOR_ON) {
-
-         int net_input_index;
-         for(int i = 0; i < tProxReads.size(); i++) {
-
-            if(BEARING_SENSOR_ON) net_input_index = i+(tRabReads.size()*3)+1;
-            else net_input_index = i+(tRabReads.size()*4)+1;
-
-            //Inverted laser
-            double reading = tProxReads[i].Value;
-            if(reading == 0) net_inputs[net_input_index] = 0;
-            else net_inputs[net_input_index] = NET_INPUT_UPPER_BOUND - mapValueIntoRange(tProxReads[i].Value,
-                                                                     PROX_SENSOR_LOWER_BOUND, PROX_SENSOR_UPPER_BOUND,
-                                                                     NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
-
-         }
-      }
-
-      //  std::cout << "----------" <<std::endl;
-      //Net input testing
-      // for(int i = 0; i < net_inputs.size(); i++) {
-      //     std::cout << net_inputs[i] << std::endl;
-      // }
-      // std::cout << "----------" <<std::endl;
-
-      m_net->load_sensors(net_inputs);
-
-      if (!(m_net->activate())) std::cout << "Inputs disconnected from output!";
-
-      //Get outputs
-
-      if(LIN_VEL_ON) {
-
-         //Linear velocity - mapped to a maximum speed
-         //std::cout << m_net->outputs[0]->activation << std::endl;
-         double mapped_lin_vel = mapValueIntoRange(m_net->outputs[0]->activation,
-                                            NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
-                                            MIN_LINEAR_VEL, MAX_LINEAR_VEL);
-         //std::cout << mapped_lin_vel << std::endl;
-         //mapped_lin_vel = 10;
-         //Angular velocity - mapped to a maximum turning speed
-         //std::cout << m_net->outputs[1]->activation << std::endl;
-         double mapped_ang_vel = mapValueIntoRange(m_net->outputs[1]->activation,
-                                            NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
-                                            MIN_ANGULAR_VEL, MAX_ANGULAR_VEL);
-         //std::cout << m_net->outputs[1]->activation << std::endl;
-         //mapped_ang_vel = 100;
-         //This function changes leftSpeed and rightSpeed
-         ConvertLinVelToWheelSpeed(mapped_lin_vel, mapped_ang_vel);
-
-         //Set currently angular vel as previous angular vel
-         prev_ang_vel = m_net->outputs[1]->activation;
-         //std:cout << "------------" << std::endl;
-         //std::cout << mapped_ang_vel << std::endl;
-         // std::cout << prev_ang_vel << std::endl;
-         // std::cout << "--------------" << std::endl;
-
-         //Set previous ranges
-         range_tminus2 = range_tminus1;
-         range_tminus1 = net_inputs[1];
-
-      } else {
-
-         leftSpeed = mapValueIntoRange(m_net->outputs[0]->activation,
-                                             NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
-                                             MIN_WHEEL_SPEED, MAX_WHEEL_SPEED);
-
-         rightSpeed = mapValueIntoRange(m_net->outputs[1]->activation,
-                                             NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
-                                             MIN_WHEEL_SPEED, MAX_WHEEL_SPEED);
-
-      }
-
-      //leftSpeed = 10.0;
-      //rightSpeed = 10.0;
-      //std::cout << leftSpeed << " " << rightSpeed << std::endl;
-      //std::cout << "------------" << std::endl;
-
-      m_pcWheels->SetLinearVelocity(leftSpeed, rightSpeed);
-
-    }
+  // if(GetId()=="bot0")
+  //   {
+  //
+  //     /* Get readings from proximity sensor */
+  //     const CCI_FootBotProximitySensor::TReadings& tProxReads = m_pcProximity->GetReadings();
+  //
+  //     // Get readings from range and bearing sensor
+  //     const CCI_RangeAndBearingSensor::TReadings& tRabReads = m_pcRangeBearing->GetReadings();
+  //
+  //     //Include inputs for both the range and the bearing
+  //     for(int i = 0; i < tRabReads.size(); i++) {
+  //        net_inputs[(i*2)+1] = mapValueIntoRange(tRabReads[i].Range,
+  //                                           RANGE_SENSOR_LOWER_BOUND, RANGE_SENSOR_UPPER_BOUND,
+  //                                           NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+  //
+  //        if(BEARING_SENSOR_ON) {
+  //           //Bearing sensor 1-0.5-1
+  //
+  //           //   net_inputs[(i*2)+2] = mapValueIntoRange(tRabReads[i].HorizontalBearing.GetValue(),
+  //           //                                       BEARING_SENSOR_LOWER_BOUND, BEARING_SENSOR_UPPER_BOUND,
+  //           //                                       NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+  //
+  //           //Bearing sensor 1-0-1
+  //
+  //           //net_inputs[(i*2)+2] = mapHorizontalAngle(tRabReads[i].HorizontalBearing.GetValue());
+  //
+  //           //Bearing sensor - left and right bearing sensors
+  //
+  //           double bearing = tRabReads[i].HorizontalBearing.GetValue();
+  //           double left_bearing_angle, right_bearing_angle;
+  //
+  //           //Get the angular distances for each of the bearing sensors and normalise
+  //           if(bearing < 0) {
+  //              left_bearing_angle = mapValueIntoRange(abs(bearing),
+  //                                                     0, 2*M_PI,
+  //                                                     NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+  //              right_bearing_angle = 1 - left_bearing_angle;
+  //           } else {
+  //              right_bearing_angle = mapValueIntoRange(bearing,
+  //                                                     0, 2*M_PI,
+  //                                                     NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+  //              left_bearing_angle = 1 - right_bearing_angle;
+  //           }
+  //
+  //           //std::cout << right_bearing_angle << std::endl;
+  //           net_inputs[(i*2)+2] = right_bearing_angle;
+  //           net_inputs[(i*2)+3] = left_bearing_angle;
+  //
+  //        } else {
+  //
+  //           //Take previous angular velocity as input
+  //           net_inputs[(i*2)+2] = prev_ang_vel;
+  //
+  //           //If it is the first time step, set the previous ranges to the
+  //           //same as the first range rather than 0, otherwise the derivative
+  //           //makes it seem like the range has instantly changed.
+  //           if(first_time_step) {
+  //
+  //              range_tminus1 = net_inputs[1];
+  //              range_tminus2 = net_inputs[1];
+  //
+  //              first_time_step = false;
+  //
+  //           }
+  //
+  //           //Take first derivative of range as input
+  //           net_inputs[(i*2)+3] = net_inputs[1] - range_tminus1;
+  //
+  //           //Take second derivative of range as input
+  //           net_inputs[(i*2)+4] = (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2);
+  //
+  //           std::cout << "R: " << net_inputs[1] << std::endl;
+  //           std::cout << "Rt-1: " << range_tminus1 << std::endl;
+  //           std::cout << "Rt-2: " << range_tminus2 << std::endl;
+  //           std::cout << "R1deriv: " << net_inputs[1] - range_tminus1 << std::endl;
+  //           std::cout << "R2deriv: " << (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2) << std::endl;
+  //           std::cout << "----------------" << std::endl;
+  //
+  //        }
+  //     }
+  //
+  //     //std::cout << net_inputs.size() << std::endl;
+  //
+  //     //Proximity sensor inputs
+  //     if(PROX_SENSOR_ON) {
+  //
+  //        int net_input_index;
+  //        for(int i = 0; i < tProxReads.size(); i++) {
+  //
+  //           if(BEARING_SENSOR_ON) net_input_index = i+(tRabReads.size()*3)+1;
+  //           else net_input_index = i+(tRabReads.size()*4)+1;
+  //
+  //           //Inverted laser
+  //           double reading = tProxReads[i].Value;
+  //           if(reading == 0) net_inputs[net_input_index] = 0;
+  //           else net_inputs[net_input_index] = NET_INPUT_UPPER_BOUND - mapValueIntoRange(tProxReads[i].Value,
+  //                                                                    PROX_SENSOR_LOWER_BOUND, PROX_SENSOR_UPPER_BOUND,
+  //                                                                    NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+  //
+  //        }
+  //     }
+  //
+  //     //  std::cout << "----------" <<std::endl;
+  //     //Net input testing
+  //     // for(int i = 0; i < net_inputs.size(); i++) {
+  //     //     std::cout << net_inputs[i] << std::endl;
+  //     // }
+  //     // std::cout << "----------" <<std::endl;
+  //
+  //     m_net->load_sensors(net_inputs);
+  //
+  //     if (!(m_net->activate())) std::cout << "Inputs disconnected from output!";
+  //
+  //     //Get outputs
+  //
+  //     if(LIN_VEL_ON) {
+  //
+  //        //Linear velocity - mapped to a maximum speed
+  //        //std::cout << m_net->outputs[0]->activation << std::endl;
+  //        double mapped_lin_vel = mapValueIntoRange(m_net->outputs[0]->activation,
+  //                                           NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
+  //                                           MIN_LINEAR_VEL, MAX_LINEAR_VEL);
+  //        //std::cout << mapped_lin_vel << std::endl;
+  //        //mapped_lin_vel = 10;
+  //        //Angular velocity - mapped to a maximum turning speed
+  //        //std::cout << m_net->outputs[1]->activation << std::endl;
+  //        double mapped_ang_vel = mapValueIntoRange(m_net->outputs[1]->activation,
+  //                                           NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
+  //                                           MIN_ANGULAR_VEL, MAX_ANGULAR_VEL);
+  //        //std::cout << m_net->outputs[1]->activation << std::endl;
+  //        //mapped_ang_vel = 100;
+  //        //This function changes leftSpeed and rightSpeed
+  //        ConvertLinVelToWheelSpeed(mapped_lin_vel, mapped_ang_vel);
+  //
+  //        //Set currently angular vel as previous angular vel
+  //        prev_ang_vel = m_net->outputs[1]->activation;
+  //        //std:cout << "------------" << std::endl;
+  //        //std::cout << mapped_ang_vel << std::endl;
+  //        // std::cout << prev_ang_vel << std::endl;
+  //        // std::cout << "--------------" << std::endl;
+  //
+  //        //Set previous ranges
+  //        range_tminus2 = range_tminus1;
+  //        range_tminus1 = net_inputs[1];
+  //
+  //     } else {
+  //
+  //        leftSpeed = mapValueIntoRange(m_net->outputs[0]->activation,
+  //                                            NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
+  //                                            MIN_WHEEL_SPEED, MAX_WHEEL_SPEED);
+  //
+  //        rightSpeed = mapValueIntoRange(m_net->outputs[1]->activation,
+  //                                            NET_OUTPUT_LOWER_BOUND, NET_OUTPUT_UPPER_BOUND,
+  //                                            MIN_WHEEL_SPEED, MAX_WHEEL_SPEED);
+  //
+  //     }
+  //
+  //     //leftSpeed = 10.0;
+  //     //rightSpeed = 10.0;
+  //     //std::cout << leftSpeed << " " << rightSpeed << std::endl;
+  //     //std::cout << "------------" << std::endl;
+  //
+  //     m_pcWheels->SetLinearVelocity(leftSpeed, rightSpeed);
+  //
+  //   }
 
 }
 
 
-double NEATGRUFootbot::mapHorizontalAngle(double angle) {
+double NEATGRUFootbotController::mapHorizontalAngle(double angle) {
 
    return abs(1/M_PI * angle);
 
 }
 
-void NEATGRUFootbot::ConvertLinVelToWheelSpeed(Real linear_x, Real angular_z) {
+void NEATGRUFootbotController::ConvertLinVelToWheelSpeed(Real linear_x, Real angular_z) {
 
   Real v = linear_x;// Forward speed
   Real w = angular_z; // Rotational speed
@@ -275,7 +275,7 @@ void NEATGRUFootbot::ConvertLinVelToWheelSpeed(Real linear_x, Real angular_z) {
   //stepsSinceCallback = 0;
 }
 
-double NEATGRUFootbot::mapValueIntoRange(const double input, const double input_start,
+double NEATGRUFootbotController::mapValueIntoRange(const double input, const double input_start,
                                            const double input_end, const double output_start,
                                            const double output_end) {
 
@@ -288,7 +288,7 @@ double NEATGRUFootbot::mapValueIntoRange(const double input, const double input_
 
 }
 
-void NEATGRUFootbot::Reset() {
+void NEATGRUFootbotController::Reset() {
 
    // delete neatOrg;
    // //Read in new genome
@@ -311,7 +311,7 @@ void NEATGRUFootbot::Reset() {
 
    //delete start_genome;
 
-   net_inputs[0] = 1.0;                            //Bias node
+   //net_inputs[0] = 1.0;                            //Bias node
 
    //Initialise inputs
    // for(int i = 1; i < m_net->inputs.size(); i++) {
@@ -321,11 +321,11 @@ void NEATGRUFootbot::Reset() {
    //
    // }
 
-   prev_ang_vel = 0;
+   //prev_ang_vel = 0;
 
 }
 
-void NEATGRUFootbot::SetNEATNet(NEAT::Network &net) {
+void NEATGRUFootbotController::SetNEATNet(NEAT::Network &net) {
 
    m_net = &net;
 
@@ -341,4 +341,4 @@ void NEATGRUFootbot::SetNEATNet(NEAT::Network &net) {
  * controller class to instantiate.
  * See also the configuration files for an example of how this is used.
  */
-REGISTER_CONTROLLER(NEATGRUFootbot, "neat_gru_footbot_controller")
+REGISTER_CONTROLLER(NEATGRUFootbotController, "neat_gru_footbot_controller")

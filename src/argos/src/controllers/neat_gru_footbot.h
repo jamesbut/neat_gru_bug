@@ -12,12 +12,12 @@ using namespace argos;
 
 #define NUMOFBOTS 2
 
-class NEATGRUFootbot : public CCI_Controller {
+class NEATGRUFootbotController : public CCI_Controller {
 
 public:
 
-  NEATGRUFootbot();
-  virtual ~NEATGRUFootbot() {}
+  NEATGRUFootbotController();
+  virtual ~NEATGRUFootbotController() {}
 
   /*
    * This function initializes the controller.

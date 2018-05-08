@@ -141,11 +141,9 @@ void GA::epoch() {
 
          std::cout << "Env: " << i+1 << std::endl;
 
-         std::cout << "Running trial.." << std::endl;
-
          //TODO: Do parallel stuff here
 
-         as.run();
+         as.run(*(neatPop->organisms[j]));
 
          //TODO: Populate trial scores as well here
 
