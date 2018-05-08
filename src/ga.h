@@ -18,6 +18,14 @@ public:
 
    void run();
 
+private:
+
+   virtual void initNEAT(std::string neat_param_file);
+
+   double getTrialScore(int trial, int org);
+
+   bool loadNEATParams(std::string neat_file);
+
    /**
     * Returns the current population.
     */
@@ -48,14 +56,6 @@ public:
     * Returns true if the evolution is finished, false otherwise.
     */
    virtual bool done() const;
-
-private:
-
-   virtual void initNEAT(std::string neat_param_file);
-
-   double getTrialScore(int trial, int org);
-
-   bool loadNEATParams(std::string neat_file);
 
 protected:
 

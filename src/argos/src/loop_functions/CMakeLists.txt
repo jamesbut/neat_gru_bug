@@ -1,0 +1,1 @@
+add_library(master_loop_function SHARED master_loop_function.cpp)

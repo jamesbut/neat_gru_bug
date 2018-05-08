@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <numeric>
+#include "argos/src/argos_simulation.h"
 
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
@@ -117,7 +118,6 @@ void GA::run() {
 
     }
 
-
 }
 
 // Evaluate 1 population
@@ -128,6 +128,8 @@ void GA::epoch() {
    double maxScore;
 
    NEAT::Organism* maxOrgan;
+
+   ARGoS_simulation as;
 
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
@@ -140,6 +142,10 @@ void GA::epoch() {
          std::cout << "Env: " << i+1 << std::endl;
 
          std::cout << "Running trial.." << std::endl;
+
+         //TODO: Do parallel stuff here
+
+         as.run();
 
          //TODO: Populate trial scores as well here
 
