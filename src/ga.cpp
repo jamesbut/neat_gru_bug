@@ -1,10 +1,17 @@
 #include "ga.h"
+#include <unistd.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+//#include <sys/stat.h>
+//#include <sys/types.h>
 
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
    NUM_ROBOTS(1),
    NUM_FLUSHES(3),
-   MUTATING_START(true)
+   MUTATING_START(true),
+   PARALLEL(false)
    {
 
    initNEAT(neat_param_file);
@@ -21,9 +28,20 @@ GA::GA(std::string neat_param_file) :
 
    }
 
+   if(PARALLEL) {
+
+      //Create shared memory block for master and slaves
+      shared_mem = new SharedMem(neatPop->organisms.size());
+
+   }
+
 }
 
-GA::~GA() {}
+GA::~GA() {
+
+   if(PARALLEL) delete shared_mem;
+
+}
 
 void GA::initNEAT(std::string neat_param_file) {
 
@@ -80,14 +98,6 @@ bool GA::loadNEATParams(std::string neat_file) {
 
 }
 
-const NEAT::Population* GA::getPopulation() const {
-   return neatPop;
-}
-
-int GA::getGeneration() const {
-   return m_unCurrentGeneration;
-}
-
 void GA::run() {
 
    //Start main loop....
@@ -96,15 +106,23 @@ void GA::run() {
    while(!done()) {
 
       //Evaluate current generation
-      epoch();
+      if(PARALLEL) {
+
+         parallel_epoch();
+
+      } else {
+
+         epoch();
+
+      }
 
       //Print organism scores
-      std::cout << "Generation #" << getGeneration() << "...";
+      std::cout << "Generation #" << m_unCurrentGeneration << "...";
       std::cout << " scores:";
 
-      for(int i = 0; i < getPopulation()->organisms.size(); ++i) {
+      for(int i = 0; i < neatPop->organisms.size(); ++i) {
 
-         std::cout << " " << getPopulation()->organisms[i]->fitness;
+         std::cout << " " << neatPop->organisms[i]->fitness;
 
       }
 
@@ -119,10 +137,6 @@ void GA::run() {
 // Evaluate 1 population
 void GA::epoch() {
 
-   //Create shared memory block for master and slaves
-   //The population size might change throughout so account for this
-   shared_mem = new SharedMem(neatPop->organisms.size());
-
    //Scores of max organism
    int maxOrg;
    double maxScore;
@@ -132,7 +146,7 @@ void GA::epoch() {
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
 
-      for(size_t j = 0; j < neatPop->organisms.size(); j++) {
+      for(size_t j = 0; j < NEAT::pop_size; j++) {
 
          std::cout << "Organism num: " << j << std::endl;
          std::cout << "Trial num: " << i << std::endl;
@@ -141,7 +155,14 @@ void GA::epoch() {
 
          //TODO: Do parallel stuff here
 
-         as.run(*(neatPop->organisms[j]));
+         //slave_PIDs.push_back(::fork());
+
+         //if(slave_PIDs.back() == 0) {
+
+            as.run(*(neatPop->organisms[j]), PARALLEL);
+
+         //}
+
 
          //TODO: Populate trial scores as well here
 
@@ -249,8 +270,143 @@ void GA::epoch() {
    //
    // std::cout << "Winning organism generation: " << (winner->winning_gen) << std::endl;
 
-   //Delete shared memory
-   delete shared_mem;
+
+}
+
+void GA::parallel_epoch() {
+
+   //Scores of max organism
+   int maxOrg;
+   double maxScore;
+
+   NEAT::Organism* maxOrgan;
+
+   //Run individual fitness tests
+   for(size_t i = 0; i < NEAT::num_trials; i++) {
+
+      for(size_t j = 0; j < NEAT::pop_size; j++) {
+
+         std::cout << "Organism num: " << j << std::endl;
+         std::cout << "Trial num: " << i << std::endl;
+
+         std::cout << "Env: " << i+1 << std::endl;
+
+         //TODO: Do parallel stuff here
+
+         slave_PIDs.push_back(::fork());
+
+         if(slave_PIDs.back() == 0) {
+
+            as.run(*(neatPop->organisms[j]), PARALLEL);
+
+         }
+
+
+         //TODO: Populate trial scores as well here
+
+      }
+
+   }
+
+
+   // for(int i = 0; i < NEAT::pop_size; i++) {
+   //
+   //    std::vector<double> individual_trial_scores(NEAT::num_trials);
+   //
+   //    for(int j = 0; j < NEAT::num_trials; j++) {
+   //
+   //       individual_trial_scores[j] = getTrialScore(j,i);
+   //
+   //    }
+   //
+   //    //double minTrial = *std::min_element(individual_trial_scores.begin(), individual_trial_scores.end());
+   //    double meanTrial = std::accumulate(individual_trial_scores.begin(), individual_trial_scores.end(), 0.0) / individual_trial_scores.size();
+   //    //double sumTrial = std::accumulate(individual_trial_scores.begin(), individual_trial_scores.end(), 0.0);
+   //
+   //    //neatPop->organisms[i]->fitness = minTrial;
+   //    neatPop->organisms[i]->fitness = meanTrial;
+   //    //neatPop->organisms[i]->fitness = sumTrial;
+   //
+   //    // Keep track of populations best organism
+   //    if (i == 0 || neatPop->organisms[i]->fitness > maxScore) {
+   //
+   //       maxScore = neatPop->organisms[i]->fitness;
+   //       //std::cout << "Organism winner number: " << i << std::endl;
+   //       maxOrg = i;
+   //       //maxOrgan = neatPop->organisms[i];
+   //
+   //    }
+   //
+   // }
+   //
+   // //Compare generational winner with overall winner
+   // //And then update overall winner
+   // if (m_unCurrentGeneration == 0 || maxScore > winner->fitness) {
+   //
+   //    //std::cout << "Updating winner!" << std::endl;
+   //    //winner = neatPop->organisms[maxOrg];
+   //    //winner = maxOrgan;
+   //    NEAT::Genome* new_genome;
+   //    NEAT::Organism* new_organism;
+   //    //std::cout << "Max org: " << maxOrg << std::endl;
+   //    new_genome = neatPop->organisms[maxOrg]->gnome->duplicate(1);
+   //
+   //    winner = new NEAT::Organism(maxScore,new_genome,1);
+   //    winner->winning_gen = (m_unCurrentGeneration+1);
+   //    //winner = new_organism;
+   //
+   // }
+
+   //Flush final generation winner
+   // if(m_unCurrentGeneration == NEAT::num_gens) {
+   //
+   //    std::stringstream ss;
+   //    ss << "ibug_working_directory/gen_" << m_unCurrentGeneration << "_winner";
+   //    std::string outFile = ss.str();
+   //
+   //    std::cout << " [Flushing final gen genome... ";
+   //
+   //    // Flush scores of best individual
+   //    neatPop->organisms[maxOrg]->gnome->print_to_filename(outFile.c_str());
+   //
+   //    std::cout << "done.]";
+   //
+   // }
+   //std::cout << "Vector size: " << flush_gens.size() << std::endl;
+
+   //Flush overall winner every 1/3 of the way through a run with different name
+   // if(std::find(flush_gens.begin(), flush_gens.end(), m_unCurrentGeneration) != flush_gens.end()) {
+   //
+   //    std::stringstream ss1;
+   //    std::stringstream ss2;
+   //
+   //    //TODO: Change these directories
+   //    ss1 << "ibug_working_directory/overall_winner_at_" << m_unCurrentGeneration;
+   //    ss2 << "ibug_working_directory/overall_winner_org_at_" << m_unCurrentGeneration;
+   //    std::string outfile = ss1.str();
+   //    std::string outfileOrg = ss2.str();
+   //
+   //    std::cout << " [Flushing winner from flush gens... ";
+   //
+   //    winner->gnome->print_to_filename(outfile.c_str());
+   //    winner->print_to_file(outfileOrg.c_str());
+   //
+   //    std::cout << " done.]" <<std::endl;
+   //
+   // }
+   //
+   // //Print out overall winner every generation
+   // std::string outfile = "ibug_working_directory/overall_winner";
+   // std::string outfileOrg = "ibug_working_directory/overall_winner_org";
+   //
+   // std::cout << " [Flushing winner... ";
+   //
+   // winner->gnome->print_to_filename(outfile.c_str());
+   // winner->print_to_file(outfileOrg.c_str());
+   //
+   // std::cout << " done.]" <<std::endl;
+   //
+   // std::cout << "Winning organism generation: " << (winner->winning_gen) << std::endl;
 
 }
 
@@ -275,12 +431,6 @@ bool GA::done() const {
 
 
 /* Function implementations for SharedMem class */
-
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-//#include <sys/stat.h>
-//#include <sys/types.h>
 
 GA::SharedMem::SharedMem(int population_size) : SHARED_MEMORY_FILE("/SHARED_MEMORY") {
 

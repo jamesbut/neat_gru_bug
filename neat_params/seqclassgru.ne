@@ -1,4 +1,4 @@
-trait_param_mut_prob 0.5 
+trait_param_mut_prob 0.5
 trait_mutation_power 1.0
 linktrait_mut_sig 1.0
 nodetrait_mut_sig 0.5
@@ -34,5 +34,5 @@ newlink_tries 20
 print_every 199
 babies_stolen 0
 num_runs 1
-num_gens 250
+num_gens 1
 num_trials 1

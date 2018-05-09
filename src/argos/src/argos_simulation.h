@@ -10,11 +10,15 @@ public:
    ARGoS_simulation();
    ~ARGoS_simulation();
 
-   void run(NEAT::Organism &org);
+   void run(NEAT::Organism &org, bool parallel);
+
+   void launch_argos(int individual);
 
 private:
 
    std::string ARGOS_FILE_NAME;
+
+   int m_individual;
 
 };
 

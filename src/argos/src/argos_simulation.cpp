@@ -4,6 +4,8 @@
 #include <argos3/core/simulator/simulator.h>
 #include "loop_functions/master_loop_function.h"
 
+#include <signal.h>
+
 ARGoS_simulation::ARGoS_simulation() {
 
    ARGOS_FILE_NAME = "../argos_params/no_walls.argos";
@@ -18,7 +20,7 @@ ARGoS_simulation::ARGoS_simulation() {
 
 ARGoS_simulation::~ARGoS_simulation() {}
 
-void ARGoS_simulation::run(NEAT::Organism &org) {
+void ARGoS_simulation::run(NEAT::Organism &org, bool parallel) {
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
@@ -31,5 +33,21 @@ void ARGoS_simulation::run(NEAT::Organism &org) {
 
    // Call terminate?
    cSimulator.Terminate();
+
+   if(parallel) {
+
+      ::raise(SIGTERM);
+
+   }
+
+}
+
+void ARGoS_simulation::launch_argos(int individual) {
+
+   m_individual = individual;
+
+   std::cout << "Launched " << m_individual << std::endl;
+
+   ::raise(SIGTERM);
 
 }

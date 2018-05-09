@@ -21,42 +21,20 @@ public:
 
 private:
 
-   virtual void initNEAT(std::string neat_param_file);
+   void initNEAT(std::string neat_param_file);
 
    double getTrialScore(int trial, int org);
 
    bool loadNEATParams(std::string neat_file);
 
-   /**
-    * Returns the current population.
-    */
-   const NEAT::Population* getPopulation() const;
+   void cleanup() {};
 
-   /**
-    * Returns the current generation.
-    */
-   int getGeneration() const;
+   void epoch();
+   void parallel_epoch();
 
-   /**
-    * Tidies up memory and close files.
-    * Used internally, don't call it from user code.
-    */
-   virtual void cleanup() {};
+   void nextGen();
 
-   /**
-    * Runs the trials to evaluate the current population.
-    */
-   virtual void epoch();
-
-   /**
-    * Executes the next generation.
-    */
-   virtual void nextGen();
-
-   /**
-    * Returns true if the evolution is finished, false otherwise.
-    */
-   virtual bool done() const;
+   bool done() const;
 
    /** Current generation */
    int m_unCurrentGeneration;
@@ -82,6 +60,8 @@ private:
    const int NUM_ROBOTS;
    const int NUM_FLUSHES;
    const int MUTATING_START;
+
+   const bool PARALLEL;
 
 
    //Class for shared memory management
@@ -114,6 +94,9 @@ private:
 
    //Shared memory object
    SharedMem* shared_mem;
+
+   //Slave pid's
+   std::vector<pid_t> slave_PIDs;
 
 };
 
