@@ -1,5 +1,6 @@
 #include "master_loop_function.h"
 
+
 MasterLoopFunction::MasterLoopFunction() {}
 
 MasterLoopFunction::~MasterLoopFunction() {}
@@ -9,9 +10,26 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
    // Find pointers to robots and their controllers
    find_robot_pointers();
 
+   fitness_score.Init(clever_bot, dead_bot);
+
 }
 
-void MasterLoopFunction::Reset() {}
+void MasterLoopFunction::PreStep() {
+
+   fitness_score.PreStep();
+
+}
+void MasterLoopFunction::PostExperiment() {
+
+   fitness_score.PostExperiment();
+
+}
+
+void MasterLoopFunction::Reset() {
+
+   fitness_score.Reset();
+
+}
 
 void MasterLoopFunction::configure_controller(NEAT::Network &net) {
 

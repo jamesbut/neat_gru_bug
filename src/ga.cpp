@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/wait.h>
 //#include <sys/stat.h>
 //#include <sys/types.h>
 
@@ -153,16 +154,7 @@ void GA::epoch() {
 
          std::cout << "Env: " << i+1 << std::endl;
 
-         //TODO: Do parallel stuff here
-
-         //slave_PIDs.push_back(::fork());
-
-         //if(slave_PIDs.back() == 0) {
-
-            as.run(*(neatPop->organisms[j]), PARALLEL);
-
-         //}
-
+         as.run(*(neatPop->organisms[j]), PARALLEL);
 
          //TODO: Populate trial scores as well here
 
@@ -284,12 +276,12 @@ void GA::parallel_epoch() {
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
 
-      for(size_t j = 0; j < NEAT::pop_size; j++) {
+      for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
-         std::cout << "Organism num: " << j << std::endl;
-         std::cout << "Trial num: " << i << std::endl;
+         //std::cout << "Organism num: " << j << std::endl;
+         //std::cout << "Trial num: " << i << std::endl;
 
-         std::cout << "Env: " << i+1 << std::endl;
+         //std::cout << "Env: " << i+1 << std::endl;
 
          //TODO: Do parallel stuff here
 
@@ -305,6 +297,28 @@ void GA::parallel_epoch() {
          //TODO: Populate trial scores as well here
 
       }
+
+      /* Wait for all the slaves to finish the run */
+      int unTrialsLeft = neatPop->organisms.size();
+      int nSlaveInfo;
+      pid_t tSlavePID;
+
+      while(unTrialsLeft > 0) {
+         /* Wait for next slave to finish */
+         tSlavePID = ::waitpid(-1, &nSlaveInfo, WUNTRACED);
+         // Check for failure
+         if(!WIFSIGNALED(nSlaveInfo)) {
+            std::cout << "Something weird happened with slave process" << std::endl;
+            exit(1);
+         }
+         /* All OK, one less slave to wait for */
+         --unTrialsLeft;
+      }
+
+      //Clear slave pids
+      slave_PIDs.clear();
+
+      //Collect scores
 
    }
 
