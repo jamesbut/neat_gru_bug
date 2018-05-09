@@ -119,6 +119,10 @@ void GA::run() {
 // Evaluate 1 population
 void GA::epoch() {
 
+   //Create shared memory block for master and slaves
+   //The population size might change throughout so account for this
+   shared_mem = new SharedMem(neatPop->organisms.size());
+
    //Scores of max organism
    int maxOrg;
    double maxScore;
@@ -128,7 +132,7 @@ void GA::epoch() {
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
 
-      for(size_t j = 0; j < NEAT::pop_size; j++) {
+      for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
          std::cout << "Organism num: " << j << std::endl;
          std::cout << "Trial num: " << i << std::endl;
@@ -245,6 +249,9 @@ void GA::epoch() {
    //
    // std::cout << "Winning organism generation: " << (winner->winning_gen) << std::endl;
 
+   //Delete shared memory
+   delete shared_mem;
+
 }
 
 double GA::getTrialScore(int trial, int org) {
@@ -265,4 +272,67 @@ bool GA::done() const {
    return m_unCurrentGeneration >= NEAT::num_gens;
 }
 
-void GA::cleanup() {}
+
+
+/* Function implementations for SharedMem class */
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+//#include <sys/stat.h>
+//#include <sys/types.h>
+
+GA::SharedMem::SharedMem(int population_size) : SHARED_MEMORY_FILE("/SHARED_MEMORY") {
+
+   m_popSize = population_size;
+
+   //Create shared mem file descriptor
+   m_sharedMemFD = ::shm_open(SHARED_MEMORY_FILE.c_str(),
+                               O_RDWR | O_CREAT,
+                               S_IRUSR | S_IWUSR);
+
+   //Check it has been initialised correctly
+   if(m_sharedMemFD < 0) {
+      ::perror(SHARED_MEMORY_FILE.c_str());
+      exit(1);
+   }
+
+   //Resize
+   size_t mem_size = m_popSize * sizeof(double);
+   ::ftruncate(m_sharedMemFD, mem_size);
+
+   //Get pointer
+   m_sharedMem = reinterpret_cast<double*>(
+      ::mmap(NULL,
+             mem_size,
+             PROT_READ | PROT_WRITE,
+             MAP_SHARED,
+             m_sharedMemFD,
+             0));
+
+   //Check for failure
+   if(m_sharedMem == MAP_FAILED) {
+      ::perror("shared memory");
+      exit(1);
+   }
+
+}
+
+GA::SharedMem::~SharedMem() {
+
+   munmap(m_sharedMem, m_popSize * sizeof(double));
+   close(m_sharedMemFD);
+   shm_unlink(SHARED_MEMORY_FILE.c_str());
+
+}
+
+double GA::SharedMem::get_fitness(int individual) {
+
+   return m_sharedMem[individual];
+
+}
+void GA::SharedMem::set_fitness(int individual, double fitness) {
+
+   m_sharedMem[individual] = fitness;
+
+}

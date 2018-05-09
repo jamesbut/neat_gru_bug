@@ -41,7 +41,7 @@ private:
     * Tidies up memory and close files.
     * Used internally, don't call it from user code.
     */
-   virtual void cleanup();
+   virtual void cleanup() {};
 
    /**
     * Runs the trials to evaluate the current population.
@@ -82,6 +82,38 @@ private:
    const int NUM_ROBOTS;
    const int NUM_FLUSHES;
    const int MUTATING_START;
+
+
+   //Class for shared memory management
+   class SharedMem {
+
+   public:
+
+      SharedMem(int population_size);
+      ~SharedMem();
+
+      double get_fitness(int individual);
+      void set_fitness(int individual, double fitness);
+
+   private:
+
+      // File name for shared memory area
+      const std::string SHARED_MEMORY_FILE;
+
+      // Shared mem file descriptor
+      int m_sharedMemFD;
+
+      // Shared mem pointer
+      double* m_sharedMem;
+
+      //Population size - this is stored in order to unmap the memory
+      //on destruction of the object
+      int m_popSize;
+
+   };
+
+   //Shared memory object
+   SharedMem* shared_mem;
 
 };
 

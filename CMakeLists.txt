@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME} src/main.cpp src/ga.cpp)
 target_link_libraries(neat_gru_bug
    neatGRULib
    argos_simulation
+   rt
    )
 
 set(EXT_LIB_INCLUDES
