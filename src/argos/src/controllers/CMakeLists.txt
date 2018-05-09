@@ -1,7 +1,7 @@
 set(EXT_LIB_INCLUDES
     ${CMAKE_SOURCE_DIR}/lib/)
 
-add_library(neat_gru_footbot_controller MODULE neat_gru_footbot.cpp)
+add_library(neat_gru_footbot_controller SHARED neat_gru_footbot_controller.cpp empty_controller.cpp)
 
 target_link_libraries(neat_gru_footbot_controller
   argos3core_simulator

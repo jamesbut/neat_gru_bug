@@ -40,4 +40,5 @@ target_include_directories(argos_simulation PUBLIC
 
 target_link_libraries(argos_simulation
   argos3core_simulator
+  master_loop_function
   )

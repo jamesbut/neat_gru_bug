@@ -34,7 +34,10 @@ void MasterLoopFunction::find_robot_pointers() {
              clever_bot = fb_pointer;
              clever_bot_controller = &dynamic_cast<NEATGRUFootbotController&>(clever_bot->GetControllableEntity().GetController());
           }
-          else if (fb_pointer->GetId() == "bot1") dead_bot = fb_pointer;
+          else if (fb_pointer->GetId() == "bot1") {
+             dead_bot = fb_pointer;
+             dead_bot_controller = &dynamic_cast<EmptyController&>(dead_bot->GetControllableEntity().GetController());
+          }
           else std::cout << "COULD NOT FIND ROBOT ENTITY - CHECK .argos FILE" << std::endl;
 
        }

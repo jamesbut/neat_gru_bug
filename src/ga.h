@@ -2,6 +2,7 @@
 #define GA_H
 
 #include <NEAT_GRU/include/population.h>
+#include "argos/src/argos_simulation.h"
 
 /*
  * A simple GA using NEAT.
@@ -57,8 +58,6 @@ private:
     */
    virtual bool done() const;
 
-protected:
-
    /** Current generation */
    int m_unCurrentGeneration;
 
@@ -67,6 +66,8 @@ protected:
 
    //Start genome for population
    NEAT::Genome* start_genome;
+
+   ARGoS_simulation as;
 
    //Keep track of overall winner over all generations.
    //I do this because it is often the case that the winner of the final

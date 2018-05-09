@@ -5,3 +5,7 @@ set(EXT_LIB_INCLUDES
 
 target_include_directories(master_loop_function PUBLIC
    ${EXT_LIB_INCLUDES})
+
+target_link_libraries(master_loop_function
+   neat_gru_footbot_controller
+   )

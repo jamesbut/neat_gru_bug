@@ -3,7 +3,8 @@
 
 #include <argos3/core/simulator/loop_functions.h>
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
-#include "../controllers/neat_gru_footbot.h"
+#include "../controllers/neat_gru_footbot_controller.h"
+#include "../controllers/empty_controller.h"
 
 using namespace argos;
 
@@ -27,6 +28,7 @@ private:
    CFootBotEntity* dead_bot;
 
    NEATGRUFootbotController* clever_bot_controller;
+   EmptyController* dead_bot_controller;
 
 };
 

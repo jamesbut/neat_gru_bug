@@ -2,6 +2,7 @@
 
 #include "argos_simulation.h"
 #include <argos3/core/simulator/simulator.h>
+#include "loop_functions/master_loop_function.h"
 
 ARGoS_simulation::ARGoS_simulation() {
 
@@ -20,6 +21,11 @@ ARGoS_simulation::~ARGoS_simulation() {}
 void ARGoS_simulation::run(NEAT::Organism &org) {
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
+
+   MasterLoopFunction& master_loop = dynamic_cast<MasterLoopFunction&>(cSimulator.GetLoopFunctions());
+
+   master_loop.configure_controller(*org.net);
+
    cSimulator.Reset();
    cSimulator.Execute();
 

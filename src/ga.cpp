@@ -1,8 +1,4 @@
 #include "ga.h"
-#include <iostream>
-#include <sstream>
-#include <numeric>
-#include "argos/src/argos_simulation.h"
 
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
@@ -128,8 +124,6 @@ void GA::epoch() {
    double maxScore;
 
    NEAT::Organism* maxOrgan;
-
-   ARGoS_simulation as;
 
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {

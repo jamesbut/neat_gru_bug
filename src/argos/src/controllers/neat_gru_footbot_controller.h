@@ -101,7 +101,7 @@ private:
   // message.
   Real leftSpeed, rightSpeed;
 
-  NEAT::Organism* neatOrg;
+  //NEAT::Organism* neatOrg;
   NEAT::Network* m_net;
 
   std::vector<float> net_inputs;
