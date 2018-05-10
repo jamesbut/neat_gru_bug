@@ -9,10 +9,10 @@
 
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
-   NUM_ROBOTS(1),
    NUM_FLUSHES(3),
    MUTATING_START(true),
-   PARALLEL(true)
+   PARALLEL(true),
+   as("../argos_params/no_walls.argos")
    {
 
    initNEAT(neat_param_file);
@@ -40,6 +40,8 @@ GA::GA(std::string neat_param_file) :
 
 GA::~GA() {
 
+   delete neatPop;
+   delete overall_winner;
    if(PARALLEL) delete shared_mem;
 
 }
@@ -61,7 +63,7 @@ void GA::initNEAT(std::string neat_param_file) {
    std::cout << "Reading in Genome id " << id << std::endl;
 
    //Initialise starting genome
-   start_genome = new NEAT::Genome(id,iFile);
+   NEAT::Genome* start_genome = new NEAT::Genome(id,iFile);
    iFile.close();
 
    //Spawn the Population
@@ -69,6 +71,8 @@ void GA::initNEAT(std::string neat_param_file) {
 
    if(MUTATING_START) neatPop = new NEAT::Population(start_genome,NEAT::pop_size);
    else neatPop = new NEAT::Population(start_genome,NEAT::pop_size,0.0);
+
+   delete start_genome;
 
    //Verify new population
    std::cout << "Verifying Spawned Pop" << std::endl;
@@ -138,32 +142,32 @@ void GA::run() {
 // Evaluate 1 population
 void GA::epoch() {
 
-   //Scores of max organism
-   int maxOrg;
-   double maxScore;
-
-   NEAT::Organism* maxOrgan;
+   std::vector<std::vector <double> > trial_scores(neatPop->organisms.size(), std::vector<double>(NEAT::num_trials));
 
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
 
-      for(size_t j = 0; j < NEAT::pop_size; j++) {
+      for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
          std::cout << "Organism num: " << j << std::endl;
          std::cout << "Trial num: " << i << std::endl;
 
          std::cout << "Env: " << i+1 << std::endl;
 
-         as.run(*(neatPop->organisms[j]));
-
-         //TODO: Populate trial scores as well here
+         trial_scores[j][i] = as.run(*(neatPop->organisms[j]));
+         std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
 
    }
 
+   collect_scores(trial_scores);
+
+   flush_winners();
+
 }
 
+//Evalute population in parallel
 void GA::parallel_epoch() {
 
    //Run individual fitness tests
@@ -268,12 +272,12 @@ void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
 void GA::flush_winners() {
 
    //Flush overall winner every 1/3 of the way through a run with different name
-   if(std::find(flush_gens.begin(), flush_gens.end(), m_unCurrentGeneration) != flush_gens.end()) {
+   if(std::find(flush_gens.begin(), flush_gens.end(), m_unCurrentGeneration+1) != flush_gens.end()) {
 
       std::stringstream ss1, ss2;
 
-      ss1 << "../winners/overall_winner_at_" << m_unCurrentGeneration;
-      ss2 << "../winners/overall_winner_org_at_" << m_unCurrentGeneration;
+      ss1 << "../winners/overall_winner_at_" << m_unCurrentGeneration+1;
+      ss2 << "../winners/overall_winner_org_at_" << m_unCurrentGeneration+1;
       std::string outfile = ss1.str();
       std::string outfileOrg = ss2.str();
 

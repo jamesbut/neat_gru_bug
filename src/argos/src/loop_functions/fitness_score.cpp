@@ -45,6 +45,8 @@ void FitnessScore::PostExperiment() {
 
    if (no_son_of_mine) fitness_score /= 10;
 
+   if (fitness_score < 0) fitness_score = 0;
+
 }
 
 void FitnessScore::calculate_bot_distance() {

@@ -25,7 +25,6 @@ private:
 
    bool loadNEATParams(std::string neat_file);
 
-   void cleanup() {};
    bool done() const;
 
    void epoch();
@@ -42,9 +41,6 @@ private:
    //Current population
    NEAT::Population* neatPop;
 
-   //Start genome for population
-   NEAT::Genome* start_genome;
-
    ARGoS_simulation as;
 
    //Keep track of overall winner over all generations.
@@ -54,7 +50,6 @@ private:
 
    std::vector<int> flush_gens;
 
-   const int NUM_ROBOTS;
    const int NUM_FLUSHES;
    const int MUTATING_START;
 

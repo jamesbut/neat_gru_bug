@@ -6,9 +6,8 @@
 
 #include <signal.h>
 
-ARGoS_simulation::ARGoS_simulation() {
-
-   ARGOS_FILE_NAME = "../argos_params/no_walls.argos";
+ARGoS_simulation::ARGoS_simulation(const std::string& argos_file) :
+   ARGOS_FILE_NAME(argos_file) {
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
    cSimulator.SetExperimentFileName(ARGOS_FILE_NAME);
@@ -32,15 +31,5 @@ double ARGoS_simulation::run(NEAT::Organism &org) {
    cSimulator.Execute();
 
    return master_loop.get_fitness_score();
-
-}
-
-void ARGoS_simulation::launch_argos(int individual) {
-
-   m_individual = individual;
-
-   std::cout << "Launched " << m_individual << std::endl;
-
-   ::raise(SIGTERM);
 
 }

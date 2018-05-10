@@ -7,7 +7,7 @@ add_subdirectory(src/argos)
 # Set ARGoS link dir
 link_directories(${ARGOS_LIBRARY_DIRS})
 
-add_executable(${PROJECT_NAME} src/main.cpp src/ga.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/ga.cpp src/individual_run.cpp)
 
 target_link_libraries(neat_gru_bug
    neatGRULib

@@ -1,10 +1,5 @@
 
-//#include "individual_run.h"
-
-#include <iostream>
-#include <cstdlib>
-#include <unistd.h>
-
+#include "individual_run.h"
 #include "ga.h"
 
 int main(int argc, char *argv[]) {
@@ -32,8 +27,8 @@ int main(int argc, char *argv[]) {
 
    } else {
 
-      // IndividualRun ir(argString);
-      // ir.run();
+      IndividualRun ir(argString);
+      ir.run();
 
    }
 
