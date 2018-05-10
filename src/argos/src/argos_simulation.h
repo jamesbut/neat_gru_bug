@@ -10,7 +10,8 @@ public:
    ARGoS_simulation();
    ~ARGoS_simulation();
 
-   void run(NEAT::Organism &org, bool parallel);
+   //Runs the experiment and returns the fitness score
+   double run(NEAT::Organism &org);
 
    void launch_argos(int individual);
 

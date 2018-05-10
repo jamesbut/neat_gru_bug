@@ -12,7 +12,7 @@ GA::GA(std::string neat_param_file) :
    NUM_ROBOTS(1),
    NUM_FLUSHES(3),
    MUTATING_START(true),
-   PARALLEL(false)
+   PARALLEL(true)
    {
 
    initNEAT(neat_param_file);
@@ -154,7 +154,7 @@ void GA::epoch() {
 
          std::cout << "Env: " << i+1 << std::endl;
 
-         as.run(*(neatPop->organisms[j]), PARALLEL);
+         as.run(*(neatPop->organisms[j]));
 
          //TODO: Populate trial scores as well here
 
@@ -278,18 +278,16 @@ void GA::parallel_epoch() {
 
       for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
-         //std::cout << "Organism num: " << j << std::endl;
-         //std::cout << "Trial num: " << i << std::endl;
-
-         //std::cout << "Env: " << i+1 << std::endl;
-
          //TODO: Do parallel stuff here
 
          slave_PIDs.push_back(::fork());
 
          if(slave_PIDs.back() == 0) {
 
-            as.run(*(neatPop->organisms[j]), PARALLEL);
+            as.run(*(neatPop->organisms[j]));
+
+            //Kill slave
+            ::raise(SIGTERM);
 
          }
 
@@ -304,6 +302,7 @@ void GA::parallel_epoch() {
       pid_t tSlavePID;
 
       while(unTrialsLeft > 0) {
+
          /* Wait for next slave to finish */
          tSlavePID = ::waitpid(-1, &nSlaveInfo, WUNTRACED);
          // Check for failure
@@ -313,12 +312,11 @@ void GA::parallel_epoch() {
          }
          /* All OK, one less slave to wait for */
          --unTrialsLeft;
+
       }
 
       //Clear slave pids
       slave_PIDs.clear();
-
-      //Collect scores
 
    }
 

@@ -10,24 +10,24 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
    // Find pointers to robots and their controllers
    find_robot_pointers();
 
-   fitness_score.Init(clever_bot, dead_bot);
+   fitness_score_loop.Init(clever_bot, dead_bot);
 
 }
 
 void MasterLoopFunction::PreStep() {
 
-   fitness_score.PreStep();
+   fitness_score_loop.PreStep();
 
 }
 void MasterLoopFunction::PostExperiment() {
 
-   fitness_score.PostExperiment();
+   fitness_score_loop.PostExperiment();
 
 }
 
 void MasterLoopFunction::Reset() {
 
-   fitness_score.Reset();
+   fitness_score_loop.Reset();
 
 }
 
@@ -59,6 +59,12 @@ void MasterLoopFunction::find_robot_pointers() {
           else std::cout << "COULD NOT FIND ROBOT ENTITY - CHECK .argos FILE" << std::endl;
 
        }
+
+}
+
+double MasterLoopFunction::get_fitness_score() {
+
+   return fitness_score_loop.get_fitness_score();
 
 }
 

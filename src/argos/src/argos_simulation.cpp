@@ -20,7 +20,7 @@ ARGoS_simulation::ARGoS_simulation() {
 
 ARGoS_simulation::~ARGoS_simulation() {}
 
-void ARGoS_simulation::run(NEAT::Organism &org, bool parallel) {
+double ARGoS_simulation::run(NEAT::Organism &org) {
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
@@ -31,14 +31,7 @@ void ARGoS_simulation::run(NEAT::Organism &org, bool parallel) {
    cSimulator.Reset();
    cSimulator.Execute();
 
-   // Call terminate?
-   cSimulator.Terminate();
-
-   if(parallel) {
-
-      ::raise(SIGTERM);
-
-   }
+   return master_loop.get_fitness_score();
 
 }
 

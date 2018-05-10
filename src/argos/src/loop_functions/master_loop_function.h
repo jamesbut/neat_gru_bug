@@ -23,6 +23,8 @@ public:
 
    void configure_controller(NEAT::Network &net);
 
+   double get_fitness_score();
+
 private:
 
    void find_robot_pointers();
@@ -33,7 +35,7 @@ private:
    NEATGRUFootbotController* clever_bot_controller;
    EmptyController* dead_bot_controller;
 
-   FitnessScore fitness_score;
+   FitnessScore fitness_score_loop;
 
 };
 

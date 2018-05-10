@@ -18,6 +18,8 @@ public:
    virtual void PreStep();
    virtual void PostExperiment();
 
+   double get_fitness_score();
+
 private:
 
    void calculate_bot_distance();
@@ -26,6 +28,11 @@ private:
    CFootBotEntity* m_dead_bot;
 
    double robots_distance;
+   double fitness_score;
+
+   bool no_son_of_mine;
+   const double CLOSE_TO_TOWER;
+   const double MAX_RANGE;
 
 };
 
