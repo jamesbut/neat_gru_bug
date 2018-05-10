@@ -23,18 +23,18 @@ private:
 
    void initNEAT(std::string neat_param_file);
 
-   double getTrialScore(int trial, int org);
-
    bool loadNEATParams(std::string neat_file);
 
    void cleanup() {};
+   bool done() const;
 
    void epoch();
    void parallel_epoch();
 
    void nextGen();
 
-   bool done() const;
+   void collect_scores(std::vector<std::vector <double> > trial_scores);
+   void flush_winners();
 
    /** Current generation */
    int m_unCurrentGeneration;
@@ -50,10 +50,7 @@ private:
    //Keep track of overall winner over all generations.
    //I do this because it is often the case that the winner of the final
    //generation is not the overall winner of all the generations.
-   NEAT::Organism* winner;
-
-   // Set up vector of scores for each trial
-   std::vector<double> trialScores;
+   NEAT::Organism* overall_winner;
 
    std::vector<int> flush_gens;
 
@@ -69,11 +66,11 @@ private:
 
    public:
 
-      SharedMem(int population_size);
+      SharedMem(int population_size, int num_trials);
       ~SharedMem();
 
-      double get_fitness(int individual);
-      void set_fitness(int individual, double fitness);
+      std::vector<double> get_fitness(int individual);
+      void set_fitness(int individual, int trial_num, double fitness);
 
    private:
 
@@ -89,6 +86,7 @@ private:
       //Population size - this is stored in order to unmap the memory
       //on destruction of the object
       int m_popSize;
+      int m_numTrials;
 
    };
 
