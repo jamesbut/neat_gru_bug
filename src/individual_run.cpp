@@ -17,7 +17,7 @@ void IndividualRun::run() {
 
    for(int i = 0; i < NUM_RUNS; i++) {
 
-      as.run(*org);
+      as.run(*org, i);
 
    }
 

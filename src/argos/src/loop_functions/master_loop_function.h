@@ -6,6 +6,8 @@
 #include "../controllers/neat_gru_footbot_controller.h"
 #include "../controllers/empty_controller.h"
 #include "fitness_score.h"
+//#include "environment_generator.h"
+#include "kim_environment_generator.h"
 
 using namespace argos;
 
@@ -22,6 +24,7 @@ public:
    virtual void PostExperiment();
 
    void configure_controller(NEAT::Network &net);
+   void set_env_num(int env_num);
 
    double get_fitness_score();
 
@@ -35,7 +38,13 @@ private:
    NEATGRUFootbotController* clever_bot_controller;
    EmptyController* dead_bot_controller;
 
+   int m_envNum;
+
    FitnessScore fitness_score_loop;
+   // EnvironmentGenerator environment_generator_loop;
+   RandomEnvironmentGenerator environment_generator_loop;
+
+   const bool GENERATE_ENVS;
 
 };
 

@@ -13,10 +13,10 @@ public:
    FitnessScore();
    ~FitnessScore();
 
-   virtual void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
-   virtual void Reset();
-   virtual void PreStep();
-   virtual void PostExperiment();
+   void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
+   void Reset();
+   void PreStep();
+   void PostExperiment();
 
    double get_fitness_score();
 

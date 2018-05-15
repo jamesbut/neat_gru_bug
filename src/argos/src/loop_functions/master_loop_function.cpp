@@ -1,16 +1,24 @@
 #include "master_loop_function.h"
 
 
-MasterLoopFunction::MasterLoopFunction() {}
+MasterLoopFunction::MasterLoopFunction() : GENERATE_ENVS(true) {}
 
 MasterLoopFunction::~MasterLoopFunction() {}
 
 void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
-   // Find pointers to robots and their controllers
+   //Find pointers to robots and their controllers
    find_robot_pointers();
 
    fitness_score_loop.Init(clever_bot, dead_bot);
+   if (GENERATE_ENVS) environment_generator_loop.Init();
+
+}
+
+void MasterLoopFunction::Reset() {
+
+   fitness_score_loop.Reset();
+   if (GENERATE_ENVS) environment_generator_loop.Reset(m_envNum);
 
 }
 
@@ -25,15 +33,15 @@ void MasterLoopFunction::PostExperiment() {
 
 }
 
-void MasterLoopFunction::Reset() {
-
-   fitness_score_loop.Reset();
-
-}
-
 void MasterLoopFunction::configure_controller(NEAT::Network &net) {
 
    clever_bot_controller->SetNEATNet(net);
+
+}
+
+void MasterLoopFunction::set_env_num(int env_num) {
+
+   m_envNum = env_num;
 
 }
 

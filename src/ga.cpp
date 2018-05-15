@@ -11,7 +11,7 @@ GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
    NUM_FLUSHES(3),
    MUTATING_START(true),
-   PARALLEL(true),
+   PARALLEL(false),
    as("../argos_params/no_walls.argos")
    {
 
@@ -154,7 +154,7 @@ void GA::epoch() {
 
          std::cout << "Env: " << i+1 << std::endl;
 
-         trial_scores[j][i] = as.run(*(neatPop->organisms[j]));
+         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), i);
          std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
@@ -180,7 +180,7 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j])));
+            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), i));
 
             //Kill slave
             ::raise(SIGTERM);
