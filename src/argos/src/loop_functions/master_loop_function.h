@@ -23,8 +23,9 @@ public:
    virtual void PreStep();
    virtual void PostExperiment();
 
-   void configure_controller(NEAT::Network &net);
-   void set_env_num(int env_num);
+   void configure_controller(NEAT::Network &net) {clever_bot_controller->SetNEATNet(net);};
+   void set_env_num(int env_num) {m_envNum = env_num;};
+   void set_env_reset(bool reset) {m_reset = reset;};
 
    double get_fitness_score();
 
@@ -39,9 +40,9 @@ private:
    EmptyController* dead_bot_controller;
 
    int m_envNum;
+   bool m_reset;
 
    FitnessScore fitness_score_loop;
-   // EnvironmentGenerator environment_generator_loop;
    RandomEnvironmentGenerator environment_generator_loop;
 
    const bool GENERATE_ENVS;

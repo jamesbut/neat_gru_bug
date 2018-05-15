@@ -18,7 +18,11 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 void MasterLoopFunction::Reset() {
 
    fitness_score_loop.Reset();
-   if (GENERATE_ENVS) environment_generator_loop.Reset(m_envNum);
+
+   if (GENERATE_ENVS && m_reset) {
+      environment_generator_loop.ClearEnvironment();
+      environment_generator_loop.Reset(m_envNum);
+   }
 
 }
 
@@ -30,18 +34,6 @@ void MasterLoopFunction::PreStep() {
 void MasterLoopFunction::PostExperiment() {
 
    fitness_score_loop.PostExperiment();
-
-}
-
-void MasterLoopFunction::configure_controller(NEAT::Network &net) {
-
-   clever_bot_controller->SetNEATNet(net);
-
-}
-
-void MasterLoopFunction::set_env_num(int env_num) {
-
-   m_envNum = env_num;
 
 }
 

@@ -17,7 +17,10 @@ void IndividualRun::run() {
 
    for(int i = 0; i < NUM_RUNS; i++) {
 
-      as.run(*org, i);
+      bool reset = false;
+      if (i = 0) reset = true;
+
+      as.run(*org, i, reset);
 
    }
 

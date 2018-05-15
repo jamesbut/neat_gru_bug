@@ -154,8 +154,11 @@ void GA::epoch() {
 
          std::cout << "Env: " << i+1 << std::endl;
 
-         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), i);
-         std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
+         bool reset = false;
+         if (j==0) reset = true;
+
+         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), i, reset);
+         //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
 
@@ -180,7 +183,7 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), i));
+            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), i, true));
 
             //Kill slave
             ::raise(SIGTERM);

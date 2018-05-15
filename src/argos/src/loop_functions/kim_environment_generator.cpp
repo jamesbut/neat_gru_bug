@@ -33,7 +33,7 @@ RandomEnvironmentGenerator::RandomEnvironmentGenerator() :
   total_boxes_generated(0),
   amount_of_openings(11),
   environment_accepted(false),
-  FILENAME_PREFIX("../argos_params/environments/kims_envs/rand_env_") {}
+  FILENAME_PREFIX("../argos_params/environments/rand_envs_14_2/rand_env_") {}
 
 
 void RandomEnvironmentGenerator::getRobotPositions()
@@ -62,7 +62,7 @@ void RandomEnvironmentGenerator::Init()
 
   environment_accepted =false;
   environment_width = (int)(cArenaSize.GetX()/2);
-  environment_height=(int)(cArenaSize.GetY()/2);
+  environment_height = (int)(cArenaSize.GetY()/2);
 
   /* Go through them */
   it_box = 0;
@@ -80,7 +80,7 @@ void RandomEnvironmentGenerator::Init()
 
 void RandomEnvironmentGenerator::ClearEnvironment()
 {
-  std::cout<<"Clear environment!!"<<std::endl;
+  std::cout<<"Clear environment"<<std::endl;
   CLoopFunctions loopfunction;
 
   if(total_boxes_generated!=0)

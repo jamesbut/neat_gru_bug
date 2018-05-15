@@ -19,7 +19,7 @@ ARGoS_simulation::ARGoS_simulation(const std::string& argos_file) :
 
 ARGoS_simulation::~ARGoS_simulation() {}
 
-double ARGoS_simulation::run(NEAT::Organism &org, int env_num) {
+double ARGoS_simulation::run(NEAT::Organism &org, int env_num, bool reset) {
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
@@ -27,6 +27,7 @@ double ARGoS_simulation::run(NEAT::Organism &org, int env_num) {
 
    master_loop.configure_controller(*org.net);
    master_loop.set_env_num(env_num);
+   master_loop.set_env_reset(reset);
 
    cSimulator.Reset();
    cSimulator.Execute();
