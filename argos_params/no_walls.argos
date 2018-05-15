@@ -119,17 +119,6 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
-  <visualization>
-    <!--
-        This shows how to add customized drawing in the world
-        using the qt user functions.
-        Check 'argos3 -q qt-opengl' for more help.
-    -->
-<!--Turn of GUI by commenting qt-opengl-->
-    <qt-opengl>
-     <camera>
-        <placement idx="0" position="-5.5,-5.5,3" look_at="-4,-4,0" lens_focal_length="20" />
-      </camera>
-    </qt-opengl>
-  </visualization>
+  <visualization/>
+
 </argos-configuration>

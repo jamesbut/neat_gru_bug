@@ -80,7 +80,7 @@ void RandomEnvironmentGenerator::Init()
 
 void RandomEnvironmentGenerator::ClearEnvironment()
 {
-  std::cout<<"Clear environment"<<std::endl;
+  //std::cout<<"Clear environment"<<std::endl;
   CLoopFunctions loopfunction;
 
   if(total_boxes_generated!=0)
@@ -104,7 +104,7 @@ void RandomEnvironmentGenerator::ClearEnvironment()
 
 void RandomEnvironmentGenerator::Reset(int env_num) {
 
-   cout<<"Regenerate Environment"<<endl;
+   //cout<<"Regenerate Environment"<<endl;
 
    //Create file name
    std::string file_name = FILENAME_PREFIX + std::to_string(env_num+1) + ".png";

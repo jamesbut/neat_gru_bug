@@ -11,7 +11,7 @@ GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
    NUM_FLUSHES(3),
    MUTATING_START(true),
-   PARALLEL(false),
+   PARALLEL(true),
    as("../argos_params/no_walls.argos")
    {
 
