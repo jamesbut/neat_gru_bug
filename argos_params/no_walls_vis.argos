@@ -91,7 +91,7 @@
 <body position="-7,0,0" orientation="0,0,0"/>
 </box>
 <foot-bot id="bot0">
-<body position="-4,-4,0" orientation="0,0,0" />
+<body position="-5.5,-5.5,0" orientation="0,0,0" />
 <controller config="neat_gru_footbot_controller"/>
 </foot-bot>
 <foot-bot id="bot1">

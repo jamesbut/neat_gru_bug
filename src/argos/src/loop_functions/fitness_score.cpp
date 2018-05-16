@@ -1,7 +1,7 @@
 #include "fitness_score.h"
 
 FitnessScore::FitnessScore() :
-   CLOSE_TO_TOWER(0.32),
+   CLOSE_TO_TOWER(1.0),    //TODO: Change this based on individual run or not
    MAX_RANGE(14.2),
    no_son_of_mine(false) {}
 

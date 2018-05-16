@@ -54,6 +54,7 @@ private:
    const int MUTATING_START;
 
    const bool PARALLEL;
+   const std::string ENV_PATH;
 
 
    //Class for shared memory management

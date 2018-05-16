@@ -32,8 +32,7 @@ RandomEnvironmentGenerator::RandomEnvironmentGenerator() :
   room_percentage(0.4f),
   total_boxes_generated(0),
   amount_of_openings(11),
-  environment_accepted(false),
-  FILENAME_PREFIX("../argos_params/environments/rand_envs_14_2/rand_env_") {}
+  environment_accepted(false) {}
 
 
 void RandomEnvironmentGenerator::getRobotPositions()
@@ -102,12 +101,9 @@ void RandomEnvironmentGenerator::ClearEnvironment()
 
 }
 
-void RandomEnvironmentGenerator::Reset(int env_num) {
+void RandomEnvironmentGenerator::Reset(std::string file_name) {
 
    //cout<<"Regenerate Environment"<<endl;
-
-   //Create file name
-   std::string file_name = FILENAME_PREFIX + std::to_string(env_num+1) + ".png";
 
     it_box = 0;
     if(file_name.length()==0)

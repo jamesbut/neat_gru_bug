@@ -21,7 +21,7 @@ void MasterLoopFunction::Reset() {
 
    if (GENERATE_ENVS && m_reset) {
       environment_generator_loop.ClearEnvironment();
-      environment_generator_loop.Reset(m_envNum);
+      environment_generator_loop.Reset(m_envPath);
    }
 
 }
@@ -31,6 +31,7 @@ void MasterLoopFunction::PreStep() {
    fitness_score_loop.PreStep();
 
 }
+
 void MasterLoopFunction::PostExperiment() {
 
    fitness_score_loop.PostExperiment();

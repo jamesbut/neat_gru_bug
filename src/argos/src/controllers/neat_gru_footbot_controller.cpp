@@ -110,13 +110,12 @@ void NEATGRUFootbotController::ControlStep() {
          //net_inputs[(i*2)+2] = mapHorizontalAngle(tRabReads[i].HorizontalBearing.GetValue());
 
          //Bearing sensor - left and right bearing sensors
-
          double bearing = tRabReads[i].HorizontalBearing.GetValue();
          double left_bearing_angle, right_bearing_angle;
 
          //Get the angular distances for each of the bearing sensors and normalise
          if(bearing < 0) {
-            left_bearing_angle = mapValueIntoRange(abs(bearing),
+            left_bearing_angle = mapValueIntoRange(fabs(bearing),
                                                    0, 2*M_PI,
                                                    NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
             right_bearing_angle = 1 - left_bearing_angle;
@@ -127,7 +126,6 @@ void NEATGRUFootbotController::ControlStep() {
             left_bearing_angle = 1 - right_bearing_angle;
          }
 
-         //std::cout << right_bearing_angle << std::endl;
          net_inputs[(i*2)+2] = right_bearing_angle;
          net_inputs[(i*2)+3] = left_bearing_angle;
 
@@ -163,8 +161,6 @@ void NEATGRUFootbotController::ControlStep() {
 
       }
    }
-
-   //std::cout << net_inputs.size() << std::endl;
 
    //Proximity sensor inputs
    if(PROX_SENSOR_ON) {
@@ -242,8 +238,8 @@ void NEATGRUFootbotController::ControlStep() {
 
    //leftSpeed = 10.0;
    //rightSpeed = 10.0;
-   //std::cout << leftSpeed << " " << rightSpeed << std::endl;
-   //std::cout << "------------" << std::endl;
+   // std::cout << leftSpeed << " " << rightSpeed << std::endl;
+   // std::cout << "------------" << std::endl;
 
    m_pcWheels->SetLinearVelocity(leftSpeed, rightSpeed);
 
@@ -290,6 +286,8 @@ void NEATGRUFootbotController::Reset() {
    net_outputs.resize(m_net->outputs.size());
 
    net_inputs[0] = 1.0;                            //Bias node
+
+   m_net->flush();
 
    //prev_ang_vel = 0;
 

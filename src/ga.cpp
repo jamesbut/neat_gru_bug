@@ -6,13 +6,15 @@
 #include <sys/wait.h>
 #include <numeric>
 #include <sstream>
+#include <boost/filesystem.hpp>
 
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
    NUM_FLUSHES(3),
    MUTATING_START(true),
    PARALLEL(true),
-   as("../argos_params/no_walls.argos")
+   as("../argos_params/no_walls.argos"),
+   ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    {
 
    initNEAT(neat_param_file);
@@ -157,7 +159,10 @@ void GA::epoch() {
          bool reset = false;
          if (j==0) reset = true;
 
-         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), i, reset);
+         //Create file name
+         std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
+
+         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, reset);
          //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
@@ -183,7 +188,10 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), i, true));
+            //Create file name
+            std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
+
+            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, true));
 
             //Kill slave
             ::raise(SIGTERM);
@@ -276,6 +284,10 @@ void GA::flush_winners() {
 
    //Flush overall winner every 1/3 of the way through a run with different name
    if(std::find(flush_gens.begin(), flush_gens.end(), m_unCurrentGeneration+1) != flush_gens.end()) {
+
+      //Create directory if it already does not exist
+      if (!boost::filesystem::exists("../winners/"))
+         boost::filesystem::create_directories("../winners");
 
       std::stringstream ss1, ss2;
 

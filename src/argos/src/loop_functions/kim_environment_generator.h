@@ -46,7 +46,7 @@ class RandomEnvironmentGenerator
 public:
   RandomEnvironmentGenerator();
   void Init();
-  void Reset(int env_num);
+  void Reset(std::string file_name);
   void Destroy();
 
   void initializeGrid();
@@ -97,8 +97,6 @@ private:
   bool corridors_are_connected;
 
   int _map_request_type;
-
-  const std::string FILENAME_PREFIX;
 
 };
 

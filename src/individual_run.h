@@ -21,6 +21,7 @@ private:
    ARGoS_simulation as;
 
    const int NUM_RUNS;
+   const std::string ENV_PATH;
 
 };
 
