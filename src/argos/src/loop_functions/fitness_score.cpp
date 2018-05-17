@@ -1,7 +1,6 @@
 #include "fitness_score.h"
 
 FitnessScore::FitnessScore() :
-   CLOSE_TO_TOWER(1.0),    //TODO: Change this based on individual run or not
    MAX_RANGE(14.2),
    no_son_of_mine(false) {}
 
@@ -14,15 +13,22 @@ void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
 }
 
-void FitnessScore::Reset() {
+void FitnessScore::Reset(bool indv_run) {
 
    robots_distance = 0;
    no_son_of_mine = false;
    fitness_score = 0;
 
+   if(indv_run) CLOSE_TO_TOWER = 1.0;
+   else CLOSE_TO_TOWER = 0.32;
+
 }
 
 void FitnessScore::PreStep() {
+
+   //Check for collisions
+   if(no_son_of_mine==false && m_clever_bot->GetEmbodiedEntity().IsCollidingWithSomething())
+      no_son_of_mine = true;
 
    //Calculate distance between bots
    calculate_bot_distance();
@@ -46,6 +52,8 @@ void FitnessScore::PostExperiment() {
    if (no_son_of_mine) fitness_score /= 10;
 
    if (fitness_score < 0) fitness_score = 0;
+
+   std::cout << "Fitness: " << fitness_score << std::endl;
 
 }
 

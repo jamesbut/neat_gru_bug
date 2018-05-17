@@ -17,7 +17,7 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
 void MasterLoopFunction::Reset() {
 
-   fitness_score_loop.Reset();
+   fitness_score_loop.Reset(m_indvRun);
 
    if (GENERATE_ENVS && m_reset) {
       environment_generator_loop.ClearEnvironment();

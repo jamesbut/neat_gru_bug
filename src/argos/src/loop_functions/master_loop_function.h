@@ -26,6 +26,7 @@ public:
    void configure_controller(NEAT::Network &net) {clever_bot_controller->SetNEATNet(net);};
    void set_env_path(std::string env_path) {m_envPath = env_path;};
    void set_env_reset(bool reset) {m_reset = reset;};
+   void set_indv_run(bool indv_run) {m_indvRun = indv_run;};
 
    double get_fitness_score();
 
@@ -41,6 +42,7 @@ private:
 
    std::string m_envPath;
    bool m_reset;
+   bool m_indvRun;
 
    FitnessScore fitness_score_loop;
    RandomEnvironmentGenerator environment_generator_loop;

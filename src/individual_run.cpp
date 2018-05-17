@@ -4,6 +4,7 @@ IndividualRun::IndividualRun(const std::string& gf) :
    NUM_RUNS(209),
    as("../argos_params/no_walls.argos"),
    ENV_PATH("../argos_params/environments/kim_envs/rand_env_")
+   //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    {
 
    readGenomeFile(gf);
@@ -23,7 +24,7 @@ void IndividualRun::run() {
       //Create file name
       std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
 
-      double fitness = as.run(*org, file_name, true);
+      double fitness = as.run(*org, file_name, true, true);
 
       if (fitness > 13.2) num_finishes++;
 

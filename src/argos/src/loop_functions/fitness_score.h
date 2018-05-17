@@ -14,7 +14,7 @@ public:
    ~FitnessScore();
 
    void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
-   void Reset();
+   void Reset(bool indv_run);
    void PreStep();
    void PostExperiment();
 
@@ -31,7 +31,7 @@ private:
    double fitness_score;
 
    bool no_son_of_mine;
-   const double CLOSE_TO_TOWER;
+   double CLOSE_TO_TOWER;
    const double MAX_RANGE;
 
 };

@@ -31,12 +31,8 @@ GA::GA(std::string neat_param_file) :
 
    }
 
-   if(PARALLEL) {
-
-      //Create shared memory block for master and slaves
-      shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials);
-
-   }
+   //Create shared memory block for master and slaves
+   if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials);
 
 }
 
@@ -162,7 +158,7 @@ void GA::epoch() {
          //Create file name
          std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
 
-         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, reset);
+         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, reset, false);
          //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
@@ -191,7 +187,7 @@ void GA::parallel_epoch() {
             //Create file name
             std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
 
-            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, true));
+            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, true, false));
 
             //Kill slave
             ::raise(SIGTERM);
@@ -304,6 +300,8 @@ void GA::flush_winners() {
       std::cout << " done.]" <<std::endl;
 
    }
+
+   std::cout << "Winning organism generation: " << (overall_winner->winning_gen) << std::endl;
 
 }
 
