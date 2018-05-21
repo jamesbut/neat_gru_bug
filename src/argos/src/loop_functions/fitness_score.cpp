@@ -53,8 +53,6 @@ void FitnessScore::PostExperiment() {
 
    if (fitness_score < 0) fitness_score = 0;
 
-   std::cout << "Fitness: " << fitness_score << std::endl;
-
 }
 
 void FitnessScore::calculate_bot_distance() {

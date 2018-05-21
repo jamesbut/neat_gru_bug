@@ -19,9 +19,9 @@ mutate_link_weights_prob 0.8
 mutate_gru_link_weights_prob 0.5
 mutate_toggle_enable_prob 0.0
 mutate_gene_reenable_prob 0.0
-mutate_add_node_prob 0.0
-mutate_gru_add_node_prob 0.001
-mutate_add_link_prob 0.01
+mutate_add_node_prob 0.003
+mutate_gru_add_node_prob 0.0015
+mutate_add_link_prob 0.02
 interspecies_mate_rate 0.001
 mate_multipoint_prob 0.6
 mate_multipoint_avg_prob 0.4
@@ -29,10 +29,10 @@ mate_singlepoint_prob 0.0
 mate_only_prob 0.2
 recur_only_prob 0.2
 pop_size 150
-dropoff_age 15
+dropoff_age 25
 newlink_tries 20
 print_every 199
 babies_stolen 0
 num_runs 1
-num_gens 300
-num_trials 10
+num_gens 500
+num_trials 20
