@@ -51,7 +51,7 @@ private:
    std::vector<int> flush_gens;
 
    const int NUM_FLUSHES;
-   const int MUTATING_START;
+   const int INCREMENTAL_EV;
 
    const bool PARALLEL;
    const std::string ENV_PATH;

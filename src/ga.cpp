@@ -11,10 +11,11 @@
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
    NUM_FLUSHES(3),
-   MUTATING_START(true),
+   INCREMENTAL_EV(true),
    PARALLEL(true),
    as("../argos_params/no_walls.argos"),
-   ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
+   //ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
+   ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    {
 
    initNEAT(neat_param_file);
@@ -52,8 +53,10 @@ void GA::initNEAT(std::string neat_param_file) {
 
    char curword[20];
    int id;
+   std::ifstream iFile;
 
-   std::ifstream iFile ("../starting_genomes/start_genome");
+   if(!INCREMENTAL_EV) iFile = std::ifstream("../starting_genomes/start_genome");
+   else iFile = std::ifstream("../starting_genomes/g44");
 
    iFile >> curword;
    iFile >> id;
@@ -67,7 +70,7 @@ void GA::initNEAT(std::string neat_param_file) {
    //Spawn the Population
    std::cout << "Spawning Population off Genome" << std::endl;
 
-   if(MUTATING_START) neatPop = new NEAT::Population(start_genome,NEAT::pop_size);
+   if(!INCREMENTAL_EV) neatPop = new NEAT::Population(start_genome,NEAT::pop_size);
    else neatPop = new NEAT::Population(start_genome,NEAT::pop_size,0.0);
 
    delete start_genome;
