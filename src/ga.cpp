@@ -304,6 +304,17 @@ void GA::flush_winners() {
 
    }
 
+   //Print out overall winner every generation
+   std::string outfile = "../winners/overall_winner";
+   std::string outfileOrg = "../winners/overall_winner_org";
+
+   std::cout << " [Flushing winner... ";
+
+   overall_winner->gnome->print_to_filename(outfile.c_str());
+   overall_winner->print_to_file(outfileOrg.c_str());
+
+   std::cout << " done.]" <<std::endl;
+
    std::cout << "Winning organism generation: " << (overall_winner->winning_gen) << std::endl;
 
 }
