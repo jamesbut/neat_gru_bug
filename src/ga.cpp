@@ -14,8 +14,8 @@ GA::GA(std::string neat_param_file) :
    INCREMENTAL_EV(true),
    PARALLEL(true),
    as("../argos_params/no_walls.argos"),
-   //ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
-   ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
+   ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
+   //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    {
 
    initNEAT(neat_param_file);
