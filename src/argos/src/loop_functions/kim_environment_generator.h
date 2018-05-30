@@ -14,9 +14,6 @@
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include <argos3/core/simulator/entity/entity.h>
 
-
-
-
 //OpenCV libraries
 #include <opencv2/opencv.hpp>
 #include "opencv2/highgui/highgui.hpp"
