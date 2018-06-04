@@ -945,8 +945,17 @@ bool Population::epoch(int generation) {
 	//cout<<"babies_stolen at end: "<<babies_stolen<<endl;
 
 	/* Debug code */
-	//Checks to see whether the GRU nodes are correctly working
 
+	// Print out every organism at every generation (debugging)
+	// for(int i = 0; i < organisms.size(); i++) {
+   //    std::stringstream ss;
+   //    ss << "../winners/org" << i ;
+   //    std::string outfile =ss.str();
+   //    organisms[i]->gnome->print_to_filename(outfile.c_str());
+	//
+   // }
+
+	//Checks to see whether the GRU nodes are correctly working
 	for(int i = 0; i < organisms.size(); i++) {
 		//Check that for each gene in organism
 		Organism* org_ptr = organisms[i];
@@ -979,19 +988,41 @@ bool Population::epoch(int generation) {
 					}
 
 					std::cout << "----------------" << std::endl;
+					std::exit(0);
 				}
 			}
 		}
 	}
 
-	// Print out every organism at every generation (debugging)
+	//Checks to see whether there are any duplicate links
+	for(int i = 0; i < organisms.size(); i++) {
+		for(int j = 0; j < organisms[i]->gnome->genes.size(); j++) {
+			Gene* gene_ptr_1 = organisms[i]->gnome->genes[j];
+			for(int k = (j+1); k < organisms[i]->gnome->genes.size(); k++) {
+				Gene* gene_ptr_2 = organisms[i]->gnome->genes[k];
+				if(gene_ptr_1->lnk->out_node == gene_ptr_2->lnk->out_node &&
+					gene_ptr_1->lnk->in_node == gene_ptr_2->lnk->in_node) {
+						std::cout << "Duplicate link!!" << std::endl;
+						std::cout << "Org num: " << i << std::endl;
+						std::cout << gene_ptr_1->lnk->in_node->node_id << " " << gene_ptr_1->lnk->out_node->node_id << std::endl;
+						std::exit(0);
+					}
+			}
+		}
+	}
+
+	//Check to see whether there are any recuflags where there should be
 	// for(int i = 0; i < organisms.size(); i++) {
-   //    std::stringstream ss;
-   //    ss << "../winners/org" << i ;
-   //    std::string outfile =ss.str();
-   //    organisms[i]->gnome->print_to_filename(outfile.c_str());
-	//
-   // }
+	// 	for(int j = 0; j < organisms[i]->gnome->genes.size(); j++) {
+	// 		Gene* gene_ptr = organisms[i]->gnome->genes[j];
+	// 		if(gene_ptr->lnk->is_recurrent && (gene_ptr->lnk->in_node->gen_node_label != OUTPUT)) {
+	// 			std::cout << "Weird recur thing in wrong place" << std::endl;
+	// 			std::cout << "Org num: " << i << std::endl;
+	// 			std::cout << gene_ptr->lnk->in_node->node_id << " " << gene_ptr->lnk->out_node->node_id << std::endl;
+	// 			std::exit(0);
+	// 		}
+	// 	}
+	// }
 
 	return true;
 

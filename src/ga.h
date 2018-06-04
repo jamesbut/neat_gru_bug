@@ -56,6 +56,8 @@ private:
    const bool PARALLEL;
    const std::string ENV_PATH;
 
+   const double ACCEPTABLE_FITNESS;
+
 
    //Class for shared memory management
    class SharedMem {

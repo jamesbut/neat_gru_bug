@@ -12,10 +12,11 @@ GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
    NUM_FLUSHES(3),
    INCREMENTAL_EV(false),
-   PARALLEL(false),
+   PARALLEL(true),
+   ACCEPTABLE_FITNESS(13.88),
    as("../argos_params/no_walls.argos"),
-   ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
-   //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
+   //ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
+   ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    {
 
    initNEAT(neat_param_file);
@@ -108,7 +109,6 @@ void GA::run() {
 
    //Start main loop....
 
-   //While the current generations is less than the maximum generation
    while(!done()) {
 
       //Evaluate current generation
@@ -326,8 +326,10 @@ void GA::nextGen() {
 
 }
 
+// Checks that it has got above the number of generations but also that the
+// fitness is high enough too
 bool GA::done() const {
-   return m_unCurrentGeneration >= NEAT::num_gens;
+   return (m_unCurrentGeneration >= NEAT::num_gens) && (overall_winner->fitness > ACCEPTABLE_FITNESS);
 }
 
 
