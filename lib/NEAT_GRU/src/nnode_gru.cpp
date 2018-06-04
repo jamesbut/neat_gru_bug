@@ -48,7 +48,7 @@ NNodeGRU::NNodeGRU(const char *argline, std::vector<Trait*> &traits) : NNode(GRU
 		ss >> curword;
 
 	}
-	//std::cout << "Constructor 3" << std::endl;
+
 	create_weight_vector();
 
 	//Test print outs
@@ -83,7 +83,9 @@ NNodeGRU::NNodeGRU(int nodeid, NNodeGRU* node) : NNode(GRU, nodeid) {
 	U=node->U;
 	U_r=node->U_r;
 	U_u=node->U_u;
-	//std::cout << "Constructor 2" << std::endl;
+
+	active_inputs=node->active_inputs;
+
 	create_weight_vector();
 
 };
@@ -103,12 +105,125 @@ NNodeGRU::NNodeGRU(int nodeid) : NNode(GRU, nodeid) {
 	U=std::vector<double>(1, 0.0);
 	U_r=std::vector<double>(1, 0.0);
 	U_u=std::vector<double>(1, 0.0);
-	//std::cout << "Constructor 1" << std::endl;
+
+	active_inputs=std::vector<bool>(1, true);
+
 	create_weight_vector();
 
 }
 
 void NNodeGRU::activate_gru(std::vector<double> inputs) {
+
+	//Check number of inputs is correct
+	int num_of_active_inputs = 0;
+
+	for(int i = 0; i < active_inputs.size(); i++)
+		num_of_active_inputs += (int)active_inputs[i];
+
+	if(num_of_active_inputs != inputs.size()) {
+
+		std::cout << "Inputs not the same size as num of active inputs!!" << std::endl;
+		std::cout << "Inputs size: " << inputs.size() << std::endl;
+		std::cout << "Num of active inputs: " << num_of_active_inputs << std::endl;
+		std::exit(0);
+
+	}
+
+	//std::cout << "Activation before: " << activation << std::endl;
+
+	//std::cout << inputs[0] << std::endl;
+
+	/* Reset Gate */
+	double input_sum_r = 0;
+	for(int i = 0; i < inputs.size(); i++) {
+
+		if(active_inputs[i])
+			input_sum_r += inputs[i] * U_r[i];
+
+	}
+
+	//std::cout << "Inputs sum r: " << input_sum_r << std::endl;
+
+	//std::cout << "Activation: " << activation << std::endl;
+	//std::cout << "w_r: " << w_r << std::endl;
+
+	// //Recurrent input
+	// //TODO: Check activation here is definitely what I want
+	input_sum_r += activation * w_r;
+
+	//std::cout << "b_r: " << b_r << std::endl;
+
+	//Bias input
+	input_sum_r += 1.0 * b_r;
+
+	//std::cout << "Reset gate sum: " << input_sum_r << std::endl;
+
+	//Reset gate output
+	//Might be interesting to play with the sigmoid parameters
+	double reset_output = NEAT::fsigmoid(input_sum_r,4.924273,2.4621365);
+
+	//std::cout << "Reset gate output: " << reset_output << std::endl;
+
+	double reset_mult = reset_output * w * activation;
+
+	/* tanh gate */
+	double tanh_input_sum = 0;
+	//std::cout << "Inputs and U size: " << inputs.size() << " " << U.size() << std::endl;
+	for(int i = 0; i < inputs.size(); i++) {
+		//std::cout << inputs[i] << " " << U[i] << std::endl;
+		if(active_inputs[i])
+			tanh_input_sum += inputs[i] * U[i];
+
+	}
+
+	tanh_input_sum = tanh_input_sum + reset_mult + (1.0 * b);
+	//std::cout << tanh_input_sum << " " << reset_mult << " " << (1.0 * b) << std::endl;
+	//std::cout << "Tanh input sum: " << tanh_input_sum << std::endl;
+
+	double h_tilda = tanh(tanh_input_sum);
+
+	//std::cout << "Tanh gate output: " << h_tilda << std::endl;
+
+	/* Update gate */
+	double input_sum_u = 0;
+	for(int i = 0; i < inputs.size(); i++) {
+
+		if(active_inputs[i])
+			input_sum_u += inputs[i] * U_u[i];
+
+	}
+
+	//Recurrent input
+	//TODO: Check activation here is definitely what I want
+	input_sum_u += activation * w_u;
+
+	//Bias input
+	input_sum_u += 1.0 * b_u;
+
+	//std::cout << "Update gate sum: " << input_sum_u << std::endl;
+
+	//Reset gate output
+	//Sigmoid seems really narrow here, maybe mess with parameters
+	double update_output = NEAT::fsigmoid(input_sum_u,4.924273,2.4621365);
+
+	//std::cout << "Update gate output: " << update_output << std::endl;
+
+	/* Final computation steps */
+	double h_tilda_mult = h_tilda * (1 - update_output);
+
+	//std::cout << "h_tilda_mult: " << h_tilda_mult << std::endl;
+
+	double update_output_w_history = update_output * activation;
+
+	//std::cout << "update_output_w_history: " << update_output_w_history << std::endl;
+
+	activation = h_tilda_mult + update_output_w_history;
+
+	//std::cout << "activation: " << activation << std::endl;
+
+}
+
+void NNodeGRU::activate_gru_old(std::vector<double> inputs) {
 	//std::cout << "Inputs size: " << inputs.size() << std::endl;
 	if(U.size() != inputs.size()) {
 
@@ -331,7 +446,7 @@ void NNodeGRU::create_weight_vector() {
 
 //When link is mutated in, add additional weights
 void NNodeGRU::added_in_link() {
-	//std::cout << "ADDED LINK IN GRU!" << std::endl;
+
 	//TODO: Determine what to set these initial weights to
 
 	U.push_back(0.0);

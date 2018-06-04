@@ -18,6 +18,7 @@
 #include <iostream>
 #include <cmath>
 #include <sstream>
+#include <map>
 
 using namespace NEAT;
 
@@ -708,6 +709,7 @@ Network *Genome::genesis(int id) {
 
 	//Create the links by iterating through the genes
 	for(curgene=genes.begin();curgene!=genes.end();++curgene) {
+
 		//Only create the link if the gene is enabled
 		if (((*curgene)->enable)==true) {
 			curlink=(*curgene)->lnk;
@@ -731,6 +733,7 @@ Network *Genome::genesis(int id) {
 			else weight_mag=-newlink->weight;
 			if (weight_mag>maxweight)
 				maxweight=weight_mag;
+
 		} else {
 
 			//std::cout << "Gene is not enabled!!! for genome: " << genome_id << std::endl;
@@ -738,8 +741,39 @@ Network *Genome::genesis(int id) {
 		}
 	}
 
+	//For all nodes, check if GRU and if so, check all genes to see whether
+	//enabed or disabled.
+	for(int i = 0; i < all_list.size(); i++) {
+
+		if(all_list[i]->type == GRU) {
+
+			std::vector<bool> active_inputs;
+
+			for(int j = 0; j < genes.size(); j++) {
+
+				if(genes[j]->lnk->out_node->node_id == all_list[i]->node_id) {
+
+					if(genes[j]->enable) active_inputs.push_back(true);
+					else active_inputs.push_back(false);
+
+				}
+
+			}
+
+			// for(int j = 0; j < active_inputs.size(); j++) {
+			// 	std::cout << active_inputs[j] << " ";
+			// }
+			// std::cout << std::endl;
+
+			NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(all_list[i]);
+			gru_ptr->set_active_inputs(active_inputs);
+
+		}
+
+	}
+
+
 	//Create the new network
-	//newnet=new Network(inlist,outlist,all_list,id);
 	newnet=new Network(inlist,outlist,all_list,id);
 
 	//Attach genotype and phenotype together
@@ -1537,6 +1571,8 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 			//Create the new NNode
 			//By convention, it will point to the first trait
 			newnode=new NNode(NEURON,curnode_id++,HIDDEN);
+			//std::cout << "End:" << std::endl;
+			//std::cout << "Added node: " << curnode_id << std::endl;
 			newnode->nodetrait=(*(traits.begin()));
 
 			//Create the new Genes
@@ -1578,6 +1614,8 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 
 			//Create the new NNode
 			newnode=new NNode(NEURON,(*theinnov)->newnode_id,HIDDEN);
+			//std::cout << "Innov:" << std::endl;
+			//std::cout << "Added node: " << (*theinnov)->newnode_id << std::endl;
 			//By convention, it will point to the first trait
 			//Note: In future may want to change this
 			newnode->nodetrait=(*(traits.begin()));
@@ -1690,6 +1728,8 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 			//Create the new NNode
 			//By convention, it will point to the first trait
 			newnode=new NNodeGRU(curnode_id++);
+			//std::cout << "End:" << std::endl;
+			//std::cout << "Added node: " << curnode_id << std::endl;
 			newnode->nodetrait=(*(traits.begin()));
 
 			//Create the new Genes
@@ -1697,11 +1737,23 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,true,curinnov,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,curinnov+1,0);
 				curinnov+=2.0;
+
+				if(out_node->type == GRU) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 			else {
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,false,curinnov,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,curinnov+1,0);
 				curinnov+=2.0;
+
+				if(out_node->type == GRU) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 
 			//Add the innovations (remember what was done)
@@ -1731,6 +1783,8 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 
 			//Create the new NNode
 			newnode=new NNodeGRU((*theinnov)->newnode_id);
+			//std::cout << "Innov:" << std::endl;
+			//std::cout << "Added node: " << (*theinnov)->newnode_id << std::endl;
 			//By convention, it will point to the first trait
 			//Note: In future may want to change this
 			newnode->nodetrait=(*(traits.begin()));
@@ -1739,10 +1793,22 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 			if (thelink->is_recurrent) {
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,true,(*theinnov)->innovation_num1,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,(*theinnov)->innovation_num2,0);
+
+				if(out_node->type == GRU) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 			else {
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,false,(*theinnov)->innovation_num1,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,(*theinnov)->innovation_num2,0);
+
+				if(out_node->type == GRU) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 
 			done=true;
@@ -1956,7 +2022,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 					// 	recurflag=true;
 
 					/* My new code */
-					if(nodep1->gen_node_label==OUTPUT) recurflag=true;
+					if((nodep1->gen_node_label)==OUTPUT) recurflag=true;
 
 					//Exit if the network is faulty (contains an infinite loop)
 					if (count>thresh) {
@@ -1997,7 +2063,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 				//If the phenotype does not exist, exit on false,print error
 				//Note: This should never happen- if it does there is a bug
 				if (phenotype==0) {
-					//cout<<"ERROR: Attempt to add link to genome with no phenotype"<<std::endl;
+					std::cout<<"ERROR: Attempt to add link to genome with no phenotype"<<std::endl;
 					return false;
 				}
 
@@ -2027,6 +2093,8 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 				//Create the new gene
 				newgene=new Gene(((thetrait[traitnum])),newweight,nodep1,nodep2,recurflag,curinnov,newweight);
+				//std::cout << "End:" << std::endl;
+				//std::cout << "Added gene: " << nodep1->node_id << " " << nodep2->node_id << std::endl;
 
 				//If the outnode is a GRU cell make sure the GRU is notified so it
 				//can add more weights.
@@ -2052,7 +2120,8 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 					//Create new gene
 					newgene=new Gene(((thetrait[(*theinnov)->new_traitnum])),(*theinnov)->new_weight,nodep1,nodep2,recurflag,(*theinnov)->innovation_num1,0);
-
+					//std::cout << "Innov:" << std::endl;
+					//std::cout << "Added gene: " << nodep1->node_id << " " << nodep2->node_id << std::endl;
 					/* James - check to make sure that if the link is going into a GRU
 					   that GRU is notified */
 					if(nodep2->type == GRU) {
@@ -2084,7 +2153,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 
 void Genome::mutate_add_sensor(std::vector<Innovation*> &innovs,double &curinnov) {
-
+	
 	std::vector<NNode*> sensors;
 	std::vector<NNode*> outputs;
 	NNode *node;

@@ -11,8 +11,8 @@
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(0),
    NUM_FLUSHES(3),
-   INCREMENTAL_EV(true),
-   PARALLEL(true),
+   INCREMENTAL_EV(false),
+   PARALLEL(false),
    as("../argos_params/no_walls.argos"),
    ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
@@ -150,10 +150,10 @@ void GA::epoch() {
 
       for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
-         std::cout << "Organism num: " << j << std::endl;
-         std::cout << "Trial num: " << i << std::endl;
+         //std::cout << "Organism num: " << j << std::endl;
+         //std::cout << "Trial num: " << i << std::endl;
 
-         std::cout << "Env: " << i+1 << std::endl;
+         //std::cout << "Env: " << i+1 << std::endl;
 
          bool reset = false;
          if (j==0) reset = true;

@@ -944,7 +944,54 @@ bool Population::epoch(int generation) {
 
 	//cout<<"babies_stolen at end: "<<babies_stolen<<endl;
 
-	//cout<<"Epoch complete"<<endl;
+	/* Debug code */
+	//Checks to see whether the GRU nodes are correctly working
+
+	for(int i = 0; i < organisms.size(); i++) {
+		//Check that for each gene in organism
+		Organism* org_ptr = organisms[i];
+		//std::cout << org_ptr->gnome->genes.size() << std::endl;
+		for(int j = 0; j < org_ptr->gnome->nodes.size(); j++) {
+			//std::cout << org_ptr->gnome->genes[j]->lnk->out_node->type << std::endl;
+			if(org_ptr->gnome->nodes[j]->type==GRU) {
+				NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(org_ptr->gnome->nodes[j]);
+				int u_size = gru_ptr->getUSize();
+				int num_outs = 0;
+				for(int k = 0; k < org_ptr->gnome->genes.size(); k++) {
+					Gene* gene_ptr = org_ptr->gnome->genes[k];
+					if(gru_ptr->node_id==gene_ptr->lnk->out_node->node_id){
+						num_outs++;
+					}
+				}
+				//std::cout << u_size << " " << num_outs << std::endl;
+				if(u_size!=num_outs) {
+					std::cout << "Org num: " << i << std::endl;
+					std::cout << "Node num: " << gru_ptr->node_id << std::endl;
+					std::cout << u_size << " " << num_outs << std::endl;
+					std::cout << "WOOPS" << std::endl;
+
+					for(int k = 0; k < org_ptr->gnome->genes.size(); k++) {
+						Gene* gene_ptr = org_ptr->gnome->genes[k];
+						if(gru_ptr->node_id==gene_ptr->lnk->out_node->node_id){
+							std::cout << gru_ptr->node_id << std::endl;
+							std::cout << gene_ptr->lnk->in_node->node_id << " " << gene_ptr->lnk->out_node->node_id << std::endl;
+						}
+					}
+
+					std::cout << "----------------" << std::endl;
+				}
+			}
+		}
+	}
+
+	// Print out every organism at every generation (debugging)
+	// for(int i = 0; i < organisms.size(); i++) {
+   //    std::stringstream ss;
+   //    ss << "../winners/org" << i ;
+   //    std::string outfile =ss.str();
+   //    organisms[i]->gnome->print_to_filename(outfile.c_str());
+	//
+   // }
 
 	return true;
 

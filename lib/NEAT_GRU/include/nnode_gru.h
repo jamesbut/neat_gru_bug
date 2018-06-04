@@ -18,6 +18,7 @@ namespace NEAT {
 			~NNodeGRU();
 
 			void activate_gru(std::vector<double> inputs);
+			void activate_gru_old(std::vector<double> inputs);
 			void mutate(double power);
 			double compatibility(NNodeGRU& node);
 			void added_in_link();
@@ -26,6 +27,10 @@ namespace NEAT {
 			void print_gru_to_file(std::ostream &outFile);
 
 			void debug_print();
+
+			void set_active_inputs(std::vector<bool> active_ins) {active_inputs = active_ins;};
+
+			int getUSize() {return U.size();};
 
 		private:
 
@@ -40,7 +45,11 @@ namespace NEAT {
 			std::vector<double> U_r;
 			std::vector<double> U_u;
 
-			std::vector<double*> weight_vector; //Used for iterating through in mutate
+			//Used for iterating through in mutate
+			std::vector<double*> weight_vector;
+
+			//Used to check what inputs are active(enabled)
+			std::vector<bool> active_inputs;
 
 			void create_weight_vector();
 

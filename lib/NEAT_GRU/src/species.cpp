@@ -405,6 +405,7 @@ double Species::count_offspring(double skim) {
 }
 
 bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &sorted_species) {
+
 	int count;
 	std::vector<Organism*>::iterator curorg;
 
