@@ -21,6 +21,8 @@
 
 namespace NEAT {
 
+	extern const bool OLD_VERSION;
+
 	const int num_trait_params = 8;
 
 	extern double trait_param_mut_prob;

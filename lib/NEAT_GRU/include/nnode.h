@@ -183,6 +183,7 @@ namespace NEAT {
 
 		/* James - Used to activate GRU method in subclass */
 		virtual void activate_gru(std::vector<double> inputs) {std::cout << "Orig node acitvated.. :(" << std::endl;};
+		virtual void activate_gru_old(std::vector<double> inputs) {std::cout << "Orig node acitvated.. :(" << std::endl;};
 
 	};
 

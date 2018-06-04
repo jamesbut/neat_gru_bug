@@ -743,30 +743,35 @@ Network *Genome::genesis(int id) {
 
 	//For all nodes, check if GRU and if so, check all genes to see whether
 	//enabed or disabled.
-	for(int i = 0; i < all_list.size(); i++) {
 
-		if(all_list[i]->type == GRU) {
+	if(!OLD_VERSION) {
 
-			std::vector<bool> active_inputs;
+		for(int i = 0; i < all_list.size(); i++) {
 
-			for(int j = 0; j < genes.size(); j++) {
+			if(all_list[i]->type == GRU) {
 
-				if(genes[j]->lnk->out_node->node_id == all_list[i]->node_id) {
+				std::vector<bool> active_inputs;
 
-					if(genes[j]->enable) active_inputs.push_back(true);
-					else active_inputs.push_back(false);
+				for(int j = 0; j < genes.size(); j++) {
+
+					if(genes[j]->lnk->out_node->node_id == all_list[i]->node_id) {
+
+						if(genes[j]->enable) active_inputs.push_back(true);
+						else active_inputs.push_back(false);
+
+					}
 
 				}
 
+				// for(int j = 0; j < active_inputs.size(); j++) {
+				// 	std::cout << active_inputs[j] << " ";
+				// }
+				// std::cout << std::endl;
+
+				NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(all_list[i]);
+				gru_ptr->set_active_inputs(active_inputs);
+
 			}
-
-			// for(int j = 0; j < active_inputs.size(); j++) {
-			// 	std::cout << active_inputs[j] << " ";
-			// }
-			// std::cout << std::endl;
-
-			NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(all_list[i]);
-			gru_ptr->set_active_inputs(active_inputs);
 
 		}
 
@@ -1738,7 +1743,7 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,curinnov+1,0);
 				curinnov+=2.0;
 
-				if(out_node->type == GRU) {
+				if(out_node->type == GRU && (!OLD_VERSION)) {
 					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
 					gru_ptr->added_in_link();
 				}
@@ -1749,7 +1754,7 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,curinnov+1,0);
 				curinnov+=2.0;
 
-				if(out_node->type == GRU) {
+				if(out_node->type == GRU && (!OLD_VERSION)) {
 					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
 					gru_ptr->added_in_link();
 				}
@@ -1794,7 +1799,7 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,true,(*theinnov)->innovation_num1,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,(*theinnov)->innovation_num2,0);
 
-				if(out_node->type == GRU) {
+				if(out_node->type == GRU && (!OLD_VERSION)) {
 					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
 					gru_ptr->added_in_link();
 				}
@@ -1804,7 +1809,7 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,false,(*theinnov)->innovation_num1,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,(*theinnov)->innovation_num2,0);
 
-				if(out_node->type == GRU) {
+				if(out_node->type == GRU && (!OLD_VERSION)) {
 					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
 					gru_ptr->added_in_link();
 				}
@@ -1898,6 +1903,9 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 			}
 			else {
+				// James - this seems to me completely like not recursion at all,
+				// I wonder why this just isn't in the else of if(do_recur).
+
 				//Choose random nodenums
 				nodenum1=randint(0,nodes.size()-1);
 				nodenum2=randint(first_nonsensor,nodes.size()-1);
@@ -1936,9 +1944,12 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 					recurflag=phenotype->is_recur(nodep1->analogue,nodep2->analogue,count,thresh);
 
 					//ADDED: CONSIDER connections out of outputs recurrent
-					if (((nodep1->type)==OUTPUT)||
-						((nodep2->type)==OUTPUT))
-						recurflag=true;
+					// if (((nodep1->type)==OUTPUT)||
+					// 	((nodep2->type)==OUTPUT))
+					// 	recurflag=true;
+
+					/* My new code */
+					if((nodep1->gen_node_label)==OUTPUT) recurflag=true;
 
 					//Exit if the network is faulty (contains an infinite loop)
 					//NOTE: A loop doesn't really matter
@@ -1968,6 +1979,8 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 			//Choose random nodenums
 			nodenum1=randint(0,nodes.size()-1);
 			nodenum2=randint(first_nonsensor,nodes.size()-1);
+
+			if((nodes[nodenum1]->type == GRU) && (nodenum1==nodenum2)) return false;
 
 			//Find the first node
 			thenode1=nodes.begin();
@@ -2051,6 +2064,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 		theinnov=innovs.begin();
 
 		//If it was supposed to be recurrent, make sure it gets labeled that way
+		// James - it should be...
 		if (do_recur) recurflag=1;
 
 		done=false;
@@ -2153,7 +2167,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 
 void Genome::mutate_add_sensor(std::vector<Innovation*> &innovs,double &curinnov) {
-	
+
 	std::vector<NNode*> sensors;
 	std::vector<NNode*> outputs;
 	NNode *node;

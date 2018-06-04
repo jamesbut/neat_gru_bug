@@ -19,6 +19,11 @@
 #include <cmath>
 #include <cstring>
 
+//Variable to determine whether it is an old version of NEAT
+//before I fixed a bug - this obviously has implications for older
+//genomes.
+const bool NEAT::OLD_VERSION = false;
+
 double NEAT::trait_param_mut_prob = 0;
 double NEAT::trait_mutation_power = 0; // Power of mutation on a signle trait param
 double NEAT::linktrait_mut_sig = 0; // Amount that mutation_num changes for a trait change inside a link

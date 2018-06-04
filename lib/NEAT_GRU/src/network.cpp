@@ -242,7 +242,8 @@ bool Network::activate() {
 					}
 				} //End for over incoming links
 
-            (*curnode)->activate_gru(link_inputs);
+            if(!OLD_VERSION) (*curnode)->activate_gru(link_inputs);
+            else (*curnode)->activate_gru_old(link_inputs);
 
          }
 
