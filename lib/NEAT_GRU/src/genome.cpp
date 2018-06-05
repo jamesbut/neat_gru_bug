@@ -1585,11 +1585,23 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,true,curinnov,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,curinnov+1,0);
 				curinnov+=2.0;
+
+				if(out_node->type == GRU && (!OLD_VERSION)) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 			else {
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,false,curinnov,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,curinnov+1,0);
 				curinnov+=2.0;
+
+				if(out_node->type == GRU && (!OLD_VERSION)) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 
 			//Add the innovations (remember what was done)
@@ -1629,10 +1641,22 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 			if (thelink->is_recurrent) {
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,true,(*theinnov)->innovation_num1,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,(*theinnov)->innovation_num2,0);
+
+				if(out_node->type == GRU && (!OLD_VERSION)) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 			else {
 				newgene1=new Gene(traitptr,1.0,in_node,newnode,false,(*theinnov)->innovation_num1,0);
 				newgene2=new Gene(traitptr,oldweight,newnode,out_node,false,(*theinnov)->innovation_num2,0);
+
+				if(out_node->type == GRU && (!OLD_VERSION)) {
+					NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+					gru_ptr->added_in_link();
+				}
+
 			}
 
 			done=true;
