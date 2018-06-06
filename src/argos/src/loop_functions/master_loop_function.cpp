@@ -11,7 +11,10 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
    find_robot_pointers();
 
    fitness_score_loop.Init(clever_bot, dead_bot);
+
    if (GENERATE_ENVS) environment_generator_loop.Init();
+
+   if(m_indvRun) trajectory_loop.Init(clever_bot);
 
 }
 
@@ -24,6 +27,8 @@ void MasterLoopFunction::Reset() {
       environment_generator_loop.Reset(m_envPath);
    }
 
+   if(m_indvRun) trajectory_loop.Reset();
+
 }
 
 void MasterLoopFunction::PreStep() {
@@ -32,9 +37,17 @@ void MasterLoopFunction::PreStep() {
 
 }
 
+void MasterLoopFunction::PostStep() {
+
+   if(m_indvRun) trajectory_loop.PostStep();
+
+}
+
 void MasterLoopFunction::PostExperiment() {
 
    fitness_score_loop.PostExperiment();
+
+   if(m_indvRun) trajectory_loop.PostExperiment();
 
 }
 

@@ -11,7 +11,6 @@ class FitnessScore {
 public:
 
    FitnessScore();
-   ~FitnessScore();
 
    void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
    void Reset(bool indv_run);

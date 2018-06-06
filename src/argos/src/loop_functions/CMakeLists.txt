@@ -1,4 +1,4 @@
-add_library(loop_functions SHARED master_loop_function.cpp fitness_score.cpp kim_environment_generator.cpp)
+add_library(loop_functions SHARED master_loop_function.cpp fitness_score.cpp kim_environment_generator.cpp trajectory_logger.cpp)
 
 set(EXT_LIB_INCLUDES
    ${CMAKE_SOURCE_DIR}/lib/)

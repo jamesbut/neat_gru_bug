@@ -4,3 +4,5 @@ build/
 #Ignore winners
 #winners/
 
+#Ignore temporary trajectories folder
+trajectories_temp/

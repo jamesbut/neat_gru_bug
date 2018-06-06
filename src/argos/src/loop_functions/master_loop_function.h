@@ -6,8 +6,8 @@
 #include "../controllers/neat_gru_footbot_controller.h"
 #include "../controllers/empty_controller.h"
 #include "fitness_score.h"
-//#include "environment_generator.h"
 #include "kim_environment_generator.h"
+#include "trajectory_logger.h"
 
 using namespace argos;
 
@@ -21,6 +21,7 @@ public:
    virtual void Init(TConfigurationNode& t_node);
    virtual void Reset();
    virtual void PreStep();
+   virtual void PostStep();
    virtual void PostExperiment();
 
    void configure_controller(NEAT::Network &net) {clever_bot_controller->SetNEATNet(net);};
@@ -46,6 +47,7 @@ private:
 
    FitnessScore fitness_score_loop;
    RandomEnvironmentGenerator environment_generator_loop;
+   TrajectoryLogger trajectory_loop;
 
    const bool GENERATE_ENVS;
 

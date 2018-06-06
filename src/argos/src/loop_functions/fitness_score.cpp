@@ -4,8 +4,6 @@ FitnessScore::FitnessScore() :
    MAX_RANGE(14.2),
    no_son_of_mine(false) {}
 
-FitnessScore::~FitnessScore() {}
-
 void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
    m_clever_bot = clever_bot;
