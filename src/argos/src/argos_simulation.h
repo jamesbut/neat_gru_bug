@@ -11,7 +11,7 @@ public:
    ~ARGoS_simulation();
 
    //Runs the experiment and returns the fitness score
-   double run(NEAT::Organism &org, std::string env_path, bool reset, bool indv_run);
+   double run(NEAT::Organism &org, std::string env_path, int env_num, bool reset, bool indv_run);
 
 private:
 

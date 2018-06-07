@@ -27,7 +27,7 @@ void MasterLoopFunction::Reset() {
       environment_generator_loop.Reset(m_envPath);
    }
 
-   if(m_indvRun) trajectory_loop.Reset();
+   if(m_indvRun) trajectory_loop.Reset(m_envNum);
 
 }
 

@@ -15,8 +15,8 @@ GA::GA(std::string neat_param_file) :
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
    as("../argos_params/no_walls.argos"),
-   //ENV_PATH("../argos_params/environments/training_envs_1/rand_env_")
-   ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
+   ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
+   //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    {
 
    initNEAT(neat_param_file);
@@ -161,7 +161,7 @@ void GA::epoch() {
          //Create file name
          std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
 
-         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, reset, false);
+         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, (i+1), reset, false);
          //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
@@ -190,7 +190,7 @@ void GA::parallel_epoch() {
             //Create file name
             std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
 
-            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, true, false));
+            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, (i+1), true, false));
 
             //Kill slave
             ::raise(SIGTERM);

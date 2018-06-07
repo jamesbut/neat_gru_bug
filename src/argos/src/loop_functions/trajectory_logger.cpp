@@ -8,7 +8,9 @@ void TrajectoryLogger::Init(CFootBotEntity* clever_bot) {
 
 }
 
-void TrajectoryLogger::Reset() {
+void TrajectoryLogger::Reset(int env_num) {
+
+   m_envNum = env_num;
 
    //Reset trajectory
    trajectory.clear();
@@ -32,8 +34,11 @@ void TrajectoryLogger::PostExperiment() {
 
    //Create/open file
    std::ofstream trajectory_file;
-   trajectory_file.open("../trajectories_temp/trajectory.txt");
+   std::stringstream file_name;
+   file_name << "../trajectories_temp/trajectory_" << m_envNum << ".txt";
+   trajectory_file.open(file_name.str());
 
+   //Insert x and y cooridnates
    for(int i = 0; i < trajectory.size(); i++) {
 
       trajectory_file << trajectory[i].GetX() << ", " << trajectory[i].GetY() << "\n";

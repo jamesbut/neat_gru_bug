@@ -4,8 +4,6 @@
 #include <argos3/core/simulator/simulator.h>
 #include "loop_functions/master_loop_function.h"
 
-#include <signal.h>
-
 ARGoS_simulation::ARGoS_simulation(const std::string& argos_file) :
    ARGOS_FILE_NAME(argos_file) {
 
@@ -19,7 +17,7 @@ ARGoS_simulation::ARGoS_simulation(const std::string& argos_file) :
 
 ARGoS_simulation::~ARGoS_simulation() {}
 
-double ARGoS_simulation::run(NEAT::Organism &org, std::string env_path, bool reset, bool indv_run) {
+double ARGoS_simulation::run(NEAT::Organism &org, std::string env_path, int env_num, bool reset, bool indv_run) {
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
@@ -27,6 +25,7 @@ double ARGoS_simulation::run(NEAT::Organism &org, std::string env_path, bool res
 
    master_loop.configure_controller(*org.net);
    master_loop.set_env_path(env_path);
+   master_loop.set_env_num(env_num);
    master_loop.set_env_reset(reset);
    master_loop.set_indv_run(indv_run);
 
