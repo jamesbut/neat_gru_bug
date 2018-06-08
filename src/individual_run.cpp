@@ -2,7 +2,8 @@
 
 IndividualRun::IndividualRun(const std::string& gf) :
    NUM_RUNS(209),
-   //NUM_RUNS(10),
+   //NUM_RUNS(100),
+   RANDOM_ENVS(false),
    as("../argos_params/no_walls.argos"),
    ENV_PATH("../argos_params/environments/kim_envs/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
@@ -23,7 +24,10 @@ void IndividualRun::run() {
       std::cout << "Run: " << (i+1) << std::endl;
 
       //Create file name
-      std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
+      std::string file_name;
+
+      if(RANDOM_ENVS) file_name = "";
+      else file_name = ENV_PATH + std::to_string(i+1) + ".png";
 
       double fitness = as.run(*org, file_name, (i+1), true, true);
 

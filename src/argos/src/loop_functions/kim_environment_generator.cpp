@@ -101,7 +101,7 @@ void RandomEnvironmentGenerator::ClearEnvironment()
 
 }
 
-void RandomEnvironmentGenerator::Reset(std::string file_name) {
+void RandomEnvironmentGenerator::Reset(std::string file_name, int env_num) {
 
    //cout<<"Regenerate Environment"<<endl;
 
@@ -109,7 +109,7 @@ void RandomEnvironmentGenerator::Reset(std::string file_name) {
     if(file_name.length()==0)
     {
       initial_bot_positions.clear();
-      generateEnvironment();
+      generateEnvironment(env_num);
     std::cout<<"random generated: "<<file_name<<std::endl;
     }
     else{
@@ -123,7 +123,7 @@ void RandomEnvironmentGenerator::Destroy()
 {
 }
 
-void RandomEnvironmentGenerator::generateEnvironment(void)
+void RandomEnvironmentGenerator::generateEnvironment(int env_num)
 {
 
   //std::cout<<"check"<<std::endl;
@@ -179,7 +179,11 @@ void RandomEnvironmentGenerator::generateEnvironment(void)
     cv::Rect border(cv::Point(0, 0), corridor_contours_img.size());
 
     rectangle(corridor_contours_img, border, Scalar(255), 3);
-    cv::imwrite("environment.png",corridor_contours_img);
+
+    std::stringstream file_name;
+    file_name << "../argos_params/environments/training_set/ts_" << env_num << ".png";
+
+    cv::imwrite(file_name.str(),corridor_contours_img);
 
 
 

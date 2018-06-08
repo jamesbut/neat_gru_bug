@@ -43,7 +43,7 @@ class RandomEnvironmentGenerator
 public:
   RandomEnvironmentGenerator();
   void Init();
-  void Reset(std::string file_name);
+  void Reset(std::string file_name, int env_num);
   void Destroy();
 
   void initializeGrid();
@@ -61,7 +61,7 @@ public:
   void makeRandomOpenings();
   void putBlocksInEnvironment();
   void putLinesInEnvironment();
-  void generateEnvironment();
+  void generateEnvironment(int env_num);
   void generateEnvironmentFromFile(std::string file_name);
   void getRobotPositions();
   void ClearEnvironment();

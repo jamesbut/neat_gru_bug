@@ -22,6 +22,7 @@ private:
 
    const int NUM_RUNS;
    const std::string ENV_PATH;
+   const bool RANDOM_ENVS;
 
 };
 
