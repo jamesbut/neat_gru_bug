@@ -15,8 +15,9 @@ GA::GA(std::string neat_param_file) :
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
    as("../argos_params/no_walls.argos"),
-   ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
+   //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
+   ENV_PATH("../argos_params/environments/training_set/ts_")
    {
 
    initNEAT(neat_param_file);
