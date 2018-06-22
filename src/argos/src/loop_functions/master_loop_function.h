@@ -29,12 +29,16 @@ public:
    void set_env_num(int env_num) {m_envNum = env_num;};
    void set_env_reset(bool reset) {m_reset = reset;};
    void set_indv_run(bool indv_run) {m_indvRun = indv_run;};
+   void set_handwritten_envs(bool handwritten) {m_handwritten = handwritten;};
+   void set_trial_num(int trial_num) {m_trialNum = trial_num;};
 
    double get_fitness_score();
 
 private:
 
    void find_robot_pointers();
+
+   void SetRobotPositionBasedOnMap(int map, int trial_num);
 
    CFootBotEntity* clever_bot;
    CFootBotEntity* dead_bot;
@@ -46,6 +50,8 @@ private:
    int m_envNum;
    bool m_reset;
    bool m_indvRun;
+   bool m_handwritten;
+   int m_trialNum;
 
    FitnessScore fitness_score_loop;
    RandomEnvironmentGenerator environment_generator_loop;

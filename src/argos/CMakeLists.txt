@@ -40,5 +40,5 @@ target_include_directories(argos_simulation PUBLIC
 
 target_link_libraries(argos_simulation
   argos3core_simulator
-  loop_functions
+  loop_functions_lib
   )

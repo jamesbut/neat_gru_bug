@@ -23,11 +23,15 @@ void MasterLoopFunction::Reset() {
    fitness_score_loop.Reset(m_indvRun);
 
    if (GENERATE_ENVS && m_reset) {
+
       environment_generator_loop.ClearEnvironment();
       environment_generator_loop.Reset(m_envPath, m_envNum);
    }
 
-   if(m_indvRun) trajectory_loop.Reset(m_envNum);
+   if (m_handwritten)
+      SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
+
+   if (m_indvRun) trajectory_loop.Reset(m_envNum);
 
 }
 
@@ -79,6 +83,80 @@ void MasterLoopFunction::find_robot_pointers() {
 double MasterLoopFunction::get_fitness_score() {
 
    return fitness_score_loop.get_fitness_score();
+
+}
+
+void MasterLoopFunction::SetRobotPositionBasedOnMap(int map, int trial_num) {
+
+   double clever_bot_x, clever_bot_y, dead_bot_x, dead_bot_y;
+   CRadians clever_bot_ori, dead_bot_ori;
+
+   switch (map) {
+
+      case 15:
+
+         clever_bot_x = -2.5;
+         clever_bot_y = -2.5;
+         dead_bot_x = 4.0;
+         dead_bot_y = 4.0;
+
+         switch (trial_num) {
+
+            case 1:
+               clever_bot_ori = (CRadians)(0);
+               break;
+            case 2:
+               clever_bot_ori = (CRadians)(M_PI/2);
+               break;
+            case 3:
+               clever_bot_ori = (CRadians)(M_PI);
+               break;
+            case 4:
+               clever_bot_ori = (CRadians)(3*M_PI/2);
+               break;
+            case 5:
+               clever_bot_ori = (CRadians)(5*M_PI/4);
+               break;
+            case 6:
+               clever_bot_ori = (CRadians)(M_PI/4);
+               break;
+
+         }
+
+         break;
+
+   }
+
+
+   SInitSetup clever_bot_allocation;
+   SInitSetup dead_bot_allocation;
+
+   clever_bot_allocation.Orientation.FromEulerAngles(
+      clever_bot_ori,        // rotation around Z
+      CRadians::ZERO, // rotation around Y
+      CRadians::ZERO  // rotation around X
+      );
+
+   dead_bot_allocation.Orientation.FromEulerAngles(
+      dead_bot_ori,        // rotation around Z
+      CRadians::ZERO, // rotation around Y
+      CRadians::ZERO  // rotation around X
+      );
+
+   clever_bot_allocation.Position.Set(clever_bot_x, clever_bot_y, 0.0);
+   dead_bot_allocation.Position.Set(dead_bot_x, dead_bot_y, 0.0);
+
+   bool clever_placed = MoveEntity(clever_bot->GetEmbodiedEntity(), clever_bot_allocation.Position, clever_bot_allocation.Orientation, false);
+
+   bool dead_placed = MoveEntity(
+          dead_bot->GetEmbodiedEntity(),     // move the body of the robot
+          dead_bot_allocation.Position,                // to this position
+          dead_bot_allocation.Orientation,             // with this orientation
+          false                                 // this is not a check, leave the robot there
+      );
+
+   if((!dead_placed) || (!clever_placed))
+      std::cout << "COULD NOT PLACE ROBOT!" << std::endl;
 
 }
 

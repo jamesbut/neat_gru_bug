@@ -116,6 +116,10 @@ private:
 
   bool first_time_step;
 
+  //debug
+  //std::ofstream debug_file;
+  std::vector<double> debug_data;
+
 };
 
 #endif

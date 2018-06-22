@@ -35,34 +35,7 @@ NEATGRUFootbotController::NEATGRUFootbotController() :
       BEARING_SENSOR_UPPER_BOUND(M_PI),
       MAX_WHEEL_SPEED(10),
       MIN_WHEEL_SPEED(-10)
-{
-
-   //Don't read genome file here
-
-   //TODO: Don't need to input from file here..
-   // std::ifstream iFile ("ibug_working_directory/temp/temp_gnome");
-   //
-   // char curword[20];
-   // int id;
-   //
-   // iFile >> curword;
-   // iFile >> id;
-   //
-   // NEAT::Genome *start_genome = new NEAT::Genome(id,iFile);
-   // //NEAT::Genome start_genome = NEAT::Genome(id,iFile);
-   // iFile.close();
-   //
-   // //NEAT::Organism *neatOrg = new NEAT::Organism(0.0,&start_genome,1);
-   // neatOrg = new NEAT::Organism(0.0,start_genome,1);
-   // m_net = neatOrg->net;
-   //
-   // //Need to set size here otherwise seg fault further on...
-   // net_inputs.resize(m_net->inputs.size());
-   // net_outputs.resize(m_net->outputs.size());
-
-   //if(GetId()=="bot0") memory.reset(new ENTMMemory(1));
-
-}
+{}
 
 void NEATGRUFootbotController::Init(TConfigurationNode& t_node) {
 
@@ -84,92 +57,92 @@ void NEATGRUFootbotController::Init(TConfigurationNode& t_node) {
 
 void NEATGRUFootbotController::ControlStep() {
 
-   //std::cout << net_inputs.size() << std::endl;
-   //std::cout << tRabReads.size() << std::endl;
    /* Get readings from proximity sensor */
    const CCI_FootBotProximitySensor::TReadings& tProxReads = m_pcProximity->GetReadings();
 
    // Get readings from range and bearing sensor
    const CCI_RangeAndBearingSensor::TReadings& tRabReads = m_pcRangeBearing->GetReadings();
 
-   //Include inputs for both the range and the bearing
-   for(int i = 0; i < tRabReads.size(); i++) {
-      net_inputs[(i*2)+1] = mapValueIntoRange(tRabReads[i].Range,
-                                         RANGE_SENSOR_LOWER_BOUND, RANGE_SENSOR_UPPER_BOUND,
-                                         NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+   //std::cout << net_inputs.size() << std::endl;
+   //std::cout << tRabReads.size() + tProxReads.size() + 1 << std::endl;
 
-      if(BEARING_SENSOR_ON) {
-         //Bearing sensor 1-0.5-1
 
-         //   net_inputs[(i*2)+2] = mapValueIntoRange(tRabReads[i].HorizontalBearing.GetValue(),
-         //                                       BEARING_SENSOR_LOWER_BOUND, BEARING_SENSOR_UPPER_BOUND,
-         //                                       NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+   net_inputs[1] = mapValueIntoRange(tRabReads[0].Range,
+                                      RANGE_SENSOR_LOWER_BOUND, RANGE_SENSOR_UPPER_BOUND,
+                                      NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
 
-         //Bearing sensor 1-0-1
+   if(BEARING_SENSOR_ON) {
+      //Bearing sensor 1-0.5-1
 
-         //net_inputs[(i*2)+2] = mapHorizontalAngle(tRabReads[i].HorizontalBearing.GetValue());
+      //   net_inputs[(i*2)+2] = mapValueIntoRange(tRabReads[i].HorizontalBearing.GetValue(),
+      //                                       BEARING_SENSOR_LOWER_BOUND, BEARING_SENSOR_UPPER_BOUND,
+      //                                       NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
 
-         //Bearing sensor - left and right bearing sensors
-         double bearing = tRabReads[i].HorizontalBearing.GetValue();
-         double left_bearing_angle, right_bearing_angle;
+      //Bearing sensor 1-0-1
 
-         //Get the angular distances for each of the bearing sensors and normalise
-         if(bearing < 0) {
-            left_bearing_angle = mapValueIntoRange(fabs(bearing),
-                                                   0, 2*M_PI,
-                                                   NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
-            right_bearing_angle = 1 - left_bearing_angle;
-         } else {
-            right_bearing_angle = mapValueIntoRange(bearing,
-                                                   0, 2*M_PI,
-                                                   NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
-            left_bearing_angle = 1 - right_bearing_angle;
-         }
+      //net_inputs[(i*2)+2] = mapHorizontalAngle(tRabReads[i].HorizontalBearing.GetValue());
 
-         net_inputs[(i*2)+2] = right_bearing_angle;
-         net_inputs[(i*2)+3] = left_bearing_angle;
+      //Bearing sensor - left and right bearing sensors
+      double bearing = tRabReads[0].HorizontalBearing.GetValue();
+      double left_bearing_angle, right_bearing_angle;
 
+      //Get the angular distances for each of the bearing sensors and normalise
+      if(bearing < 0) {
+         left_bearing_angle = mapValueIntoRange(fabs(bearing),
+                                                0, 2*M_PI,
+                                                NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+         right_bearing_angle = 1 - left_bearing_angle;
       } else {
-
-         //Take previous angular velocity as input
-         net_inputs[(i*2)+2] = prev_ang_vel;
-
-         //If it is the first time step, set the previous ranges to the
-         //same as the first range rather than 0, otherwise the derivative
-         //makes it seem like the range has instantly changed.
-         if(first_time_step) {
-
-            range_tminus1 = net_inputs[1];
-            range_tminus2 = net_inputs[1];
-
-            first_time_step = false;
-
-         }
-
-         //Take first derivative of range as input
-         net_inputs[(i*2)+3] = net_inputs[1] - range_tminus1;
-
-         //Take second derivative of range as input
-         net_inputs[(i*2)+4] = (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2);
-
-         std::cout << "R: " << net_inputs[1] << std::endl;
-         std::cout << "Rt-1: " << range_tminus1 << std::endl;
-         std::cout << "Rt-2: " << range_tminus2 << std::endl;
-         std::cout << "R1deriv: " << net_inputs[1] - range_tminus1 << std::endl;
-         std::cout << "R2deriv: " << (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2) << std::endl;
-         std::cout << "----------------" << std::endl;
-
+         right_bearing_angle = mapValueIntoRange(bearing,
+                                                0, 2*M_PI,
+                                                NET_INPUT_LOWER_BOUND, NET_INPUT_UPPER_BOUND);
+         left_bearing_angle = 1 - right_bearing_angle;
       }
+
+      net_inputs[2] = right_bearing_angle;
+      net_inputs[3] = left_bearing_angle;
+
+   } else {
+
+      //Take previous angular velocity as input
+      // net_inputs[2] = prev_ang_vel;
+      //
+      // //If it is the first time step, set the previous ranges to the
+      // //same as the first range rather than 0, otherwise the derivative
+      // //makes it seem like the range has instantly changed.
+      // if(first_time_step) {
+      //
+      //    range_tminus1 = net_inputs[1];
+      //    range_tminus2 = net_inputs[1];
+      //
+      //    first_time_step = false;
+      //
+      // }
+      //
+      // //Take first derivative of range as input
+      // net_inputs[3] = net_inputs[1] - range_tminus1;
+      //
+      // //Take second derivative of range as input
+      // net_inputs[4] = (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2);
+
+      // std::cout << "R: " << net_inputs[1] << std::endl;
+      // std::cout << "Rt-1: " << range_tminus1 << std::endl;
+      // std::cout << "Rt-2: " << range_tminus2 << std::endl;
+      // std::cout << "R1deriv: " << net_inputs[1] - range_tminus1 << std::endl;
+      // std::cout << "R2deriv: " << (net_inputs[1] - range_tminus1) - (range_tminus1 - range_tminus2) << std::endl;
+      // std::cout << "----------------" << std::endl;
+
    }
 
    //Proximity sensor inputs
    if(PROX_SENSOR_ON) {
 
       int net_input_index;
+
       for(int i = 0; i < tProxReads.size(); i++) {
 
-         if(BEARING_SENSOR_ON) net_input_index = i+(tRabReads.size()*3)+1;
-         else net_input_index = i+(tRabReads.size()*4)+1;
+         if(BEARING_SENSOR_ON) net_input_index = i+4;
+         else net_input_index = i+2;
 
          //Inverted laser
          double reading = tProxReads[i].Value;
@@ -236,6 +209,14 @@ void NEATGRUFootbotController::ControlStep() {
 
    }
 
+
+   // debug_data.push_back(net_inputs[1]);
+   // debug_data.push_back(m_net->outputs[0]->activation);
+   // debug_data.push_back(m_net->outputs[1]->activation);
+   //
+   // debug_data.push_back(leftSpeed);
+   // debug_data.push_back(rightSpeed);
+
    //leftSpeed = 10.0;
    //rightSpeed = 10.0;
    // std::cout << leftSpeed << " " << rightSpeed << std::endl;
@@ -281,6 +262,21 @@ double NEATGRUFootbotController::mapValueIntoRange(const double input, const dou
 void NEATGRUFootbotController::Reset() {
 
    // delete neatOrg;
+
+   // if(debug_data.size() != 0) {
+   //
+   //    std::ofstream debug_file;
+   //    std::stringstream file_name;
+   //    file_name << "../debug/debug.txt";
+   //    debug_file.open(file_name.str());
+   //
+   //    for(int i = 0; i < debug_data.size()-2; i += 3) {
+   //       debug_file << debug_data[i] << "," << debug_data[i+1] << "," << debug_data[i+2]<<"\n";
+   //    }
+   //
+   //    debug_file.close();
+   // }
+
 
    net_inputs.resize(m_net->inputs.size());
    net_outputs.resize(m_net->outputs.size());

@@ -38,6 +38,11 @@ struct grid_element_status_t {
   bool is_corridor_present;
 };
 
+struct SInitSetup {
+   CVector3 Position;
+   CQuaternion Orientation;
+};
+
 class RandomEnvironmentGenerator
 {
 public:
@@ -98,4 +103,4 @@ private:
 };
 
 
-#endif /* ARGOS_BRIDGE_PLUGIN_LOOP_FUNCTIONS_RANDOM_ENVIRONMENT_GENERATOR_H_ */
+#endif

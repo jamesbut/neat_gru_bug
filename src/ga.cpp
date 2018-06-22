@@ -14,10 +14,12 @@ GA::GA(std::string neat_param_file) :
    INCREMENTAL_EV(false),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
-   as("../argos_params/no_walls.argos"),
+   HANDWRITTEN_ENVS(true),
+   as(GetArgosFilePath(HANDWRITTEN_ENVS)),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
-   ENV_PATH("../argos_params/environments/training_set/ts_")
+   //ENV_PATH("../argos_params/environments/training_set/ts_")
+   ENV_PATH("../argos_params/environments/handwritten_envs/e")
    {
 
    initNEAT(neat_param_file);
@@ -25,7 +27,7 @@ GA::GA(std::string neat_param_file) :
    //Determine when to flush overall winner to file
    flush_gens.resize(NUM_FLUSHES);
    std::cout << NEAT::num_gens << std::endl;
-   std::cout << "Flush Gens: " << std::endl;
+   //std::cout << "Flush Gens: " << std::endl;
 
    for(int i = 0; i < NUM_FLUSHES; i++) {
 
@@ -47,6 +49,14 @@ GA::~GA() {
 
 }
 
+
+std::string GA::GetArgosFilePath(bool handwritten_envs) {
+
+   if(handwritten_envs) return "../argos_params/no_walls_10.argos";
+   else return "../argos_params/no_walls.argos";
+
+}
+
 void GA::initNEAT(std::string neat_param_file) {
 
    std::cout << "Initialising NEAT.." << std::endl;
@@ -58,7 +68,7 @@ void GA::initNEAT(std::string neat_param_file) {
    std::ifstream iFile;
 
    if(!INCREMENTAL_EV) iFile = std::ifstream("../starting_genomes/start_genome");
-   else iFile = std::ifstream("../starting_genomes/g44");
+   else iFile = std::ifstream("../winners/archive_winners_nb/g2");
 
    iFile >> curword;
    iFile >> id;
@@ -149,21 +159,30 @@ void GA::epoch() {
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
 
+      std::string file_name;
+      int env_num;
+      bool reset = false;
+
+      //Create file name and env num
+      if(HANDWRITTEN_ENVS) {
+         file_name = ENV_PATH + "15.png";
+         env_num = 15;
+      } else {
+         file_name = ENV_PATH + std::to_string(i+1) + ".png";
+         env_num = i+1;
+      }
+
       for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
-         //std::cout << "Organism num: " << j << std::endl;
-         //std::cout << "Trial num: " << i << std::endl;
+         std::cout << "Organism num: " << j << std::endl;
+         std::cout << "Trial num: " << i << std::endl;
 
          //std::cout << "Env: " << i+1 << std::endl;
 
-         bool reset = false;
-         if (j==0) reset = true;
+         if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
-         //Create file name
-         std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
-
-         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, (i+1), reset, false);
-         //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
+         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
+         std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
 
@@ -181,6 +200,20 @@ void GA::parallel_epoch() {
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
 
+      std::string file_name;
+      int env_num;
+      bool reset = false;
+
+      //Create file name and env num
+      if(HANDWRITTEN_ENVS) {
+         file_name = ENV_PATH + "15.png";
+         env_num = 15;
+      } else {
+         file_name = ENV_PATH + std::to_string(i+1) + ".png";
+         env_num = i+1;
+         reset = true;
+      }
+
       for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
          //Spawn slaves
@@ -188,10 +221,7 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            //Create file name
-            std::string file_name = ENV_PATH + std::to_string(i+1) + ".png";
-
-            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, (i+1), true, false));
+            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
 
             //Kill slave
             ::raise(SIGTERM);
@@ -332,7 +362,6 @@ void GA::nextGen() {
 bool GA::done() const {
    return (m_unCurrentGeneration >= NEAT::num_gens) && (overall_winner->fitness > ACCEPTABLE_FITNESS);
 }
-
 
 
 /* Function implementations for SharedMem class */

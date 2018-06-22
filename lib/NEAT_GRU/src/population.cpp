@@ -18,6 +18,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <boost/filesystem.hpp>
+
 using namespace NEAT;
 
 Population::Population(Genome *g,int size) {
@@ -928,10 +930,10 @@ bool Population::epoch(int generation) {
 		++curspecies;
 	}
 	if (!best_ok) {
-		//cout<<"ERROR: THE BEST SPECIES DIED!"<<endl;
+		std::cout<<"ERROR: THE BEST SPECIES DIED!"<<std::endl;
 	}
 	else {
-		//cout<<"The best survived: "<<best_species_num<<endl;
+		std::cout<<"The best survived: "<<best_species_num<<std::endl;
 	}
 
 	//DEBUG: Checking the top organism's duplicate in the next gen
@@ -1005,7 +1007,16 @@ bool Population::epoch(int generation) {
 						std::cout << "Duplicate link!!" << std::endl;
 						std::cout << "Org num: " << i << std::endl;
 						std::cout << gene_ptr_1->lnk->in_node->node_id << " " << gene_ptr_1->lnk->out_node->node_id << std::endl;
-						std::exit(0);
+
+						//Create directory if it already does not exist
+				      if (!boost::filesystem::exists("../broken_genomes/"))
+				         boost::filesystem::create_directories("../broken_genomes");
+
+						std::stringstream ss;
+					   ss << "../broken_genomes/broke_fella";
+					   std::string outfile =ss.str();
+					   organisms[i]->gnome->print_to_filename(outfile.c_str());
+
 					}
 			}
 		}

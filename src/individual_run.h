@@ -16,13 +16,16 @@ private:
 
    void readGenomeFile(const std::string& gf);
 
+   std::string GetArgosFilePath(bool handwritten_envs);
+
    NEAT::Organism* org;
 
-   ARGoS_simulation as;
+   ARGoS_simulation* as;
 
    const int NUM_RUNS;
    const std::string ENV_PATH;
    const bool RANDOM_ENVS;
+   const bool HANDWRITTEN_ENVS;
 
 };
 

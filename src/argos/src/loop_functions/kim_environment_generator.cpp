@@ -8,11 +8,14 @@
 #include "kim_environment_generator.h"
 #include <chrono>
 
+#include <argos3/core/simulator/loop_functions.h>
+
 
 //#define ACCEPT_ENVIRONMENT
 
 using namespace std;
 using namespace cv;
+using namespace argos;
 
 #define EFFICIENT_ENVIRONMENT true
 
@@ -183,7 +186,7 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
     std::stringstream file_name;
     file_name << "../argos_params/environments/training_set/ts_" << env_num << ".png";
 
-    cv::imwrite(file_name.str(),corridor_contours_img);
+    //cv::imwrite(file_name.str(),corridor_contours_img);
 
 
 
@@ -229,7 +232,7 @@ void RandomEnvironmentGenerator::generateEnvironmentFromFile(std::string file_na
 
 
 #if EFFICIENT_ENVIRONMENT
-  putLinesInEnvironment();
+  //putLinesInEnvironment();
   putBlocksInEnvironment();
 #else
   putBlocksInEnvironment();
