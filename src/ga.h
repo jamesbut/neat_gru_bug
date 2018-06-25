@@ -43,7 +43,7 @@ private:
    //Current population
    NEAT::Population* neatPop;
 
-   ARGoS_simulation as;
+   ARGoS_simulation* as;
 
    //Keep track of overall winner over all generations.
    //I do this because it is often the case that the winner of the final

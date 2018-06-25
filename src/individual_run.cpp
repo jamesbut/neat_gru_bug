@@ -13,26 +13,30 @@ IndividualRun::IndividualRun(const std::string& gf) :
    if(HANDWRITTEN_ENVS)
       as = new ARGoS_simulation("../argos_params/no_walls_10_vis.argos");
    else
-      as = new ARGoS_simulation("../argos_params/no_walls_vis.argos");
+      as = new ARGoS_simulation("../argos_params/no_walls.argos");
 
    readGenomeFile(gf);
 
 }
 
-IndividualRun::~IndividualRun() {}
+IndividualRun::~IndividualRun() {
 
-std::string IndividualRun::GetArgosFilePath(bool handwritten_envs) {
-   std::cout << handwritten_envs << std::endl;
-   if(handwritten_envs) {
-      std::cout << "Here1" << std::endl;
-      return "../argos_params/no_walls_10_vis.argos";
-}
-   else {
-      std::cout << "Here2" << std::endl;
-      return "../argos_params/no_walls.argos";
-   }
+   delete as;
 
 }
+
+// std::string IndividualRun::GetArgosFilePath(bool handwritten_envs) {
+//    std::cout << handwritten_envs << std::endl;
+//    if(handwritten_envs) {
+//
+//       return "../argos_params/no_walls_10_vis.argos";
+// }
+//    else {
+//
+//       return "../argos_params/no_walls.argos";
+//    }
+//
+// }
 
 void IndividualRun::run() {
 

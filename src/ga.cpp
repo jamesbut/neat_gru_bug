@@ -14,13 +14,17 @@ GA::GA(std::string neat_param_file) :
    INCREMENTAL_EV(false),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
-   HANDWRITTEN_ENVS(true),
-   as(GetArgosFilePath(HANDWRITTEN_ENVS)),
+   HANDWRITTEN_ENVS(false),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    //ENV_PATH("../argos_params/environments/training_set/ts_")
    ENV_PATH("../argos_params/environments/handwritten_envs/e")
    {
+
+   if(HANDWRITTEN_ENVS)
+      as = new ARGoS_simulation("../argos_params/no_walls_10.argos");
+   else
+      as = new ARGoS_simulation("../argos_params/no_walls.argos");
 
    initNEAT(neat_param_file);
 
@@ -46,6 +50,8 @@ GA::~GA() {
    delete neatPop;
    delete overall_winner;
    if(PARALLEL) delete shared_mem;
+
+   delete as;
 
 }
 
@@ -181,7 +187,7 @@ void GA::epoch() {
 
          if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
-         trial_scores[j][i] = as.run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
+         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
          std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
@@ -221,7 +227,7 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            shared_mem->set_fitness(j, i, as.run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
+            shared_mem->set_fitness(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
 
             //Kill slave
             ::raise(SIGTERM);

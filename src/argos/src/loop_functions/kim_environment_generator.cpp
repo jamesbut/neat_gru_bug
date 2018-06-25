@@ -232,7 +232,7 @@ void RandomEnvironmentGenerator::generateEnvironmentFromFile(std::string file_na
 
 
 #if EFFICIENT_ENVIRONMENT
-  //putLinesInEnvironment();
+  putLinesInEnvironment();    //Comment out for handwritten envs
   putBlocksInEnvironment();
 #else
   putBlocksInEnvironment();
