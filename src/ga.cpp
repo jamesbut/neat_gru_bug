@@ -17,7 +17,7 @@ GA::GA(std::string neat_param_file) :
    HANDWRITTEN_ENVS(false),
    TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
-   NUM_TEST_ENVS(3),
+   NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    ENV_PATH("../argos_params/environments/training_set/ts_")
