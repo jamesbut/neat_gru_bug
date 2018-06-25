@@ -15,10 +15,13 @@ GA::GA(std::string neat_param_file) :
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
    HANDWRITTEN_ENVS(false),
+   TEST_EVAL_GEN(25),
+   TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
+   NUM_TEST_ENVS(3),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
-   //ENV_PATH("../argos_params/environments/training_set/ts_")
-   ENV_PATH("../argos_params/environments/handwritten_envs/e")
+   ENV_PATH("../argos_params/environments/training_set/ts_")
+   //ENV_PATH("../argos_params/environments/handwritten_envs/e")
    {
 
    if(HANDWRITTEN_ENVS)
@@ -43,6 +46,9 @@ GA::GA(std::string neat_param_file) :
    //Create shared memory block for master and slaves
    if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials);
 
+   //Remove file ready for next run
+   remove("../eval_set_scores/eval_scores.txt");
+
 }
 
 GA::~GA() {
@@ -52,14 +58,6 @@ GA::~GA() {
    if(PARALLEL) delete shared_mem;
 
    delete as;
-
-}
-
-
-std::string GA::GetArgosFilePath(bool handwritten_envs) {
-
-   if(handwritten_envs) return "../argos_params/no_walls_10.argos";
-   else return "../argos_params/no_walls.argos";
 
 }
 
@@ -311,6 +309,49 @@ void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
 
       overall_winner = new NEAT::Organism(maxPopScore, new_genome, 1);
       overall_winner->winning_gen = (m_unCurrentGeneration+1);
+
+   }
+
+   //Every TEST_EVAL_GEN test the best genome on the evaluation set and
+   //write to file
+   if(!HANDWRITTEN_ENVS) {
+
+      std::vector<double> eval_set_scores(NUM_TEST_ENVS);
+
+      if ((m_unCurrentGeneration+1) % TEST_EVAL_GEN == 0) {
+
+         std::cout << "Evaluating on test set" << std::endl;
+
+         for(int i = 0; i < NUM_TEST_ENVS; i++) {
+
+            //std::cout << "Env: " << (i+1) << std::endl;
+
+            std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
+
+            eval_set_scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
+
+            //std::cout << "Fitness: " << eval_set_scores[i] << std::endl;
+
+         }
+
+         int num_finishes = 0;
+
+         for(int i = 0; i < eval_set_scores.size(); i++) {
+
+            if(eval_set_scores[i] > 13.2) num_finishes++;
+
+         }
+
+         std::ofstream outfile;
+
+         outfile.open("../eval_set_scores/eval_scores.txt", std::ios_base::app);
+         outfile << (m_unCurrentGeneration+1) << "," << num_finishes << "\n";
+
+         outfile.close();
+
+         std::cout << "Test set score printed" << std::endl;
+
+      }
 
    }
 

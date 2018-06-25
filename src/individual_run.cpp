@@ -25,19 +25,6 @@ IndividualRun::~IndividualRun() {
 
 }
 
-// std::string IndividualRun::GetArgosFilePath(bool handwritten_envs) {
-//    std::cout << handwritten_envs << std::endl;
-//    if(handwritten_envs) {
-//
-//       return "../argos_params/no_walls_10_vis.argos";
-// }
-//    else {
-//
-//       return "../argos_params/no_walls.argos";
-//    }
-//
-// }
-
 void IndividualRun::run() {
 
    int num_finishes = 0;

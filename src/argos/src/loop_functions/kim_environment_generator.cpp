@@ -211,7 +211,7 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
   }
 
 #if EFFICIENT_ENVIRONMENT
-  putLinesInEnvironment();
+  putLinesInEnvironment();     //Comment out for handwritten envs
   putBlocksInEnvironment();
 #else
   putBlocksInEnvironment();
@@ -224,12 +224,10 @@ void RandomEnvironmentGenerator::generateEnvironmentFromFile(std::string file_na
   bin_corridor_img_large = Mat::zeros(environment_width * 20, environment_height * 20, CV_8UC1);
   resize(bin_corridor_img, bin_corridor_img_large, bin_corridor_img_large.size(), 0, 0, INTER_NEAREST);
   corridor_contours_img = Mat::zeros(bin_corridor_img_large.size(), CV_8UC1);
-  //std::cout<<"size "<<bin_corridor_img_large.size()<<std::endl;
+  //std::cout<<"size "<<corridor_contours_img.size()<<std::endl;
 
   cv::Mat read_img = cv::imread(file_name, CV_LOAD_IMAGE_GRAYSCALE);
   resize(read_img, corridor_contours_img, corridor_contours_img.size(), 0, 0, INTER_NEAREST);
-
-
 
 #if EFFICIENT_ENVIRONMENT
   putLinesInEnvironment();    //Comment out for handwritten envs
@@ -643,8 +641,8 @@ void RandomEnvironmentGenerator::putBlocksInEnvironment()
 
 void RandomEnvironmentGenerator::putLinesInEnvironment()
 {
-   Mat dst;
-   Canny(corridor_contours_img, dst, 50, 200, 3);     //This never used to be here
+   //Mat dst;
+   //Canny(corridor_contours_img, dst, 50, 200, 3);     //This never used to be here
 
   // Show our image inside it.
   vector<Vec4i> lines;
@@ -673,6 +671,7 @@ void RandomEnvironmentGenerator::putLinesInEnvironment()
 
 
   }
+
   //imshow( "img_lines ", corridor_contours_img);
   //waitKey(0);
 

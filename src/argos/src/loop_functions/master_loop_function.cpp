@@ -6,7 +6,7 @@ MasterLoopFunction::MasterLoopFunction() : GENERATE_ENVS(true) {}
 MasterLoopFunction::~MasterLoopFunction() {}
 
 void MasterLoopFunction::Init(TConfigurationNode& t_node) {
-
+   std::cout << "Master loop init" << std::endl;
    //Find pointers to robots and their controllers
    find_robot_pointers();
 

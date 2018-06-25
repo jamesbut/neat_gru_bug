@@ -5,7 +5,7 @@
 # inputs and outputs
 
 #number of inputs (not including bias)
-num_inputs=1
+num_inputs=15
 
 #number of outputs
 num_outputs=2

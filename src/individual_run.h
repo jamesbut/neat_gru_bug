@@ -16,8 +16,6 @@ private:
 
    void readGenomeFile(const std::string& gf);
 
-   //std::string GetArgosFilePath(bool handwritten_envs);
-
    NEAT::Organism* org;
 
    ARGoS_simulation* as;

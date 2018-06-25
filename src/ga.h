@@ -35,8 +35,6 @@ private:
    void collect_scores(std::vector<std::vector <double> > trial_scores);
    void flush_winners();
 
-   std::string GetArgosFilePath(bool handwritten_envs);
-
    /** Current generation */
    int m_unCurrentGeneration;
 
@@ -61,6 +59,10 @@ private:
    const bool HANDWRITTEN_ENVS;
 
    const double ACCEPTABLE_FITNESS;
+
+   const int TEST_EVAL_GEN;
+   const std::string TEST_SET_PATH;
+   const int NUM_TEST_ENVS;
 
 
    //Class for shared memory management

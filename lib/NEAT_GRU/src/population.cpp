@@ -933,7 +933,7 @@ bool Population::epoch(int generation) {
 		std::cout<<"ERROR: THE BEST SPECIES DIED!"<<std::endl;
 	}
 	else {
-		std::cout<<"The best survived: "<<best_species_num<<std::endl;
+		//std::cout<<"The best survived: "<<best_species_num<<std::endl;
 	}
 
 	//DEBUG: Checking the top organism's duplicate in the next gen
