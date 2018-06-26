@@ -9,11 +9,15 @@
 #include <boost/filesystem.hpp>
 
 GA::GA(std::string neat_param_file) :
-   m_unCurrentGeneration(0),
-   NUM_FLUSHES(3),
+   m_unCurrentGeneration(1),
+   overall_winner_num_finishes(0),
+   NUM_FLUSHES(3),   //Currently not used
+   FLUSH_EVERY(25),
    INCREMENTAL_EV(false),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
+   GOT_TO_TOWER_DIST(13.2),
+   //GOT_TO_TOWER_DIST(2.0),
    HANDWRITTEN_ENVS(false),
    TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
@@ -33,13 +37,11 @@ GA::GA(std::string neat_param_file) :
 
    //Determine when to flush overall winner to file
    flush_gens.resize(NUM_FLUSHES);
-   std::cout << NEAT::num_gens << std::endl;
-   //std::cout << "Flush Gens: " << std::endl;
 
    for(int i = 0; i < NUM_FLUSHES; i++) {
 
       flush_gens[i] = (double)(i+1)/(double)NUM_FLUSHES * NEAT::num_gens;
-      std::cout << flush_gens[i] << std::endl;
+      //std::cout << flush_gens[i] << std::endl;
 
    }
 
@@ -47,7 +49,8 @@ GA::GA(std::string neat_param_file) :
    if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials);
 
    //Remove file ready for next run
-   remove("../eval_set_scores/eval_scores.txt");
+   remove("../scores/training_scores.txt");
+   remove("../scores/eval_scores.txt");
 
 }
 
@@ -296,9 +299,14 @@ void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
 
    }
 
+   bool overall_winner_changed = false;
+
    //Compare generational winner with overall winner
    //And then update overall winner
-   if (m_unCurrentGeneration == 0 || maxPopScore > overall_winner->fitness) {
+   if (m_unCurrentGeneration == 1 || maxPopScore > overall_winner->fitness) {
+
+      overall_winner_changed = true;
+      change_since_last_eval = true;
 
       //Duplicate winner because it will be deleted by next generation
       //We need this to flush genome.
@@ -308,50 +316,96 @@ void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
       new_genome = neatPop->organisms[maxPopOrg]->gnome->duplicate(1);
 
       overall_winner = new NEAT::Organism(maxPopScore, new_genome, 1);
-      overall_winner->winning_gen = (m_unCurrentGeneration+1);
+      overall_winner->winning_gen = m_unCurrentGeneration;
 
    }
 
+   if(!HANDWRITTEN_ENVS) test_on_training_set(trial_scores[maxPopOrg], overall_winner_changed);
+   if(!HANDWRITTEN_ENVS) test_on_eval_set(overall_winner_changed);
+
+}
+
+//Record the number of finishes on the TRAINING SET for the overall winner
+void GA::test_on_training_set(std::vector<double> overall_winner_scores, bool changed) {
+
+   if(changed) {
+
+      int finishes = 0;
+
+      for(int i = 0; i < overall_winner_scores.size(); i++) {
+         //std::cout << overall_winner_scores[i] << std::endl;
+         if(overall_winner_scores[i] > GOT_TO_TOWER_DIST) finishes++;
+
+      }
+      //std::cout << "Finishes: " << finishes << std::endl;
+      overall_winner_num_finishes = finishes;
+
+   }
+
+   std::ofstream outfile;
+
+   outfile.open("../scores/training_scores.txt", std::ios_base::app);
+   outfile << m_unCurrentGeneration << "," << overall_winner_num_finishes << "\n";
+
+   outfile.close();
+
+   std::cout << "Training set scores printed" << std::endl;
+
+}
+
+void GA::test_on_eval_set(bool changed) {
+
    //Every TEST_EVAL_GEN test the best genome on the evaluation set and
    //write to file
-   if(!HANDWRITTEN_ENVS) {
 
-      std::vector<double> eval_set_scores(NUM_TEST_ENVS);
+   if(m_unCurrentGeneration % TEST_EVAL_GEN == 0) {
 
-      if ((m_unCurrentGeneration+1) % TEST_EVAL_GEN == 0) {
+      if (change_since_last_eval) {
 
-         std::cout << "Evaluating on test set" << std::endl;
+         std::cout << "Evaluating on test set.." << std::endl;
+
+         std::vector<double> scores(NUM_TEST_ENVS);
 
          for(int i = 0; i < NUM_TEST_ENVS; i++) {
 
-            //std::cout << "Env: " << (i+1) << std::endl;
-
             std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
 
-            eval_set_scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
+            scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
 
-            //std::cout << "Fitness: " << eval_set_scores[i] << std::endl;
+            //std::cout << "Eval set: " << scores[i] << std::endl;
 
          }
 
          int num_finishes = 0;
 
-         for(int i = 0; i < eval_set_scores.size(); i++) {
+         for(int i = 0; i < scores.size(); i++) {
 
-            if(eval_set_scores[i] > 13.2) num_finishes++;
+            if(scores[i] > GOT_TO_TOWER_DIST) num_finishes++;
 
          }
 
-         std::ofstream outfile;
+         eval_set_finishes = num_finishes;
+         eval_set_scores = scores;
 
-         outfile.open("../eval_set_scores/eval_scores.txt", std::ios_base::app);
-         outfile << (m_unCurrentGeneration+1) << "," << num_finishes << "\n";
-
-         outfile.close();
-
-         std::cout << "Test set score printed" << std::endl;
+         change_since_last_eval = false;
 
       }
+
+      std::ofstream outfile;
+
+      outfile.open("../scores/eval_scores.txt", std::ios_base::app);
+      outfile << m_unCurrentGeneration << "," << eval_set_finishes;
+
+      for(int i = 0; i < eval_set_scores.size(); i++) {
+
+         outfile << "," << eval_set_scores[i];
+
+      }
+
+      outfile << "\n";
+      outfile.close();
+
+      std::cout << "Test set scores printed" << std::endl;
 
    }
 
@@ -360,7 +414,11 @@ void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
 void GA::flush_winners() {
 
    //Flush overall winner every 1/3 of the way through a run with different name
-   if(std::find(flush_gens.begin(), flush_gens.end(), m_unCurrentGeneration+1) != flush_gens.end()) {
+   //if(std::find(flush_gens.begin(), flush_gens.end(), m_unCurrentGeneration) != flush_gens.end()) {
+
+   //Flush every FLUSH_EVERY gens - could to make this equal to TEST_EVAL_GEN so
+   //the winner that is tested on the eval set is flushed
+   if (m_unCurrentGeneration % FLUSH_EVERY == 0) {
 
       //Create directory if it already does not exist
       if (!boost::filesystem::exists("../winners/"))
@@ -368,8 +426,8 @@ void GA::flush_winners() {
 
       std::stringstream ss1, ss2;
 
-      ss1 << "../winners/overall_winner_at_" << m_unCurrentGeneration+1;
-      ss2 << "../winners/overall_winner_org_at_" << m_unCurrentGeneration+1;
+      ss1 << "../winners/overall_winner_at_" << m_unCurrentGeneration;
+      ss2 << "../winners/overall_winner_org_at_" << m_unCurrentGeneration;
       std::string outfile = ss1.str();
       std::string outfileOrg = ss2.str();
 
@@ -399,15 +457,15 @@ void GA::flush_winners() {
 
 void GA::nextGen() {
 
-   ++m_unCurrentGeneration;
    neatPop->epoch(m_unCurrentGeneration);
+   ++m_unCurrentGeneration;
 
 }
 
 // Checks that it has got above the number of generations but also that the
 // fitness is high enough too
 bool GA::done() const {
-   return (m_unCurrentGeneration >= NEAT::num_gens) && (overall_winner->fitness > ACCEPTABLE_FITNESS);
+   return (m_unCurrentGeneration > NEAT::num_gens) && (overall_winner->fitness > ACCEPTABLE_FITNESS);
 }
 
 

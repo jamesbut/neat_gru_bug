@@ -404,6 +404,8 @@ bool Population::print_to_file_by_species(std::ostream& outFile) {
 
 bool Population::epoch(int generation) {
 
+	std::cout << "------------------------" << std::endl;
+
 	std::vector<Species*>::iterator curspecies;
 	std::vector<Species*>::iterator deadspecies;  //For removing empty Species
 
@@ -493,7 +495,7 @@ bool Population::epoch(int generation) {
 
 
 	std::cout<<"Number of Species: "<<num_species<<std::endl;
-	std::cout<<"compat_thresh: "<<compat_threshold<<std::endl;
+	//std::cout<<"compat_thresh: "<<compat_threshold<<std::endl;
 
 	//Use Species' ages to modify the objective fitness of organisms
 	// in other words, make it more fair for younger species
@@ -1034,6 +1036,8 @@ bool Population::epoch(int generation) {
 	// 		}
 	// 	}
 	// }
+
+	std::cout << "------------------------" << std::endl;
 
 	return true;
 

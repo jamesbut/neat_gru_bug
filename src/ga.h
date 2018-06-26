@@ -35,6 +35,9 @@ private:
    void collect_scores(std::vector<std::vector <double> > trial_scores);
    void flush_winners();
 
+   void test_on_training_set(std::vector<double> overall_winner_scores, bool changed);
+   void test_on_eval_set(bool changed);
+
    /** Current generation */
    int m_unCurrentGeneration;
 
@@ -47,11 +50,14 @@ private:
    //I do this because it is often the case that the winner of the final
    //generation is not the overall winner of all the generations.
    NEAT::Organism* overall_winner;
+   int overall_winner_num_finishes;
 
    std::vector<int> flush_gens;
 
    const int NUM_FLUSHES;
    const int INCREMENTAL_EV;
+
+   const int FLUSH_EVERY;
 
    const bool PARALLEL;
    const std::string ENV_PATH;
@@ -59,10 +65,15 @@ private:
    const bool HANDWRITTEN_ENVS;
 
    const double ACCEPTABLE_FITNESS;
+   const double GOT_TO_TOWER_DIST;
 
    const int TEST_EVAL_GEN;
    const std::string TEST_SET_PATH;
    const int NUM_TEST_ENVS;
+
+   int eval_set_finishes;
+   std::vector<double> eval_set_scores;
+   bool change_since_last_eval;
 
 
    //Class for shared memory management
