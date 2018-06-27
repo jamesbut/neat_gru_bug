@@ -51,6 +51,7 @@ private:
    //generation is not the overall winner of all the generations.
    NEAT::Organism* overall_winner;
    int overall_winner_num_finishes;
+   std::vector<double> m_overall_winner_scores;
 
    std::vector<int> flush_gens;
 

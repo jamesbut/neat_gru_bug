@@ -339,14 +339,22 @@ void GA::test_on_training_set(std::vector<double> overall_winner_scores, bool ch
       }
       //std::cout << "Finishes: " << finishes << std::endl;
       overall_winner_num_finishes = finishes;
+      m_overall_winner_scores = overall_winner_scores;
 
    }
 
    std::ofstream outfile;
 
    outfile.open("../scores/training_scores.txt", std::ios_base::app);
-   outfile << m_unCurrentGeneration << "," << overall_winner_num_finishes << "\n";
+   outfile << m_unCurrentGeneration << "," << overall_winner_num_finishes;
 
+   for(int i = 0; i < m_overall_winner_scores.size(); i++) {
+
+      outfile << "," << m_overall_winner_scores[i];
+
+   }
+
+   outfile << "\n";
    outfile.close();
 
    std::cout << "Training set scores printed" << std::endl;
@@ -444,7 +452,7 @@ void GA::flush_winners() {
    std::string outfile = "../winners/overall_winner";
    std::string outfileOrg = "../winners/overall_winner_org";
 
-   std::cout << " [Flushing winner... ";
+   std::cout << "[Flushing winner... ";
 
    overall_winner->gnome->print_to_filename(outfile.c_str());
    overall_winner->print_to_file(outfileOrg.c_str());
