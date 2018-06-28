@@ -50,7 +50,7 @@ void IndividualRun::run() {
       }
 
       double fitness = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
-
+      std::cout << fitness << std::endl;
       if (fitness > 13.2) num_finishes++;
 
    }

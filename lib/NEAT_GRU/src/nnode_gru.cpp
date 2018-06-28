@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <math.h>
+#include <iomanip>
 
 using namespace NEAT;
 
@@ -456,7 +457,11 @@ void NNodeGRU::added_in_link() {
 	//std::cout << "U size after adding link: " <<U.size() << std::endl;
 
 }
+
 void NNodeGRU::print_gru_to_file(std::ofstream &outFile) {
+
+	if(!PRE_PRECISION_VERSION)
+		outFile<<std::setprecision(std::numeric_limits<double>::max_digits10);
 
 	outFile<<"nodegru "<<node_id<<" ";
 	outFile<<gen_node_label<<" ";
@@ -494,6 +499,9 @@ void NNodeGRU::print_gru_to_file(std::ofstream &outFile) {
 }
 
 void NNodeGRU::print_gru_to_file(std::ostream &outFile) {
+
+	if(!PRE_PRECISION_VERSION)
+		outFile<<std::setprecision(std::numeric_limits<double>::max_digits10);
 
 	// char tempbuf[128];
 	// sprintf(tempbuf, "nodegru %d %d ", node_id, gen_node_label);

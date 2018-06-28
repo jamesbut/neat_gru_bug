@@ -11,9 +11,8 @@ ARGoS_simulation::ARGoS_simulation(const std::string& argos_file) :
 
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
    cSimulator.SetExperimentFileName(ARGOS_FILE_NAME);
-   std::cout << "Loading.." << std::endl;
+
    cSimulator.LoadExperiment();
-   std::cout << "Loaded" << std::endl;
 
 }
 

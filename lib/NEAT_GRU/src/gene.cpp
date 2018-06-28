@@ -17,6 +17,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <iomanip>
+
 using namespace NEAT;
 
 Gene::Gene(double w, NNode *inode, NNode *onode, bool recur, double innov, double mnum) {
@@ -140,6 +142,21 @@ Gene::~Gene() {
 
 
 void Gene::print_to_file(std::ofstream &outFile) {
+
+	//DEBUGGING:
+   //std::cout.precision(std::numeric_limits<double>::max_digits10);
+	//std::cout.precision(std::numeric_limits<double>::max());
+   // for(int i = 0; i < genes.size(); i++) {
+	//
+   //  std::cout << genes[i]->lnk->weight << std::endl;
+	//
+   // }
+	//std::cout << lnk->weight << std::endl;
+
+  //James - added to preserve precision when printing to file
+  if(!PRE_PRECISION_VERSION)
+  	outFile<<std::setprecision(std::numeric_limits<double>::max_digits10);
+
   outFile<<"gene ";
   //Start off with the trait number for this gene
   if ((lnk->linktrait)==0) outFile<<"0 ";

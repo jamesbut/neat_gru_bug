@@ -75,7 +75,7 @@ void GA::initNEAT(std::string neat_param_file) {
    std::ifstream iFile;
 
    if(!INCREMENTAL_EV) iFile = std::ifstream("../starting_genomes/start_genome");
-   else iFile = std::ifstream("../winners/archive_winners_nb/g2");
+   else iFile = std::ifstream("../winners/overall_winner_at_3");
 
    iFile >> curword;
    iFile >> id;
@@ -189,7 +189,7 @@ void GA::epoch() {
          if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
          trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
-         std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
+         //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
 
@@ -199,10 +199,15 @@ void GA::epoch() {
 
    flush_winners();
 
+   //if(!HANDWRITTEN_ENVS) test_on_eval_set(true);
+
 }
 
 //Evalute population in parallel
 void GA::parallel_epoch() {
+
+   //overall_winner = neatPop->organisms[0];
+   //if(!HANDWRITTEN_ENVS) test_on_eval_set(true);
 
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
@@ -368,6 +373,31 @@ void GA::test_on_eval_set(bool changed) {
 
    if(m_unCurrentGeneration % TEST_EVAL_GEN == 0) {
 
+      // char curword[20];
+      // int id;
+      //
+      // std::string file_prefix = "../winners/overall_winner";
+      // std::string genomeFilePath = file_prefix;
+      //
+      // std::ifstream iFile(genomeFilePath.c_str());
+      //
+      // std::cout << "Reading in the individual" << std::endl;
+      //
+      // iFile >> curword;
+      // iFile >> id;
+      //
+      // std::cout << curword << std::endl;
+      // std::cout << id << std::endl;
+      //
+      // NEAT::Genome* genom = new NEAT::Genome(id,iFile);
+      // iFile.close();
+      //
+      // std::cout << "Complexity: " << genom->get_complexity() << std::endl;
+      //
+      // overall_winner = new NEAT::Organism(0.0, genom, 1);
+      //
+      // delete genom;
+
       if (change_since_last_eval) {
 
          std::cout << "Evaluating on test set.." << std::endl;
@@ -377,6 +407,8 @@ void GA::test_on_eval_set(bool changed) {
          for(int i = 0; i < NUM_TEST_ENVS; i++) {
 
             std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
+
+            //overall_winner->gnome->print_to_filename(outfile.c_str());
 
             scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
 

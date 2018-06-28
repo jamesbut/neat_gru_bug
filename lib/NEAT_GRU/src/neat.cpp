@@ -24,6 +24,10 @@
 //genomes.
 const bool NEAT::OLD_VERSION = false;
 
+//Variable to determine whether to switch back to before when I
+//had precision issues when reading back in a genome
+const bool NEAT::PRE_PRECISION_VERSION = false;
+
 double NEAT::trait_param_mut_prob = 0;
 double NEAT::trait_mutation_power = 0; // Power of mutation on a signle trait param
 double NEAT::linktrait_mut_sig = 0; // Amount that mutation_num changes for a trait change inside a link

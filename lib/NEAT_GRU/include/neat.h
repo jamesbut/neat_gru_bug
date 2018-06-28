@@ -22,6 +22,7 @@
 namespace NEAT {
 
 	extern const bool OLD_VERSION;
+	extern const bool PRE_PRECISION_VERSION;
 
 	const int num_trait_params = 8;
 
