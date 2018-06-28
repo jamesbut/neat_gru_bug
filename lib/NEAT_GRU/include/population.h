@@ -22,31 +22,32 @@
 #include "genome.h"
 #include "species.h"
 #include "organism.h"
+#include "complexity_regulation.h"
 
 namespace NEAT {
 
 	class Species;
 	class Organism;
 
-	// ---------------------------------------------  
+	// ---------------------------------------------
 	// POPULATION CLASS:
-	//   A Population is a group of Organisms   
-	//   including their species                        
-	// ---------------------------------------------  
+	//   A Population is a group of Organisms
+	//   including their species
+	// ---------------------------------------------
 	class Population {
 
-	protected: 
+	protected:
 
-		// A Population can be spawned off of a single Genome 
-		// There will be size Genomes added to the Population 
-		// The Population does not have to be empty to add Genomes 
+		// A Population can be spawned off of a single Genome
+		// There will be size Genomes added to the Population
+		// The Population does not have to be empty to add Genomes
 		bool spawn(Genome *g,int size);
 
 	public:
 
-        std::vector<Organism*> organisms; //The organisms in the Population
+      std::vector<Organism*> organisms; //The organisms in the Population
 
-        std::vector<Species*> species;  // Species in the Population. Note that the species should comprise all the genomes 
+      std::vector<Species*> species;  // Species in the Population. Note that the species should comprise all the genomes
 
 		// ******* Member variables used during reproduction *******
         std::vector<Innovation*> innovations;  // For holding the genetic innovations of the newest generation
@@ -69,7 +70,7 @@ namespace NEAT {
 		// Separate the Organisms into species
 		bool speciate();
 
-		// Print Population to a file specified by a string 
+		// Print Population to a file specified by a string
 		bool print_to_file(std::ostream& outFile);
 
 		// Print Population to a file in speciated order with comments separating each species
@@ -84,33 +85,33 @@ namespace NEAT {
 		// Run verify on all Genomes in this Population (Debugging)
 		bool verify();
 
-		// Turnover the population to a new generation using fitness 
+		// Turnover the population to a new generation using fitness
 		// The generation argument is the next generation
 		bool epoch(int generation);
 
-		// *** Real-time methods *** 
+		// *** Real-time methods ***
 
-		// Places the organisms in species in order from best to worst fitness 
+		// Places the organisms in species in order from best to worst fitness
 		bool rank_within_species();
 
-		// Construct off of a single spawning Genome 
+		// Construct off of a single spawning Genome
 		Population(Genome *g,int size);
 
 		// Construct off of a single spawning Genome without mutation
 		Population(Genome *g,int size, float power);
-		
+
 		//MSC Addition
 		// Construct off of a vector of genomes with a mutation rate of "power"
 		Population(std::vector<Genome*> genomeList, float power);
 
 		bool clone(Genome *g,int size, float power);
 
-		//// Special constructor to create a population of random topologies     
-		//// uses Genome(int i, int o, int n,int nmax, bool r, double linkprob) 
+		//// Special constructor to create a population of random topologies
+		//// uses Genome(int i, int o, int n,int nmax, bool r, double linkprob)
 		//// See the Genome constructor for the argument specifications
 		//Population(int size,int i,int o, int nmax, bool r, double linkprob);
 
-		// Construct off of a file of Genomes 
+		// Construct off of a file of Genomes
 		Population(const char *filename);
 
 		// It can delete a Population in two ways:
@@ -119,7 +120,11 @@ namespace NEAT {
 		// It does the latter if it sees the species list is empty
 		~Population();
 
-		
+	private:
+
+		void debug_checks();
+
+		ComplexityRegulation complexity_regulation;
 
 	};
 

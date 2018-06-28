@@ -3525,6 +3525,12 @@ void Genome::randomize_traits() {
 
 }
 
+int Genome::get_complexity() {
+
+	return genes.size();
+
+}
+
 //Calls special constructor that creates a Genome of 3 possible types:
 //0 - Fully linked, no hidden nodes
 //1 - Fully linked, one hidden node splitting each link

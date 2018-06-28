@@ -193,6 +193,8 @@ namespace NEAT {
 		// Randomize the trait pointers of all the node and connection genes
 		void randomize_traits();
 
+		int get_complexity();
+
 	protected:
 		//Inserts a NNode into a given ordered list of NNodes in order
 		void node_insert(std::vector<NNode*> &nlist, NNode *n);

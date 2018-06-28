@@ -22,14 +22,18 @@
 
 using namespace NEAT;
 
-Population::Population(Genome *g,int size) {
+const bool COMPLEXITY_REGULATION = true;
+
+Population::Population(Genome *g,int size) :
+	complexity_regulation(ComplexityRegulation::Complexifying) {
 	winnergen=0;
 	highest_fitness=0.0;
 	highest_last_changed=0;
 	spawn(g,size);
 }
 
-Population::Population(Genome *g,int size, float power) {
+Population::Population(Genome *g,int size, float power) :
+ 	complexity_regulation(ComplexityRegulation::Complexifying) {
 	winnergen=0;
 	highest_fitness=0.0;
 	highest_last_changed=0;
@@ -63,7 +67,8 @@ Population::Population(Genome *g,int size, float power) {
 //MSC Addition
 //Added the ability for a population to be spawned
 //off of a vector of Genomes.  Useful when converging.
-Population::Population(std::vector<Genome*> genomeList, float power) {
+Population::Population(std::vector<Genome*> genomeList, float power) :
+ 	complexity_regulation(ComplexityRegulation::Complexifying) {
 
 	winnergen=0;
 	highest_fitness=0.0;
@@ -95,7 +100,8 @@ Population::Population(std::vector<Genome*> genomeList, float power) {
 	speciate();
 }
 
-Population::Population(const char *filename) {
+Population::Population(const char *filename) :
+	complexity_regulation(ComplexityRegulation::Complexifying) {
 
 	char curword[128];  //max word size of 128 characters
 	char curline[1024]; //max line size of 1024 characters
@@ -948,6 +954,33 @@ bool Population::epoch(int generation) {
 
 	//cout<<"babies_stolen at end: "<<babies_stolen<<endl;
 
+	//Check for complexity or simplification shift
+	if(COMPLEXITY_REGULATION)
+		complexity_regulation.evaluate_complexity(organisms);
+
+
+	debug_checks();
+
+	std::cout << "------------------------" << std::endl;
+
+	return true;
+
+}
+
+
+bool Population::rank_within_species() {
+	std::vector<Species*>::iterator curspecies;
+
+	//Add each Species in this generation to the snapshot
+	for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
+		(*curspecies)->rank();
+	}
+
+	return true;
+}
+
+void Population::debug_checks() {
+
 	/* Debug code */
 
 	// Print out every organism at every generation (debugging)
@@ -1037,19 +1070,4 @@ bool Population::epoch(int generation) {
 	// 	}
 	// }
 
-	std::cout << "------------------------" << std::endl;
-
-	return true;
-
-}
-
-bool Population::rank_within_species() {
-	std::vector<Species*>::iterator curspecies;
-
-	//Add each Species in this generation to the snapshot
-	for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
-		(*curspecies)->rank();
-	}
-
-	return true;
 }

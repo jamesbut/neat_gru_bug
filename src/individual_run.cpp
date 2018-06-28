@@ -81,6 +81,8 @@ void IndividualRun::readGenomeFile(const std::string& gf) {
    NEAT::Genome* genom = new NEAT::Genome(id,iFile);
    iFile.close();
 
+   std::cout << "Complexity: " << genom->get_complexity() << std::endl;
+
    org = new NEAT::Organism(0.0, genom, 1);
 
    delete genom;
