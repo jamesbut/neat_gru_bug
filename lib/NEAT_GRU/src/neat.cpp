@@ -52,6 +52,7 @@ double NEAT::mutate_gene_reenable_prob = 0;
 double NEAT::mutate_add_node_prob = 0;
 double NEAT::mutate_add_gru_node_prob = 0;
 double NEAT::mutate_add_link_prob = 0;
+double NEAT::mutate_delete_link_prob = 0;
 double NEAT::interspecies_mate_rate = 0; // Prob. of a mate being outside species
 double NEAT::mate_multipoint_prob = 0;
 double NEAT::mate_multipoint_avg_prob = 0;

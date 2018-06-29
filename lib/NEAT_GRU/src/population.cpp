@@ -956,7 +956,7 @@ bool Population::epoch(int generation) {
 
 	//Check for complexity or simplification shift
 	if(COMPLEXITY_REGULATION)
-		complexity_regulation.evaluate_complexity(organisms);
+		complexity_regulation.evaluate_complexity(organisms, generation);
 
 
 	debug_checks();
