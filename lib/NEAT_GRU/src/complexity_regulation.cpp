@@ -5,10 +5,10 @@ using namespace NEAT;
 #include "organism.h"
 
 ComplexityRegulation::ComplexityRegulation(ComplexityMode starting_mode) :
-   complexity_ceiling(100),
-   MIN_SIMPLIFICATION_GENERATIONS(20),
+   complexity_ceiling(40),
+   MIN_SIMPLIFICATION_GENERATIONS(10),
    last_transition_generation(1),
-   complexity_accumulator(bt::rolling_window::window_size = 50),
+   complexity_accumulator(bt::rolling_window::window_size = 10),
    complexity_mode(starting_mode),
    COMPLEXIFYING_CONNECTION_WEIGHT_MUT_PROB(NEAT::mutate_link_weights_prob),
    COMPLEXIFYING_ADD_NODE_MUT_PROB(NEAT::mutate_add_node_prob),
@@ -49,6 +49,7 @@ void ComplexityRegulation::calculate_mean_complexity(const std::vector<Organism*
 
    std::cout << "Mean complexity: " << mean_complexity << std::endl;
    std::cout << "Complexity MA: " << current_complexity_ma << std::endl;
+   std::cout << "Previous complexity MA: " << previous_complexity_ma << std::endl;
 
 }
 

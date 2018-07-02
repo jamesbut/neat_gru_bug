@@ -327,7 +327,7 @@ void NNodeGRU::activate_gru_old(std::vector<double> inputs) {
 }
 
 //TODO: TEST THIS!!
-double NNodeGRU::compatibility(NNodeGRU& node) {
+double NNodeGRU::compatibility(NNodeGRU node) {
 
 	double cumm_diff = 0;
 
@@ -338,21 +338,54 @@ double NNodeGRU::compatibility(NNodeGRU& node) {
 	cumm_diff += fabs(w_u - node.w_u);
 	cumm_diff += fabs(w_r - node.w_r);
 
-	for(int i; i < U.size(); i++) {
+	//Sometimes the vectors will be different sizes
+	//You have to add zeros to the end of the smaller
+	//vector
 
-		cumm_diff += fabs(U[i] - node.U[i]);
+	NNodeGRU own_node_copy = NNodeGRU(1, this);
+
+	if(U.size() > node.U.size()) {
+
+		int diff = U.size() - node.U.size();
+		for(int i = 0; i < diff; i++) {
+			//std::cout << "Pushing1" << std::endl;
+			node.U.push_back(0.0);
+			node.U_u.push_back(0.0);
+			node.U_r.push_back(0.0);
+
+		}
+
+	} else {
+
+		int diff = node.U.size() - U.size();
+		for(int i = 0; i < diff; i++) {
+			//std::cout << "Pushing2" << std::endl;
+			own_node_copy.U.push_back(0.0);
+			own_node_copy.U_u.push_back(0.0);
+			own_node_copy.U_r.push_back(0.0);
+
+		}
 
 	}
 
-	for(int i = 0; i < U_u.size(); i++) {
+	//std::cout << own_node_copy.U.size() << " " << node.U.size() << std::endl;
+	for(int i; i < node.U.size(); i++) {
 
-		cumm_diff += fabs(U_u[i] - node.U_u[i]);
+		cumm_diff += fabs(own_node_copy.U[i] - node.U[i]);
 
 	}
 
-	for(int i = 0; i < U_r.size(); i++) {
+	//std::cout << U_u.size() << " " << node.U_u.size() << std::endl;
+	for(int i = 0; i < node.U_u.size(); i++) {
 
-		cumm_diff += fabs(U_r[i] - node.U_r[i]);
+		cumm_diff += fabs(own_node_copy.U_u[i] - node.U_u[i]);
+
+	}
+
+	//std::cout << U_r.size() << " " << node.U_r.size() << std::endl;
+	for(int i = 0; i < node.U_r.size(); i++) {
+
+		cumm_diff += fabs(own_node_copy.U_r[i] - node.U_r[i]);
 
 	}
 
@@ -455,6 +488,14 @@ void NNodeGRU::added_in_link() {
 	U_r.push_back(0.0);
 
 	//std::cout << "U size after adding link: " <<U.size() << std::endl;
+
+}
+
+void NNodeGRU::deleted_link(int weight_num) {
+
+	U.erase(U.begin()+weight_num);
+	U_u.erase(U_u.begin()+weight_num);
+	U_r.erase(U_r.begin()+weight_num);
 
 }
 

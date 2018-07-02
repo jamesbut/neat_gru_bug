@@ -163,7 +163,9 @@ void NEATGRUFootbotController::ControlStep() {
 
    m_net->load_sensors(net_inputs);
 
-   if (!(m_net->activate())) std::cout << "Inputs disconnected from output!";
+   //TODO: CHANGE THIS BACK!!
+   //if (!(m_net->activate())) std::cout << "Inputs disconnected from output!";
+   m_net->activate();
 
    //Get outputs
 

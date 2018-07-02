@@ -15,13 +15,14 @@ namespace NEAT {
 			NNodeGRU(int nodeid, NNodeGRU* node);
 			NNodeGRU(int nodeid);
 
-			~NNodeGRU();
+			//~NNodeGRU();
 
 			void activate_gru(std::vector<double> inputs);
 			void activate_gru_old(std::vector<double> inputs);
 			void mutate(double power);
-			double compatibility(NNodeGRU& node);
+			double compatibility(NNodeGRU node);
 			void added_in_link();
+			void deleted_link(int weight_num);
 
 			void print_gru_to_file(std::ofstream &outFile);
 			void print_gru_to_file(std::ostream &outFile);

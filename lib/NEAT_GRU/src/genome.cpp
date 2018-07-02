@@ -2189,6 +2189,108 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 }
 
+bool Genome::mutate_delete_link() {
+
+	std::cout << "Deleting link" << std::endl;
+
+	//Cannot delete if too little genes
+	if(genes.size() < 2) return false;
+
+	//Select gene at random
+	int genenum=randint(0,genes.size()-1);
+
+	//Get in and out node ids
+	// int in_node_id = genes[genenum]->lnk->in_node->node_id;
+	// nodeplace in_node_place = genes[genenum]->lnk->in_node->gen_node_label;
+	// int out_node_id = genes[genenum]->lnk->out_node->node_id;
+	// nodeplace in_node_place = genes[genenum]->lnk->in_node->gen_node_label;
+
+	NNode* in_node = genes[genenum]->lnk->in_node;
+	NNode* out_node = genes[genenum]->lnk->out_node;
+
+	//Check that if the outnode is a GRU, that the GRU is notified
+	//which link was deleted
+
+	//TODO: TEST ALL THIS, MIGHT BE DELETING WRONG GENE WEIGHT IN GRU
+	if(out_node->type == GRU) {
+
+		NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(out_node);
+
+		int link_position = -1;
+
+		//Check how many links go into this node
+		for(int i = 0; i < genes.size(); i++) {
+
+			if(genes[i]->lnk->out_node->node_id == out_node->node_id) {
+
+				link_position++;
+
+				if(genes[i]->innovation_num == genes[genenum]->innovation_num) break;
+
+			}
+
+		}
+
+		gru_ptr->deleted_link(link_position);
+
+	}
+
+	//Delete gene
+	delete genes[genenum];
+	genes.erase(genes.begin()+genenum);
+
+
+
+	//Delete source and target neuron if they are redundant
+	if(is_neuron_redundant(*in_node)) {
+
+		for(int i = 0; i < nodes.size(); i++) {
+
+			if(nodes[i]->node_id == in_node->node_id) {
+
+				delete nodes[i];
+				nodes.erase(nodes.begin()+i);
+				break;
+
+			}
+
+		}
+
+	}
+
+	if(is_neuron_redundant(*out_node)) {
+
+		for(int i = 0; i < nodes.size(); i++) {
+
+			if(nodes[i]->node_id == out_node->node_id) {
+
+				delete nodes[i];
+				nodes.erase(nodes.begin()+i);
+				break;
+
+			}
+
+		}
+
+	}
+
+}
+
+//"Redundant neurons are hidden neurons with no connections attached to them"
+bool Genome::is_neuron_redundant(const NNode& neuron) {
+
+	if (neuron.gen_node_label != HIDDEN) return false;
+
+	for(int i = 0; i < genes.size(); i++) {
+
+		if(genes[i]->lnk->in_node->node_id == neuron.node_id) return false;
+		if(genes[i]->lnk->out_node->node_id == neuron.node_id) return false;
+
+	}
+
+	return true;
+
+}
 
 void Genome::mutate_add_sensor(std::vector<Innovation*> &innovs,double &curinnov) {
 
@@ -3443,7 +3545,7 @@ double Genome::compatibility(Genome *g) {
 			double perc_diff_gru;
 			if (num_matching_gru==0) perc_diff_gru = 0;
 			else perc_diff_gru = gru_diff_total/num_matching_gru;
-
+			//std::cout << perc_diff_gru << std::endl;
 			double gru_compat = NEAT::gru_compat_coeff*perc_diff_gru;
 				//std::cout << "GRU compat: " << gru_compat << std::endl;
 				//std::cout << "Combined compat: " << ken_compat + gru_compat << std::endl;

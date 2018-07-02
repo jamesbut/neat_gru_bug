@@ -148,6 +148,8 @@ namespace NEAT {
 		// Mutate the genome by adding a new link between 2 random NNodes
 		bool mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,int tries);
 
+		bool mutate_delete_link();
+
 		void mutate_add_sensor(std::vector<Innovation*> &innovs, double &curinnov);
 
 		// ****** MATING METHODS *****
@@ -202,6 +204,10 @@ namespace NEAT {
 		//Adds a new gene that has been created through a mutation in the
 		//*correct order* into the list of genes in the genome
 		void add_gene(std::vector<Gene*> &glist,Gene *g);
+
+	private:
+
+		bool is_neuron_redundant(const NNode& neuron);
 
 	};
 

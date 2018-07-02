@@ -1,7 +1,7 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
-   //NUM_RUNS(3),
+   //NUM_RUNS(5),
    NUM_RUNS(209),
    RANDOM_ENVS(false),
    HANDWRITTEN_ENVS(false),
@@ -28,6 +28,7 @@ IndividualRun::~IndividualRun() {
 void IndividualRun::run() {
 
    int num_finishes = 0;
+   double total_score = 0;
 
    for(int i = 0; i < NUM_RUNS; i++) {
 
@@ -50,6 +51,7 @@ void IndividualRun::run() {
       }
 
       double fitness = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
+      total_score += fitness;
       std::cout << fitness << std::endl;
       if (fitness > 13.2) num_finishes++;
 
@@ -57,6 +59,7 @@ void IndividualRun::run() {
 
    std::cout << "Finishes: " << num_finishes << std::endl;
    std::cout << "Runs: " << NUM_RUNS << std::endl;
+   std::cout << "Average score: " << (total_score / NUM_RUNS) << std::endl;
 
 }
 
