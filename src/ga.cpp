@@ -16,16 +16,17 @@ GA::GA(std::string neat_param_file) :
    INCREMENTAL_EV(false),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
+   //ACCEPTABLE_FITNESS(1),
    GOT_TO_TOWER_DIST(13.2),
    //GOT_TO_TOWER_DIST(2.0),
-   HANDWRITTEN_ENVS(false),
+   HANDWRITTEN_ENVS(true),
    TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
-   ENV_PATH("../argos_params/environments/training_set/ts_")
-   //ENV_PATH("../argos_params/environments/handwritten_envs/e")
+   //ENV_PATH("../argos_params/environments/training_set/ts_")
+   ENV_PATH("../argos_params/environments/handwritten_envs/e")
    {
 
    if(HANDWRITTEN_ENVS)
@@ -75,7 +76,7 @@ void GA::initNEAT(std::string neat_param_file) {
    std::ifstream iFile;
 
    if(!INCREMENTAL_EV) iFile = std::ifstream("../starting_genomes/start_genome");
-   else iFile = std::ifstream("../winners/overall_winner_at_3");
+   else iFile = std::ifstream("../winners/archive_winners_nb/g4");
 
    iFile >> curword;
    iFile >> id;

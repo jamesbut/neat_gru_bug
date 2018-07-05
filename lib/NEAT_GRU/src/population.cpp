@@ -535,11 +535,13 @@ bool Population::epoch(int generation) {
 	for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
 		skim=(*curspecies)->count_offspring(skim);
 		total_expected+=(*curspecies)->expected_offspring;
+		//std::cout << "Species: " << (*curspecies)->id << " total expected: " << (*curspecies)->expected_offspring << std::endl;
 	}
 
 	//Need to make up for lost foating point precision in offspring assignment
 	//If we lost precision, give an extra baby to the best Species
 	if (total_expected<total_organisms) {
+
 		//Find the Species expecting the most
 		max_expected=0;
 		final_expected=0;
@@ -560,8 +562,9 @@ bool Population::epoch(int generation) {
 		//Then the whole population plummets in fitness
 		//If the average fitness is allowed to hit 0, then we no longer have
 		//an average we can use to assign offspring.
+		//James - I think this is rare.
 		if (final_expected<total_organisms) {
-			//      cout<<"Population died!"<<endl;
+			std::cout<<"Population died!"<<std::endl;
 			//cin>>pause;
 			for(curspecies=species.begin();curspecies!=species.end();++curspecies) {
 				(*curspecies)->expected_offspring=0;
@@ -573,7 +576,7 @@ bool Population::epoch(int generation) {
 	//Sort the Species by max fitness (Use an extra list to do this)
 	//These need to use ORIGINAL fitness
 	//sorted_species.qsort(order_species);
-    std::sort(sorted_species.begin(), sorted_species.end(), order_species);
+   std::sort(sorted_species.begin(), sorted_species.end(), order_species);
 
 	best_species_num=(*(sorted_species.begin()))->id;
 
@@ -603,9 +606,10 @@ bool Population::epoch(int generation) {
 	/* James - It can perform delta coding without crashing, but more often than not it crashes
 	   It is also fine when the GRU cell is a hidden node just not when it is an output node */
 	/* James - it seems here that all but the 2 best species are killed off */
-	if (highest_last_changed>=NEAT::dropoff_age+5) {
+	// James - turned off delta coding for now.
+	if (highest_last_changed>=NEAT::dropoff_age+5 && false) {
 
-		//std::cout<<"PERFORMING DELTA CODING"<<std::endl;
+		std::cout<<"PERFORMING DELTA CODING"<<std::endl;
 
 		highest_last_changed=0;
 
@@ -646,10 +650,10 @@ bool Population::epoch(int generation) {
 	//STOLEN BABIES:  The system can take expected offspring away from
 	//  worse species and give them to superior species depending on
 	//  the system parameter babies_stolen (when babies_stolen > 0)
-	/* James - I don't have any stolen abbies so this is never called */
+	/* James - I don't have any stolen babies so this is never called */
 	else if (NEAT::babies_stolen>0) {
 		//Take away a constant number of expected offspring from the worst few species
-
+		std::cout << "STEALING BABIES" << std::endl;
 		stolen_babies=0;
 		curspecies=sorted_species.end();
 		curspecies--;
@@ -891,6 +895,7 @@ bool Population::epoch(int generation) {
 	orgcount=0;
 	while(curspecies!=species.end()) {
 		if (((*curspecies)->organisms.size())==0) {
+			//std::cout << "Species: " << (*curspecies)->id << " size 0" << std::endl;
 			delete (*curspecies);
 
 			deadspecies=curspecies;
@@ -1031,6 +1036,8 @@ void Population::debug_checks() {
 		}
 	}
 
+	bool duplicate_link = false;
+
 	//Checks to see whether there are any duplicate links
 	for(int i = 0; i < organisms.size(); i++) {
 		for(int j = 0; j < organisms[i]->gnome->genes.size(); j++) {
@@ -1039,10 +1046,10 @@ void Population::debug_checks() {
 				Gene* gene_ptr_2 = organisms[i]->gnome->genes[k];
 				if(gene_ptr_1->lnk->out_node == gene_ptr_2->lnk->out_node &&
 					gene_ptr_1->lnk->in_node == gene_ptr_2->lnk->in_node) {
-						std::cout << "Duplicate link!!" << std::endl;
-						std::cout << "Org num: " << i << std::endl;
-						std::cout << gene_ptr_1->lnk->in_node->node_id << " " << gene_ptr_1->lnk->out_node->node_id << std::endl;
-
+						//std::cout << "Duplicate link!!" << std::endl;
+						//std::cout << "Org num: " << i << std::endl;
+						//std::cout << gene_ptr_1->lnk->in_node->node_id << " " << gene_ptr_1->lnk->out_node->node_id << std::endl;
+						duplicate_link = true;
 						//Create directory if it already does not exist
 				      if (!boost::filesystem::exists("../broken_genomes/"))
 				         boost::filesystem::create_directories("../broken_genomes");
@@ -1056,6 +1063,8 @@ void Population::debug_checks() {
 			}
 		}
 	}
+
+	if(duplicate_link) std::cout << "There is a duplicate link, the bad organism has been printed" << std::endl;
 
 	//Check to see whether there are any recuflags where there should be
 	// for(int i = 0; i < organisms.size(); i++) {

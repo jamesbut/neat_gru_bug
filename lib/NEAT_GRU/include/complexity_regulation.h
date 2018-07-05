@@ -9,7 +9,8 @@
 //Used for moving average
 namespace ba = boost::accumulators;
 namespace bt = ba::tag;
-typedef ba::accumulator_set < uint32_t, ba::stats <bt::rolling_mean > > MeanAccumulator;
+//typedef ba::accumulator_set < uint32_t, ba::stats <bt::rolling_mean > > MeanAccumulator;
+typedef ba::accumulator_set < double, ba::stats <bt::rolling_mean > > MeanAccumulator;
 
 namespace NEAT {
 

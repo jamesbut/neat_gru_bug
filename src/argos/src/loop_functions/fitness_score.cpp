@@ -17,8 +17,8 @@ void FitnessScore::Reset(bool indv_run) {
    no_son_of_mine = false;
    fitness_score = 0;
 
-   if(indv_run) CLOSE_TO_TOWER = 1.0;
-   //if(indv_run) CLOSE_TO_TOWER = 0.32;
+   //if(indv_run) CLOSE_TO_TOWER = 1.0;
+   if(indv_run) CLOSE_TO_TOWER = 0.32;
    else CLOSE_TO_TOWER = 0.32;
    //else CLOSE_TO_TOWER = 0.6;
 

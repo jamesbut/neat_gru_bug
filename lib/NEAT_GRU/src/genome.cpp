@@ -2191,7 +2191,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 bool Genome::mutate_delete_link() {
 
-	std::cout << "Deleting link" << std::endl;
+	//std::cout << "Deleting link" << std::endl;
 
 	//Cannot delete if too little genes
 	if(genes.size() < 2) return false;

@@ -21,6 +21,13 @@ ARGoS_simulation::~ARGoS_simulation() {}
 double ARGoS_simulation::run(NEAT::Organism &org, std::string env_path,
    int env_num, bool reset, bool indv_run, bool handwritten, int trial_num) {
 
+   // std::cout << env_path << std::endl;
+   // std::cout << env_num << std::endl;
+   // std::cout << "RESET: " << reset << std::endl;
+   // std::cout << indv_run << std::endl;
+   // std::cout << handwritten << std::endl;
+   // std::cout << trial_num << std::endl;
+
    argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
    MasterLoopFunction& master_loop = dynamic_cast<MasterLoopFunction&>(cSimulator.GetLoopFunctions());

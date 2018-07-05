@@ -323,6 +323,9 @@ void Species::adjust_fitness() {
 	//Adding 1.0 ensures that at least one will survive
 	num_parents=(int) floor((NEAT::survival_thresh*((double) organisms.size()))+1.0);
 
+	//std::cout << "Species: " << id << " size: " << organisms.size() << std::endl;
+	//std::cout << "Species: " << id << " num_parents: " << num_parents << std::endl;
+
 	//Mark for death those who are ranked too low to be parents
 	curorg=organisms.begin();
 	(*curorg)->champion=true;  //Mark the champ as such
@@ -332,7 +335,7 @@ void Species::adjust_fitness() {
 	}
 	while(curorg!=organisms.end()) {
 	  (*curorg)->eliminate=true;  //Mark for elimination
-	  //std::std::cout<<"marked org # "<<(*curorg)->gnome->genome_id<<" fitness = "<<(*curorg)->fitness<<std::std::endl;
+	  //std::cout<<"marked org # "<<(*curorg)->gnome->genome_id<<" fitness = "<<(*curorg)->fitness<<std::endl;
 	  ++curorg;
 	}
 
@@ -465,14 +468,14 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 	//Check for a mistake
 	if ((expected_offspring>0)&&
 		(organisms.size()==0)) {
-			    //std::cout<<"ERROR:  ATTEMPT TO REPRODUCE OUT OF EMPTY SPECIES"<<std::endl;
+			//std::cout<<"ERROR:  ATTEMPT TO REPRODUCE OUT OF EMPTY SPECIES"<<std::endl;
 			return false;
 		}
 
 		poolsize=organisms.size()-1;
 
 		thechamp=(*(organisms.begin()));
-
+		//std::cout << "Species: " << id << " Expected: " << expected_offspring << std::endl;
 		//Create the designated number of offspring for the Species
 		//one at a time
 		for (count=0;count<expected_offspring;count++) {		/* James - if this is 0, no offspring created */
@@ -540,8 +543,9 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 				thechamp->super_champ_offspring--;
 			}
 			//If we have a Species champion, just clone it
-			else if ((!champ_done)&&
-				(expected_offspring>5)) {
+		   //else if ((!champ_done)&&				//James - I CHANGED THIS
+			//	(expected_offspring>5)) {		//James - why does this have to be greater than 5?
+			else if (!champ_done) {
 					//std::cout << "Cloning Species Champion" <<std::endl;			//This is called more often than it crashes
 					mom=thechamp; //Mom is the champ
 
@@ -554,8 +558,9 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 
 					champ_done=true;
 
-					baby->pop_champ_child=true;						//James - I added this to compare other duplication
-					baby->high_fit=mom->orig_fitness;
+					//baby->pop_champ_child=true;						//James - I added this to compare other duplication
+					//baby->high_fit=mom->orig_fitness;
+
 					//std::cout << "Moms orig fitness: " << mom->orig_fitness << std::endl;
 					//std::cout << "Moms fitness: " << mom->fitness << std::endl;
 					//mom->print_to_file("file_dump/mom_org");
@@ -567,8 +572,9 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 				//First, decide whether to mate or mutate
 				//If there is only one organism in the pool, then always mutate
 			else if ((randfloat()<NEAT::mutate_only_prob)||
-				poolsize== 0) {
-
+				poolsize==0) {
+					//std::cout << "HERE?" << std::endl;
+					//std::cout << "Pool size: " << poolsize << std::endl;
 					//Choose the random parent
 
 					//RANDOM PARENT CHOOSER

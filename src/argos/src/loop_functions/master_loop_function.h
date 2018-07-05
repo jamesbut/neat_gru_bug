@@ -59,6 +59,8 @@ private:
 
    const bool GENERATE_ENVS;
 
+   int count;
+
 };
 
 #endif

@@ -1,13 +1,13 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
-   //NUM_RUNS(5),
-   NUM_RUNS(209),
+   NUM_RUNS(5),
+   //NUM_RUNS(209),
    RANDOM_ENVS(false),
-   HANDWRITTEN_ENVS(false),
-   ENV_PATH("../argos_params/environments/kim_envs/rand_env_")
+   HANDWRITTEN_ENVS(true),
+   //ENV_PATH("../argos_params/environments/kim_envs/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
-   //ENV_PATH("../argos_params/environments/handwritten_envs/e")
+   ENV_PATH("../argos_params/environments/handwritten_envs/e")
 {
 
    if(HANDWRITTEN_ENVS)

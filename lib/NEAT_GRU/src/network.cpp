@@ -183,15 +183,15 @@ bool Network::activate() {
 	// are always active)
 
 	onetime=false;
-
+   //std::cout << "Outputs Off: " << outputsoff() << std::endl;
    /* James - outputs are never off according to their metric */
 	while(outputsoff()||!onetime) {
-
+      //std::cout << "Outputs Off: " << outputsoff() << std::endl;
 		++abortcount;
 
 		if (abortcount==20) {
 			return false;
-			//cout<<"Inputs disconnected from output!"<<endl;
+			//std::cout<<"Inputs disconnected from output!"<<std::endl;
 		}
 		//std::cout<<"Outputs are off"<<std::endl;
 
@@ -225,6 +225,8 @@ bool Network::activate() {
 				} //End for over incoming links
             //End if (((*curnode)->type)!=SENSOR)
 			} else if (((*curnode)->type)==GRU) {
+            (*curnode)->activesum=0;
+				(*curnode)->active_flag=false;  //This will tell us if it has any active inputs
 
             //Gather inputs to GRU cell
             std::vector<double> link_inputs;
@@ -233,6 +235,7 @@ bool Network::activate() {
 					//Handle possible time delays     *James - keep this in because I don't know what it does :/
 					if (!((*curlink)->time_delay)) {
 						link_inputs.push_back(((*curlink)->in_node)->get_active_out());
+                  //std::cout << "GRU: " << (*curlink)->weight << " * " << ((*curlink)->in_node)->get_active_out() << std::endl;
 						if ((((*curlink)->in_node)->active_flag)||
 							(((*curlink)->in_node)->type==SENSOR)) (*curnode)->active_flag=true;
 					}
@@ -288,6 +291,7 @@ bool Network::activate() {
 		}
 
 		onetime=true;
+      //std::cout << "Outputs Off End: " << outputsoff() << std::endl;
 	}
 
 	if (adaptable) {

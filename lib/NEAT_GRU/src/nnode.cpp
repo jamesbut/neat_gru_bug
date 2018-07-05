@@ -229,6 +229,8 @@ void NNode::flushback() {
 			activation=0;
 			last_activation=0;
 			last_activation2=0;
+
+			active_flag = false; //JAMES - ADDED BY ME!
 		}
 
 		//Flush back recursively
@@ -245,6 +247,8 @@ void NNode::flushback() {
 		activation=0;
 		last_activation=0;
 		last_activation2=0;
+
+		active_flag = false; //JAMES - ADDED BY ME!
 
 	}
 

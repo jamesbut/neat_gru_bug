@@ -52,6 +52,8 @@ public:
 
   void SetNEATNet(NEAT::Network &net);
 
+  std::vector<std::vector<double> > GetDebugData(){return debug_data;};
+
 private:
 
    double mapValueIntoRange(const double input, const double input_start,

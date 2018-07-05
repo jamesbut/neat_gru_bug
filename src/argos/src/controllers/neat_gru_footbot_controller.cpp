@@ -1,8 +1,8 @@
 #include "neat_gru_footbot_controller.h"
 
-#define BEARING_SENSOR_ON true
-#define PROX_SENSOR_ON true
-#define LIN_VEL_ON false
+#define BEARING_SENSOR_ON false
+#define PROX_SENSOR_ON false
+#define LIN_VEL_ON true
 
 /****************************************/
 /****************************************/
@@ -54,8 +54,12 @@ void NEATGRUFootbotController::Init(TConfigurationNode& t_node) {
   GetNodeAttributeOrDefault(t_node, "stopWithoutSubscriberCount", stopWithoutSubscriberCount, stopWithoutSubscriberCount);
 
 }
-
+//int count = 0;
 void NEATGRUFootbotController::ControlStep() {
+   // std::cout << "---------------------------------" << std::endl;
+   // std::cout << "Time Step: " << count << std::endl;
+   // std::cout << "---------------------------------" << std::endl;
+   //count++;
 
    /* Get readings from proximity sensor */
    const CCI_FootBotProximitySensor::TReadings& tProxReads = m_pcProximity->GetReadings();
@@ -217,6 +221,8 @@ void NEATGRUFootbotController::ControlStep() {
    // for(int i = 0; i < net_inputs.size(); i++) {
    //    debug_vec.push_back(net_inputs[i]);
    // }
+   // debug_vec.push_back(m_net->outputs[0]->activation);
+   // debug_vec.push_back(m_net->outputs[1]->activation);
    // debug_vec.push_back(leftSpeed);
    // debug_vec.push_back(rightSpeed);
    //
@@ -271,10 +277,10 @@ double NEATGRUFootbotController::mapValueIntoRange(const double input, const dou
 
 }
 
-int count = 0;
+//int count = 0;
 
 void NEATGRUFootbotController::Reset() {
-
+   //count = 0;
    // delete neatOrg;
 
    //std::cout << "debug data size: " << debug_data.size() << std::endl;
@@ -297,7 +303,7 @@ void NEATGRUFootbotController::Reset() {
    //    count++;
    //    debug_data.clear();
    // }
-
+   //debug_data.clear();
 
    net_inputs.resize(m_net->inputs.size());
    net_outputs.resize(m_net->outputs.size());

@@ -53,6 +53,24 @@ void MasterLoopFunction::PostExperiment() {
 
    if(m_indvRun) trajectory_loop.PostExperiment();
 
+   //DEBUGGING
+   // std::vector<std::vector<double> > debug_data = clever_bot_controller->GetDebugData();
+   //
+   // std::ofstream debug_file;
+   // std::stringstream file_name;
+   // file_name << "../debug/debug"<<count<<".txt";
+   // debug_file.open(file_name.str());
+   //
+   // for(int i = 0; i < debug_data.size(); i++) {
+   //    for(int j = 0; j < debug_data[i].size(); j++) {
+   //          debug_file << debug_data[i][j] << ",";
+   //    }
+   //    debug_file << "\n";
+   // }
+   // std::cout << "Printed to: " << file_name.str() << std::endl;
+   // debug_file.close();
+   // count++;
+
 }
 
 void MasterLoopFunction::find_robot_pointers() {
@@ -107,6 +125,7 @@ void MasterLoopFunction::SetRobotPositionBasedOnMap(int map, int trial_num) {
                break;
             case 2:
                clever_bot_ori = (CRadians)(M_PI/2);
+               //clever_bot_ori = (CRadians)(0);
                break;
             case 3:
                clever_bot_ori = (CRadians)(M_PI);
