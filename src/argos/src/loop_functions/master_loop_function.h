@@ -32,7 +32,8 @@ public:
    void set_handwritten_envs(bool handwritten) {m_handwritten = handwritten;};
    void set_trial_num(int trial_num) {m_trialNum = trial_num;};
 
-   double get_fitness_score();
+   //double get_fitness_score();
+   RunResult get_fitness_score();
 
 private:
 

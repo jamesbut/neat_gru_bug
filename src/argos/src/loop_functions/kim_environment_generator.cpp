@@ -211,7 +211,7 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
   }
 
 #if EFFICIENT_ENVIRONMENT
-  //putLinesInEnvironment();     //Comment out for handwritten envs
+  putLinesInEnvironment();     //Comment out for handwritten envs
   putBlocksInEnvironment();
 #else
   putBlocksInEnvironment();
@@ -230,7 +230,7 @@ void RandomEnvironmentGenerator::generateEnvironmentFromFile(std::string file_na
   resize(read_img, corridor_contours_img, corridor_contours_img.size(), 0, 0, INTER_NEAREST);
 
 #if EFFICIENT_ENVIRONMENT
- // putLinesInEnvironment();    //Comment out for handwritten envs
+  putLinesInEnvironment();    //Comment out for handwritten envs
   putBlocksInEnvironment();
 #else
   putBlocksInEnvironment();

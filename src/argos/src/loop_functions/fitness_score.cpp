@@ -1,7 +1,7 @@
 #include "fitness_score.h"
 
 FitnessScore::FitnessScore() :
-   MAX_RANGE(14.2),
+   //MAX_RANGE(14.2),
    no_son_of_mine(false) {}
 
 void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
@@ -11,16 +11,19 @@ void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
 }
 
-void FitnessScore::Reset(bool indv_run) {
+void FitnessScore::Reset(bool indv_run, CVector3 arena_size) {
+
+   arena_size = CVector3(arena_size.GetX(), arena_size.GetY(), 0.0);
+   max_range = arena_size.Length();
 
    robots_distance = 0;
    no_son_of_mine = false;
    fitness_score = 0;
+   hit_tower = false;
 
-   //if(indv_run) CLOSE_TO_TOWER = 1.0;
-   if(indv_run) CLOSE_TO_TOWER = 0.32;
+   if(indv_run) CLOSE_TO_TOWER = 1.0;
+   //if(indv_run) CLOSE_TO_TOWER = 0.32;
    else CLOSE_TO_TOWER = 0.32;
-   //else CLOSE_TO_TOWER = 0.6;
 
 }
 
@@ -37,6 +40,8 @@ void FitnessScore::PreStep() {
    //No need to continue - it just wastes time
    if(robots_distance < CLOSE_TO_TOWER) {
 
+      hit_tower = true;
+
       argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
       cSimulator.Terminate();
 
@@ -47,7 +52,8 @@ void FitnessScore::PreStep() {
 void FitnessScore::PostExperiment() {
 
    //Calculate fitness
-   fitness_score = MAX_RANGE - robots_distance;
+   //fitness_score = MAX_RANGE - robots_distance;
+   fitness_score = max_range - robots_distance;
 
    if (no_son_of_mine) fitness_score /= 10;
 
@@ -66,8 +72,18 @@ void FitnessScore::calculate_bot_distance() {
 
 }
 
-double FitnessScore::get_fitness_score() {
+RunResult FitnessScore::get_fitness_score() {
 
-   return fitness_score;
+   RunResult rr;
+   rr.fitness = fitness_score;
+   rr.got_to_tower = hit_tower;
+
+   return rr;
 
 }
+
+// double FitnessScore::get_fitness_score() {
+//
+//    return fitness_score;
+//
+// }

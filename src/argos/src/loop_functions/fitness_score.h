@@ -6,6 +6,13 @@
 
 using namespace argos;
 
+struct RunResult {
+
+   double fitness;
+   bool got_to_tower;
+
+};
+
 class FitnessScore {
 
 public:
@@ -13,11 +20,12 @@ public:
    FitnessScore();
 
    void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
-   void Reset(bool indv_run);
+   void Reset(bool indv_run, CVector3 arena_size);
    void PreStep();
    void PostExperiment();
 
-   double get_fitness_score();
+   RunResult get_fitness_score();
+   // double get_fitness_score();
 
 private:
 
@@ -31,7 +39,10 @@ private:
 
    bool no_son_of_mine;
    double CLOSE_TO_TOWER;
-   const double MAX_RANGE;
+   //const double MAX_RANGE;
+   double max_range;
+
+   bool hit_tower;
 
 };
 

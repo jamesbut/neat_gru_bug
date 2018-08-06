@@ -1,13 +1,13 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
-   NUM_RUNS(5),
-   //NUM_RUNS(209),
+   //NUM_RUNS(5),
+   NUM_RUNS(209),
    RANDOM_ENVS(false),
-   HANDWRITTEN_ENVS(true),
-   //ENV_PATH("../argos_params/environments/kim_envs/rand_env_")
+   HANDWRITTEN_ENVS(false),
+   ENV_PATH("../argos_params/environments/kim_envs/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
-   ENV_PATH("../argos_params/environments/handwritten_envs/e")
+   //ENV_PATH("../argos_params/environments/handwritten_envs/e")
 {
 
    if(HANDWRITTEN_ENVS)
@@ -30,6 +30,8 @@ void IndividualRun::run() {
    int num_finishes = 0;
    double total_score = 0;
 
+   std::vector<int> struggling_envs;
+
    for(int i = 0; i < NUM_RUNS; i++) {
 
       std::cout << "Run: " << (i+1) << std::endl;
@@ -50,16 +52,29 @@ void IndividualRun::run() {
          reset = true;
       }
 
-      double fitness = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
-      total_score += fitness;
-      std::cout << fitness << std::endl;
-      if (fitness > 13.2) num_finishes++;
+      //double fitness = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
+      RunResult rr = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
+
+      //total_score += fitness;
+      total_score += rr.fitness;
+
+      //std::cout << fitness << std::endl;
+      std::cout << rr.fitness << std::endl;
+
+      //if (fitness > 13.2) num_finishes++;
+      if(rr.got_to_tower) num_finishes++;
+      else struggling_envs.push_back(i);
 
    }
 
    std::cout << "Finishes: " << num_finishes << std::endl;
    std::cout << "Runs: " << NUM_RUNS << std::endl;
    std::cout << "Average score: " << (total_score / NUM_RUNS) << std::endl;
+
+   std::cout << "Struggling envs: ";
+   for(int i = 0; i < struggling_envs.size(); i++)
+      std::cout << struggling_envs[i]+1 << ", ";
+   std::cout << std::endl;
 
 }
 

@@ -35,6 +35,7 @@ add_subdirectory(src/loop_functions)
 add_library(argos_simulation SHARED src/argos_simulation.cpp)
 
 target_include_directories(argos_simulation PUBLIC
+   ${LUA_INCLUDE_DIR}
    ${EXT_LIB_INCLUDES}
    )
 

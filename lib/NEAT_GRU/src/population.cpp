@@ -22,7 +22,7 @@
 
 using namespace NEAT;
 
-const bool COMPLEXITY_REGULATION = true;
+const bool COMPLEXITY_REGULATION = false;
 
 Population::Population(Genome *g,int size) :
 	complexity_regulation(ComplexityRegulation::Complexifying) {

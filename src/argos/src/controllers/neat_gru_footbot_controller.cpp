@@ -1,8 +1,8 @@
 #include "neat_gru_footbot_controller.h"
 
-#define BEARING_SENSOR_ON false
-#define PROX_SENSOR_ON false
-#define LIN_VEL_ON true
+#define BEARING_SENSOR_ON true
+#define PROX_SENSOR_ON true
+#define LIN_VEL_ON false
 
 /****************************************/
 /****************************************/

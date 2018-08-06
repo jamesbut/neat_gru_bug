@@ -20,7 +20,10 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
 void MasterLoopFunction::Reset() {
 
-   fitness_score_loop.Reset(m_indvRun);
+   //Get arena size for fitness function
+   CVector3 arena_size =  CSimulator::GetInstance().GetSpace().GetArenaSize();
+
+   fitness_score_loop.Reset(m_indvRun, arena_size);
 
    if (GENERATE_ENVS && m_reset) {
 
@@ -98,11 +101,17 @@ void MasterLoopFunction::find_robot_pointers() {
 
 }
 
-double MasterLoopFunction::get_fitness_score() {
+RunResult MasterLoopFunction::get_fitness_score() {
 
    return fitness_score_loop.get_fitness_score();
 
 }
+
+// double MasterLoopFunction::get_fitness_score() {
+//
+//    return fitness_score_loop.get_fitness_score();
+//
+// }
 
 void MasterLoopFunction::SetRobotPositionBasedOnMap(int map, int trial_num) {
 

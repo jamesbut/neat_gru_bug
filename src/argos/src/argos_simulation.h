@@ -2,6 +2,7 @@
 #define ARGOS_SIMULATION_H
 
 #include <NEAT_GRU/include/organism.h>
+#include "loop_functions/fitness_score.h"
 
 class ARGoS_simulation {
 
@@ -12,7 +13,9 @@ public:
    ~ARGoS_simulation();
 
    //Runs the experiment and returns the fitness score
-   double run(NEAT::Organism &org, std::string env_path, int env_num,
+   // double run(NEAT::Organism &org, std::string env_path, int env_num,
+   //    bool reset, bool indv_run, bool handwritten, int trial_num);
+   RunResult run(NEAT::Organism &org, std::string env_path, int env_num,
       bool reset, bool indv_run, bool handwritten, int trial_num);
 
 private:

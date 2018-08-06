@@ -13,20 +13,21 @@ GA::GA(std::string neat_param_file) :
    overall_winner_num_finishes(0),
    NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(25),
-   INCREMENTAL_EV(false),
+   INCREMENTAL_EV(true),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
    //ACCEPTABLE_FITNESS(1),
    GOT_TO_TOWER_DIST(13.2),
    //GOT_TO_TOWER_DIST(2.0),
-   HANDWRITTEN_ENVS(true),
+   HANDWRITTEN_ENVS(false),
    TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
+   ENV_PATH("../argos_params/environments/rand_envs_14_2_incr_ev/rand_env_")
    //ENV_PATH("../argos_params/environments/training_set/ts_")
-   ENV_PATH("../argos_params/environments/handwritten_envs/e")
+   //ENV_PATH("../argos_params/environments/handwritten_envs/e")
    {
 
    if(HANDWRITTEN_ENVS)
@@ -76,7 +77,7 @@ void GA::initNEAT(std::string neat_param_file) {
    std::ifstream iFile;
 
    if(!INCREMENTAL_EV) iFile = std::ifstream("../starting_genomes/start_genome");
-   else iFile = std::ifstream("../winners/archive_winners_nb/g4");
+   else iFile = std::ifstream("../winners/archive_winners/g29");
 
    iFile >> curword;
    iFile >> id;
@@ -189,7 +190,8 @@ void GA::epoch() {
 
          if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
-         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
+         //trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
+         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)).fitness;
          //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
@@ -234,7 +236,8 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            shared_mem->set_fitness(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
+            //shared_mem->set_fitness(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
+            shared_mem->set_fitness(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)).fitness);
 
             //Kill slave
             ::raise(SIGTERM);
@@ -411,7 +414,8 @@ void GA::test_on_eval_set(bool changed) {
 
             //overall_winner->gnome->print_to_filename(outfile.c_str());
 
-            scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
+            //scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
+            scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1)).fitness;
 
             //std::cout << "Eval set: " << scores[i] << std::endl;
 
