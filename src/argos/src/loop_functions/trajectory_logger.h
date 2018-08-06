@@ -7,9 +7,6 @@ using namespace argos;
 
 class TrajectoryLogger {
 
-   //TrajectoryLogger();
-   //~TrajectoryLogger();
-
 public:
 
    void Init(CFootBotEntity* clever_bot);
