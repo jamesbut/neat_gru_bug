@@ -81,9 +81,3 @@ RunResult FitnessScore::get_fitness_score() {
    return rr;
 
 }
-
-// double FitnessScore::get_fitness_score() {
-//
-//    return fitness_score;
-//
-// }

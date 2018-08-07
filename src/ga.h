@@ -32,10 +32,10 @@ private:
 
    void nextGen();
 
-   void collect_scores(std::vector<std::vector <double> > trial_scores);
+   void collect_scores(std::vector<std::vector <RunResult> > trial_results);
    void flush_winners();
 
-   void test_on_training_set(std::vector<double> overall_winner_scores, bool changed);
+   void test_on_training_set(std::vector<RunResult> overall_winner_results, bool changed);
    void test_on_eval_set(bool changed);
 
    /** Current generation */
@@ -51,7 +51,7 @@ private:
    //generation is not the overall winner of all the generations.
    NEAT::Organism* overall_winner;
    int overall_winner_num_finishes;
-   std::vector<double> m_overall_winner_scores;
+   std::vector<RunResult> m_overall_winner_results;
 
    std::vector<int> flush_gens;
 
@@ -66,14 +66,13 @@ private:
    const bool HANDWRITTEN_ENVS;
 
    const double ACCEPTABLE_FITNESS;
-   const double GOT_TO_TOWER_DIST;
 
    const int TEST_EVAL_GEN;
    const std::string TEST_SET_PATH;
    const int NUM_TEST_ENVS;
 
    int eval_set_finishes;
-   std::vector<double> eval_set_scores;
+   std::vector<RunResult> eval_set_results;
    bool change_since_last_eval;
 
 
@@ -85,19 +84,22 @@ private:
       SharedMem(int population_size, int num_trials);
       ~SharedMem();
 
-      std::vector<double> get_fitness(int individual);
-      void set_fitness(int individual, int trial_num, double fitness);
+      std::vector<RunResult> get_run_result(int individual);
+      void set_run_result(int individual, int trial_num, RunResult run_result);
 
    private:
 
       // File name for shared memory area
-      const std::string SHARED_MEMORY_FILE;
+      const std::string SHARED_MEMORY_FILE_FITNESS;
+      const std::string SHARED_MEMORY_FILE_RESULT;
 
       // Shared mem file descriptor
-      int m_sharedMemFD;
+      int m_sharedMemFD_fitness;
+      int m_sharedMemFD_result;
 
       // Shared mem pointer
-      double* m_sharedMem;
+      double* m_sharedMem_fitness;
+      bool* m_sharedMem_result;
 
       //Population size - this is stored in order to unmap the memory
       //on destruction of the object

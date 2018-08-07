@@ -12,11 +12,10 @@ GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(1),
    overall_winner_num_finishes(0),
    NUM_FLUSHES(3),   //Currently not used
-   FLUSH_EVERY(25),
+   FLUSH_EVERY(1),
    INCREMENTAL_EV(true),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
-   GOT_TO_TOWER_DIST(13.2),
    HANDWRITTEN_ENVS(false),
    TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
@@ -161,7 +160,7 @@ void GA::run() {
 // Evaluate 1 population
 void GA::epoch() {
 
-   std::vector<std::vector <double> > trial_scores(neatPop->organisms.size(), std::vector<double>(NEAT::num_trials));
+   std::vector<std::vector <RunResult> > trial_scores(neatPop->organisms.size(), std::vector<RunResult>(NEAT::num_trials));
 
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
@@ -188,8 +187,7 @@ void GA::epoch() {
 
          if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
-         //trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
-         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)).fitness;
+         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
          //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
 
       }
@@ -234,7 +232,7 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            shared_mem->set_fitness(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)).fitness);
+            shared_mem->set_run_result(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
 
             //Kill slave
             ::raise(SIGTERM);
@@ -268,18 +266,18 @@ void GA::parallel_epoch() {
    }
 
    //Populate trial scores from shared mem
-   std::vector<std::vector <double> > trial_scores;
+   std::vector<std::vector <RunResult> > trial_results;
 
    for(size_t i = 0; i < neatPop->organisms.size(); i++)
-      trial_scores.push_back(shared_mem->get_fitness(i));
+      trial_results.push_back(shared_mem->get_run_result(i));
 
-   collect_scores(trial_scores);
+   collect_scores(trial_results);
 
    flush_winners();
 
 }
 
-void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
+void GA::collect_scores(std::vector<std::vector <RunResult> > trial_results) {
 
    int maxPopOrg;
    double maxPopScore;
@@ -287,13 +285,17 @@ void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
    //Set fitnesses in NEAT
    for(size_t i = 0; i < neatPop->organisms.size(); i++) {
 
-      std::vector<double> individual_trial_scores = trial_scores[i];
+      std::vector<RunResult> individual_trial_run_results = trial_results[i];
+      std::vector<double> individual_trial_fitnesses;
+
+      for(int i = 0; i < individual_trial_run_results.size(); i++)
+         individual_trial_fitnesses.push_back(individual_trial_run_results[i].fitness);
 
       //double minTrial = *std::min_element(individual_trial_scores.begin(), individual_trial_scores.end());
-      double meanTrial = std::accumulate(individual_trial_scores.begin(), individual_trial_scores.end(), 0.0) / individual_trial_scores.size();
+      double meanTrialFitness = std::accumulate(individual_trial_fitnesses.begin(), individual_trial_fitnesses.end(), 0.0) / individual_trial_fitnesses.size();
       //double sumTrial = std::accumulate(individual_trial_scores.begin(), individual_trial_scores.end(), 0.0);
 
-      neatPop->organisms[i]->fitness = meanTrial;
+      neatPop->organisms[i]->fitness = meanTrialFitness;
 
       //Find best organism in population
       if (i == 0 || neatPop->organisms[i]->fitness > maxPopScore) {
@@ -326,37 +328,41 @@ void GA::collect_scores(std::vector<std::vector <double> > trial_scores) {
 
    }
 
-   if(!HANDWRITTEN_ENVS) test_on_training_set(trial_scores[maxPopOrg], overall_winner_changed);
+   if(!HANDWRITTEN_ENVS) test_on_training_set(trial_results[maxPopOrg], overall_winner_changed);
    if(!HANDWRITTEN_ENVS) test_on_eval_set(overall_winner_changed);
 
 }
 
 //Record the number of finishes on the TRAINING SET for the overall winner
-void GA::test_on_training_set(std::vector<double> overall_winner_scores, bool changed) {
+void GA::test_on_training_set(std::vector<RunResult> overall_winner_results, bool changed) {
 
    if(changed) {
 
       int finishes = 0;
 
-      for(int i = 0; i < overall_winner_scores.size(); i++) {
+      for(int i = 0; i < overall_winner_results.size(); i++) {
          //std::cout << overall_winner_scores[i] << std::endl;
-         if(overall_winner_scores[i] > GOT_TO_TOWER_DIST) finishes++;  //No longer valid
+         if(overall_winner_results[i].got_to_tower) finishes++;
 
       }
       //std::cout << "Finishes: " << finishes << std::endl;
       overall_winner_num_finishes = finishes;
-      m_overall_winner_scores = overall_winner_scores;
+      m_overall_winner_results = overall_winner_results;
 
    }
 
    std::ofstream outfile;
 
+   //Create directory if it already does not exist
+   if (!boost::filesystem::exists("../scores/"))
+      boost::filesystem::create_directories("../scores");
+
    outfile.open("../scores/training_scores.txt", std::ios_base::app);
    outfile << m_unCurrentGeneration << "," << overall_winner_num_finishes;
 
-   for(int i = 0; i < m_overall_winner_scores.size(); i++) {
+   for(int i = 0; i < m_overall_winner_results.size(); i++) {
 
-      outfile << "," << m_overall_winner_scores[i];
+      outfile << "," << m_overall_winner_results[i].fitness;
 
    }
 
@@ -403,7 +409,7 @@ void GA::test_on_eval_set(bool changed) {
 
          std::cout << "Evaluating on test set.." << std::endl;
 
-         std::vector<double> scores(NUM_TEST_ENVS);
+         std::vector<RunResult> run_results(NUM_TEST_ENVS);
 
          for(int i = 0; i < NUM_TEST_ENVS; i++) {
 
@@ -411,8 +417,7 @@ void GA::test_on_eval_set(bool changed) {
 
             //overall_winner->gnome->print_to_filename(outfile.c_str());
 
-            //scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
-            scores[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1)).fitness;
+            run_results[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
 
             //std::cout << "Eval set: " << scores[i] << std::endl;
 
@@ -420,14 +425,14 @@ void GA::test_on_eval_set(bool changed) {
 
          int num_finishes = 0;
 
-         for(int i = 0; i < scores.size(); i++) {
+         for(int i = 0; i < run_results.size(); i++) {
 
-            if(scores[i] > GOT_TO_TOWER_DIST) num_finishes++;     //No longer valid
+            if(run_results[i].got_to_tower) num_finishes++;
 
          }
 
          eval_set_finishes = num_finishes;
-         eval_set_scores = scores;
+         eval_set_results = run_results;
 
          change_since_last_eval = false;
 
@@ -435,12 +440,16 @@ void GA::test_on_eval_set(bool changed) {
 
       std::ofstream outfile;
 
+      //Create directory if it already does not exist
+      if (!boost::filesystem::exists("../scores/"))
+         boost::filesystem::create_directories("../scores");
+
       outfile.open("../scores/eval_scores.txt", std::ios_base::app);
       outfile << m_unCurrentGeneration << "," << eval_set_finishes;
 
-      for(int i = 0; i < eval_set_scores.size(); i++) {
+      for(int i = 0; i < eval_set_results.size(); i++) {
 
-         outfile << "," << eval_set_scores[i];
+         outfile << "," << eval_set_results[i].fitness;
 
       }
 
@@ -514,37 +523,64 @@ bool GA::done() const {
 /* Function implementations for SharedMem class */
 
 GA::SharedMem::SharedMem(int population_size, int num_trials) :
-   SHARED_MEMORY_FILE("/SHARED_MEMORY"),
+   SHARED_MEMORY_FILE_FITNESS("/SHARED_MEMORY_FITNESS"),
+   SHARED_MEMORY_FILE_RESULT("/SHARED_MEMORY_RESULT"),
    m_popSize(population_size),
    m_numTrials(num_trials) {
 
    //Create shared mem file descriptor
-   m_sharedMemFD = ::shm_open(SHARED_MEMORY_FILE.c_str(),
+   m_sharedMemFD_fitness = ::shm_open(SHARED_MEMORY_FILE_FITNESS.c_str(),
                                O_RDWR | O_CREAT,
                                S_IRUSR | S_IWUSR);
 
+    //Create shared mem file descriptor
+    m_sharedMemFD_result = ::shm_open(SHARED_MEMORY_FILE_RESULT.c_str(),
+                                O_RDWR | O_CREAT,
+                                S_IRUSR | S_IWUSR);
+
    //Check it has been initialised correctly
-   if(m_sharedMemFD < 0) {
-      ::perror(SHARED_MEMORY_FILE.c_str());
+   if(m_sharedMemFD_fitness < 0) {
+      ::perror(SHARED_MEMORY_FILE_FITNESS.c_str());
+      exit(1);
+   }
+
+   if(m_sharedMemFD_result < 0) {
+      ::perror(SHARED_MEMORY_FILE_RESULT.c_str());
       exit(1);
    }
 
    //Resize
-   size_t mem_size = m_popSize * m_numTrials * sizeof(double);
-   ::ftruncate(m_sharedMemFD, mem_size);
+   size_t mem_size_fitness = m_popSize * m_numTrials * sizeof(double);
+   ::ftruncate(m_sharedMemFD_fitness, mem_size_fitness);
+
+   size_t mem_size_result = m_popSize * m_numTrials * sizeof(bool);
+   ::ftruncate(m_sharedMemFD_result, mem_size_result);
 
    //Get pointer
-   m_sharedMem = reinterpret_cast<double*>(
+   m_sharedMem_fitness = reinterpret_cast<double*>(
       ::mmap(NULL,
-             mem_size,
+             mem_size_fitness,
              PROT_READ | PROT_WRITE,
              MAP_SHARED,
-             m_sharedMemFD,
+             m_sharedMemFD_fitness,
              0));
 
+    m_sharedMem_result = reinterpret_cast<bool*>(
+       ::mmap(NULL,
+              mem_size_result,
+              PROT_READ | PROT_WRITE,
+              MAP_SHARED,
+              m_sharedMemFD_result,
+              0));
+
    //Check for failure
-   if(m_sharedMem == MAP_FAILED) {
-      ::perror("shared memory");
+   if(m_sharedMem_fitness == MAP_FAILED) {
+      ::perror("shared memory fitness");
+      exit(1);
+   }
+
+   if(m_sharedMem_result == MAP_FAILED) {
+      ::perror("shared memory result");
       exit(1);
    }
 
@@ -552,25 +588,37 @@ GA::SharedMem::SharedMem(int population_size, int num_trials) :
 
 GA::SharedMem::~SharedMem() {
 
-   munmap(m_sharedMem, m_popSize * sizeof(double));
-   close(m_sharedMemFD);
-   shm_unlink(SHARED_MEMORY_FILE.c_str());
+   munmap(m_sharedMem_fitness, m_popSize * sizeof(double));
+   close(m_sharedMemFD_fitness);
+   shm_unlink(SHARED_MEMORY_FILE_FITNESS.c_str());
+
+   munmap(m_sharedMem_result, m_popSize * sizeof(bool));
+   close(m_sharedMemFD_result);
+   shm_unlink(SHARED_MEMORY_FILE_RESULT.c_str());
 
 }
 
-std::vector<double> GA::SharedMem::get_fitness(int individual) {
+std::vector<RunResult> GA::SharedMem::get_run_result(int individual) {
 
-   std::vector<double> fitnesses;
+   std::vector<RunResult> run_results;
 
-   for(size_t i = 0; i < m_numTrials; i++)
-      fitnesses.push_back(m_sharedMem[individual * m_numTrials + i]);
+   for(size_t i = 0; i < m_numTrials; i++) {
 
-   return fitnesses;
+      RunResult rr;
+      rr.fitness = m_sharedMem_fitness[individual * m_numTrials + i];
+      rr.got_to_tower = m_sharedMem_result[individual * m_numTrials + i];
+
+      run_results.push_back(rr);
+
+   }
+
+   return run_results;
 
 }
 
-void GA::SharedMem::set_fitness(int individual, int trial_num, double fitness) {
+void GA::SharedMem::set_run_result(int individual, int trial_num, RunResult run_result) {
 
-   m_sharedMem[individual * m_numTrials + trial_num] = fitness;
+   m_sharedMem_fitness[individual * m_numTrials + trial_num] = run_result.fitness;
+   m_sharedMem_result[individual * m_numTrials + trial_num] = run_result.got_to_tower;
 
 }
