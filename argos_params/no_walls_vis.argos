@@ -48,7 +48,7 @@
   <!-- * Loop functions * -->
   <!-- ****************** -->
 
-  <loop_functions library="src/argos/src/loop_functions/libloop_functions.so"
+  <loop_functions library="src/argos/src/loop_functions/libloop_functions_lib.so"
                   label="master_loop_function"/>
 
   <!-- *********************** -->

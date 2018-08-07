@@ -16,9 +16,7 @@ GA::GA(std::string neat_param_file) :
    INCREMENTAL_EV(true),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
-   //ACCEPTABLE_FITNESS(1),
    GOT_TO_TOWER_DIST(13.2),
-   //GOT_TO_TOWER_DIST(2.0),
    HANDWRITTEN_ENVS(false),
    TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
@@ -236,7 +234,6 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            //shared_mem->set_fitness(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
             shared_mem->set_fitness(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)).fitness);
 
             //Kill slave
@@ -343,7 +340,7 @@ void GA::test_on_training_set(std::vector<double> overall_winner_scores, bool ch
 
       for(int i = 0; i < overall_winner_scores.size(); i++) {
          //std::cout << overall_winner_scores[i] << std::endl;
-         if(overall_winner_scores[i] > GOT_TO_TOWER_DIST) finishes++;
+         if(overall_winner_scores[i] > GOT_TO_TOWER_DIST) finishes++;  //No longer valid
 
       }
       //std::cout << "Finishes: " << finishes << std::endl;
@@ -425,7 +422,7 @@ void GA::test_on_eval_set(bool changed) {
 
          for(int i = 0; i < scores.size(); i++) {
 
-            if(scores[i] > GOT_TO_TOWER_DIST) num_finishes++;
+            if(scores[i] > GOT_TO_TOWER_DIST) num_finishes++;     //No longer valid
 
          }
 
