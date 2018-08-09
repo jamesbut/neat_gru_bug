@@ -28,7 +28,8 @@ void MasterLoopFunction::Reset() {
    if (GENERATE_ENVS && m_reset) {
 
       environment_generator_loop.ClearEnvironment();
-      environment_generator_loop.Reset(m_envPath, m_envNum);
+      environment_generator_loop.Reset(m_envPath, m_envNum, m_randSeed);
+
    }
 
    if (m_handwritten)

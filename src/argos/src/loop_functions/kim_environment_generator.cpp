@@ -12,12 +12,11 @@
 
 
 //#define ACCEPT_ENVIRONMENT
+#define EFFICIENT_ENVIRONMENT true
 
 using namespace std;
 using namespace cv;
 using namespace argos;
-
-#define EFFICIENT_ENVIRONMENT true
 
 RandomEnvironmentGenerator::RandomEnvironmentGenerator() :
   // environment_width(10),
@@ -35,7 +34,13 @@ RandomEnvironmentGenerator::RandomEnvironmentGenerator() :
   room_percentage(0.4f),
   total_boxes_generated(0),
   amount_of_openings(11),
-  environment_accepted(false) {}
+  environment_accepted(false),
+  rng(5)
+  {
+
+   //std::srand(5);
+
+  }
 
 
 void RandomEnvironmentGenerator::getRobotPositions()
@@ -104,16 +109,18 @@ void RandomEnvironmentGenerator::ClearEnvironment()
 
 }
 
-void RandomEnvironmentGenerator::Reset(std::string file_name, int env_num) {
+void RandomEnvironmentGenerator::Reset(std::string file_name, int env_num, int rand_seed) {
 
-   //cout<<"Regenerate Environment"<<endl;
+   //Reset rngs
+   std::srand(rand_seed);
+   rng(rand_seed);
 
     it_box = 0;
     if(file_name.length()==0)
     {
       initial_bot_positions.clear();
       generateEnvironment(env_num);
-    std::cout<<"random generated: "<<file_name<<std::endl;
+      //std::cout<<"Random env generated: "<<file_name<<std::endl;
     }
     else{
       generateEnvironmentFromFile(file_name);
@@ -128,27 +135,33 @@ void RandomEnvironmentGenerator::Destroy()
 
 void RandomEnvironmentGenerator::generateEnvironment(int env_num)
 {
-
+  //std::cout << "RNG state: " << rng.state << std::endl;
   //std::cout<<"check"<<std::endl;
   corridors_are_connected = false;
-  rng = cv::getTickCount();
+  //rng = cv::getTickCount();
 
   while(!environment_accepted){
-    while (!corridors_are_connected) {
+    while (!corridors_are_connected) {    //This repeats a random number of times
       getRobotPositions();
       initializeGrid();
-      initializeAgents();
+      initializeAgents();     //Randomness in here too
       bin_corridor_img = Mat::zeros(environment_width, environment_height, CV_8UC1);
 
       for (int it_total = 0; it_total < 100; it_total++) {
 
         findAgents();
+        //std::cout << "-------" << std::endl;
 
         for (int it = 0; it < current_agent_positions.size(); it++) {
-          decideNextAction(current_agent_positions.at(it));
+           //std::cout << it << std::endl;
+          decideNextAction(current_agent_positions.at(it));    //Randomness in here //This is called a random num of times
           setNextLocation(current_agent_positions.at(it));
 
+          //std::cout << "-----" << std::endl;
+
         }
+
+        //std::cout << "*********" << std::endl;
 
 /*        for (int itx = 0; itx < environment_width; itx++) {
            for (int ity = 0; ity < environment_height; ity++) {
@@ -156,7 +169,8 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
            }
            cout<<" "<<endl;
          }*/
-
+         //std::cout << it_total << std::endl;
+         //std::cout << "Corridor perc: " << getCorridorPercentage() << std::endl;
         if (getCorridorPercentage() > wanted_corridor_percentage) {
           break;
         }
@@ -164,20 +178,24 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
 
       }
 
+      //std::cout << "........................................" << std::endl;
+
       checkConnectivity();
 
-      if(!corridors_are_connected)
-        //cout<<"corridors are not connected!!"<<endl;
-        rng = cv::getTickCount();
-    }
+      //James - does she seed the rng with a tick count?
+      //I think the rng does not have to be reinitilised here
+      //it will just move onto the next random number
+      if(!corridors_are_connected) {
+        //std::cout<<"corridors are not connected!!"<<std::endl;
+        //rng = cv::getTickCount();
+      }
 
+    }
 
     makeBinaryImageCorridors();
     makeBoundariesCorridors();
     makeRooms();
-    makeRandomOpenings();
-
-
+    makeRandomOpenings();     //Randomness in here too
 
     cv::Rect border(cv::Point(0, 0), corridor_contours_img.size());
 
@@ -186,9 +204,8 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
     std::stringstream file_name;
     file_name << "../argos_params/environments/training_set/ts_" << env_num << ".png";
 
+    //Write images of generated envs
     //cv::imwrite(file_name.str(),corridor_contours_img);
-
-
 
 #ifdef ACCEPT_ENVIRONMENT
 
@@ -201,7 +218,7 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
       break;
     }else
     {
-      rng = cv::getTickCount();
+      //rng = cv::getTickCount();
       corridors_are_connected = false;
     }
 #else
@@ -210,6 +227,7 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
 
   }
 
+  //There could be some randomness with the Hough lines here
 #if EFFICIENT_ENVIRONMENT
   putLinesInEnvironment();     //Comment out for handwritten envs
   putBlocksInEnvironment();
@@ -292,26 +310,50 @@ void RandomEnvironmentGenerator::findAgents(void)
     }
   }
 
+ //  for (int i = 0; i < current_agent_positions.size(); i++) {
+ //     for(int j = 0; j < current_agent_positions[i].size(); j++) {
+ //        std::cout << current_agent_positions[i][j] << " ";
+ //     }
+ //     std::cout << std::endl;
+ // }
+
+
 }
 
 void RandomEnvironmentGenerator::decideNextAction(std::vector<int> current_bot_position)
 {
   float random_percentage = rng.uniform(0.0f,1.0f);
+  //std::cout << "Agent at: " << current_bot_position[0] << ", " << current_bot_position[1] << std::endl;
+  //std::cout << "Random percentage: " << random_percentage << std::endl;
   float percentage_rest = 1.0f - change_agent_gostraight;
 
+  //Analogous to..
+  //So this just gets the circ_action for the environment grid that the agent is at
+  //environment_grid[current_bot_position[0]][current_bot_position[1]].circ_action
   vector<vector<int>>circ_action_temp = environment_grid.at(current_bot_position.at(0)).at(current_bot_position.at(1)).circ_action;
 
-  string state;
+ //  std::cout << "Circ action temp:" << std::endl;
+ //  for(int i = 0; i < circ_action_temp.size(); i++) {
+ //     for(int j = 0; j < circ_action_temp[i].size(); j++) {
+ //        std::cout << circ_action_temp[i][j] << " ";
+ //     }
+ //     std::cout << std::endl;
+ // }
+
+  //string state;
   if (random_percentage <= change_agent_gostraight) {
-    state = "GO_STRAIGHT";
+    //std::cout << "STRAIGHT" << std::endl;
+    //state = "GO_STRAIGHT";
   } else if (random_percentage > change_agent_gostraight &&
              random_percentage <= change_agent_gostraight + percentage_rest / 2.0f) {
-    state = "GO_LEFT";
+    //std::cout << "LEFT" << std::endl;
+    //state = "GO_LEFT";
     std::rotate(circ_action_temp.begin(), circ_action_temp.begin() + 1, circ_action_temp.end());
 
   } else if (random_percentage > change_agent_gostraight + percentage_rest / 2.0f &&
              random_percentage <= 1) {
-    state = "GO_RIGHT";
+    //std::cout << "RIGHT" << std::endl;
+    //state = "GO_RIGHT";
     std::rotate(circ_action_temp.rbegin(), circ_action_temp.rbegin() + 1, circ_action_temp.rend());
   }
 
@@ -382,7 +424,6 @@ void RandomEnvironmentGenerator::checkConnectivityOpenCV()
       break;
     }
   }
-
 }
 
 
@@ -449,6 +490,7 @@ void RandomEnvironmentGenerator::checkConnectivity()
       break;
     }
   }
+
 }
 
 void RandomEnvironmentGenerator::makeBoundariesCorridors()
@@ -545,7 +587,7 @@ void RandomEnvironmentGenerator::makeRooms()
 
 void RandomEnvironmentGenerator::makeRandomOpenings()
 {
-  RNG rng(cv::getTickCount());
+  //RNG rng(cv::getTickCount());
   int half_size_openings = 13;
   int erosion_size = 1;
   Mat element = getStructuringElement(cv::MORPH_CROSS,

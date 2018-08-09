@@ -36,7 +36,7 @@ private:
    void flush_winners();
 
    void test_on_training_set(std::vector<RunResult> overall_winner_results, bool changed);
-   void test_on_eval_set(bool changed);
+   void test_on_eval_set();
 
    /** Current generation */
    int m_unCurrentGeneration;
@@ -64,6 +64,7 @@ private:
    const std::string ENV_PATH;
 
    const bool HANDWRITTEN_ENVS;
+   const bool RANDOMLY_GENERATED_ENVS;
 
    const double ACCEPTABLE_FITNESS;
 
@@ -73,7 +74,7 @@ private:
 
    int eval_set_finishes;
    std::vector<RunResult> eval_set_results;
-   bool change_since_last_eval;
+   bool overall_winner_change_since_last_eval;
 
 
    //Class for shared memory management

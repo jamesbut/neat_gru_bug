@@ -48,7 +48,7 @@ class RandomEnvironmentGenerator
 public:
   RandomEnvironmentGenerator();
   void Init();
-  void Reset(std::string file_name, int env_num);
+  void Reset(std::string file_name, int env_num, int rand_seed);
   void Destroy();
 
   void initializeGrid();

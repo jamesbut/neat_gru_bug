@@ -13,11 +13,12 @@ GA::GA(std::string neat_param_file) :
    overall_winner_num_finishes(0),
    NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(1),
-   INCREMENTAL_EV(true),
+   INCREMENTAL_EV(false),
    PARALLEL(true),
    ACCEPTABLE_FITNESS(13.88),
    HANDWRITTEN_ENVS(false),
-   TEST_EVAL_GEN(25),
+   RANDOMLY_GENERATED_ENVS(true),
+   TEST_EVAL_GEN(10),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
@@ -173,22 +174,29 @@ void GA::epoch() {
       if(HANDWRITTEN_ENVS) {
          file_name = ENV_PATH + "15.png";
          env_num = 15;
+      } else if (RANDOMLY_GENERATED_ENVS) {
+         file_name = "";
+         env_num = i+1;
       } else {
          file_name = ENV_PATH + std::to_string(i+1) + ".png";
          env_num = i+1;
       }
+
+      //Create random seed for parallel processes - it is not really needed
+      //in the serial version but the method now needs one
+      int rand_seed = rand();
 
       for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
          std::cout << "Organism num: " << j << std::endl;
          std::cout << "Trial num: " << i << std::endl;
 
-         //std::cout << "Env: " << i+1 << std::endl;
-
          if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
-         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1));
-         //std::cout << "Score for org: " << j << " : " <<  trial_scores[j][i] << std::endl;
+         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num,
+                                       reset, false, HANDWRITTEN_ENVS, (i+1), rand_seed);
+
+         reset = false;
 
       }
 
@@ -205,9 +213,6 @@ void GA::epoch() {
 //Evalute population in parallel
 void GA::parallel_epoch() {
 
-   //overall_winner = neatPop->organisms[0];
-   //if(!HANDWRITTEN_ENVS) test_on_eval_set(true);
-
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
 
@@ -219,11 +224,18 @@ void GA::parallel_epoch() {
       if(HANDWRITTEN_ENVS) {
          file_name = ENV_PATH + "15.png";
          env_num = 15;
+      } else if (RANDOMLY_GENERATED_ENVS) {
+         file_name = "";
+         env_num = i+1;
+         reset = true;
       } else {
          file_name = ENV_PATH + std::to_string(i+1) + ".png";
          env_num = i+1;
          reset = true;
       }
+
+      //Create random seed for parallel processes
+      int rand_seed = rand();
 
       for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
@@ -232,7 +244,9 @@ void GA::parallel_epoch() {
 
          if(slave_PIDs.back() == 0) {
 
-            shared_mem->set_run_result(j, i, as->run(*(neatPop->organisms[j]), file_name, env_num, reset, false, HANDWRITTEN_ENVS, (i+1)));
+            shared_mem->set_run_result(j, i, as->run(*(neatPop->organisms[j]), file_name,
+                                                      env_num, reset, false, HANDWRITTEN_ENVS,
+                                                      (i+1), rand_seed));
 
             //Kill slave
             ::raise(SIGTERM);
@@ -314,7 +328,7 @@ void GA::collect_scores(std::vector<std::vector <RunResult> > trial_results) {
    if (m_unCurrentGeneration == 1 || maxPopScore > overall_winner->fitness) {
 
       overall_winner_changed = true;
-      change_since_last_eval = true;
+      overall_winner_change_since_last_eval = true;
 
       //Duplicate winner because it will be deleted by next generation
       //We need this to flush genome.
@@ -328,8 +342,8 @@ void GA::collect_scores(std::vector<std::vector <RunResult> > trial_results) {
 
    }
 
-   if(!HANDWRITTEN_ENVS) test_on_training_set(trial_results[maxPopOrg], overall_winner_changed);
-   if(!HANDWRITTEN_ENVS) test_on_eval_set(overall_winner_changed);
+   if(!HANDWRITTEN_ENVS && !RANDOMLY_GENERATED_ENVS) test_on_training_set(trial_results[maxPopOrg], overall_winner_changed);
+   if(!HANDWRITTEN_ENVS) test_on_eval_set();
 
 }
 
@@ -373,39 +387,17 @@ void GA::test_on_training_set(std::vector<RunResult> overall_winner_results, boo
 
 }
 
-void GA::test_on_eval_set(bool changed) {
+void GA::test_on_eval_set() {
 
    //Every TEST_EVAL_GEN test the best genome on the evaluation set and
    //write to file
 
    if(m_unCurrentGeneration % TEST_EVAL_GEN == 0) {
 
-      // char curword[20];
-      // int id;
-      //
-      // std::string file_prefix = "../winners/overall_winner";
-      // std::string genomeFilePath = file_prefix;
-      //
-      // std::ifstream iFile(genomeFilePath.c_str());
-      //
-      // std::cout << "Reading in the individual" << std::endl;
-      //
-      // iFile >> curword;
-      // iFile >> id;
-      //
-      // std::cout << curword << std::endl;
-      // std::cout << id << std::endl;
-      //
-      // NEAT::Genome* genom = new NEAT::Genome(id,iFile);
-      // iFile.close();
-      //
-      // std::cout << "Complexity: " << genom->get_complexity() << std::endl;
-      //
-      // overall_winner = new NEAT::Organism(0.0, genom, 1);
-      //
-      // delete genom;
+      //Collect genomes to be tested
+      //Here I can include overall winner if it has changed
 
-      if (change_since_last_eval) {
+      if (overall_winner_change_since_last_eval) {
 
          std::cout << "Evaluating on test set.." << std::endl;
 
@@ -417,7 +409,12 @@ void GA::test_on_eval_set(bool changed) {
 
             //overall_winner->gnome->print_to_filename(outfile.c_str());
 
-            run_results[i] = as->run(*overall_winner, file_name, (i+1), true, true, HANDWRITTEN_ENVS, (i+1));
+            //Create random seed for parallel processes - it is not really needed
+            //in the serial version but the method now needs one
+            int rand_seed = rand();
+
+            run_results[i] = as->run(*overall_winner, file_name, (i+1), true, true,
+                                      HANDWRITTEN_ENVS, (i+1), rand_seed);
 
             //std::cout << "Eval set: " << scores[i] << std::endl;
 
@@ -434,7 +431,7 @@ void GA::test_on_eval_set(bool changed) {
          eval_set_finishes = num_finishes;
          eval_set_results = run_results;
 
-         change_since_last_eval = false;
+         overall_winner_change_since_last_eval = false;
 
       }
 

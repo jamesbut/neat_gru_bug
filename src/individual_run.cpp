@@ -52,8 +52,13 @@ void IndividualRun::run() {
          reset = true;
       }
 
+      //Create random seed for parallel processes - it is not really needed
+      //in the serial version but the method now needs one
+      int rand_seed = rand();
+
       //double fitness = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
-      RunResult rr = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
+      RunResult rr = as->run(*org, file_name, env_num, reset, true,
+                              HANDWRITTEN_ENVS, (i+1), rand_seed);
 
       //total_score += fitness;
       total_score += rr.fitness;

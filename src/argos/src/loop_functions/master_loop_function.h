@@ -31,8 +31,8 @@ public:
    void set_indv_run(bool indv_run) {m_indvRun = indv_run;};
    void set_handwritten_envs(bool handwritten) {m_handwritten = handwritten;};
    void set_trial_num(int trial_num) {m_trialNum = trial_num;};
+   void set_random_seed(int rand_seed) {m_randSeed = rand_seed;};
 
-   //double get_fitness_score();
    RunResult get_fitness_score();
 
 private:
@@ -53,6 +53,7 @@ private:
    bool m_indvRun;
    bool m_handwritten;
    int m_trialNum;
+   int m_randSeed;
 
    FitnessScore fitness_score_loop;
    RandomEnvironmentGenerator environment_generator_loop;
