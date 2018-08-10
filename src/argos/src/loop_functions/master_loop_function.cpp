@@ -14,7 +14,7 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
    if (GENERATE_ENVS) environment_generator_loop.Init();
 
-   if(m_indvRun) trajectory_loop.Init(clever_bot);
+   trajectory_loop.Init(clever_bot);
 
 }
 
