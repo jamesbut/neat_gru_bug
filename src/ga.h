@@ -53,6 +53,14 @@ private:
    int overall_winner_num_finishes;
    std::vector<RunResult> m_overall_winner_results;
 
+   //Also keep track of other winners for test set evaluations
+   NEAT::Organism* gen_n_1;
+   NEAT::Organism* gen_n_2;
+   NEAT::Organism* gen_n_3;
+   NEAT::Organism* gen_nminus1_1;
+   NEAT::Organism* gen_nminus1_2;
+   NEAT::Organism* gen_nminus2_1;
+
    std::vector<int> flush_gens;
 
    const int NUM_FLUSHES;
@@ -72,8 +80,8 @@ private:
    const std::string TEST_SET_PATH;
    const int NUM_TEST_ENVS;
 
-   int eval_set_finishes;
-   std::vector<RunResult> eval_set_results;
+   // int eval_set_finishes_overall_winner;
+   // std::vector<RunResult> eval_set_results_overall_winner;
    bool overall_winner_change_since_last_eval;
 
 

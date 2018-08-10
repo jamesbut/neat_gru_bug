@@ -18,7 +18,7 @@ GA::GA(std::string neat_param_file) :
    ACCEPTABLE_FITNESS(13.88),
    HANDWRITTEN_ENVS(false),
    RANDOMLY_GENERATED_ENVS(true),
-   TEST_EVAL_GEN(10),
+   TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
@@ -48,9 +48,8 @@ GA::GA(std::string neat_param_file) :
    //Create shared memory block for master and slaves
    if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials);
 
-   //Remove file ready for next run
-   remove("../scores/training_scores.txt");
-   remove("../scores/eval_scores.txt");
+   //Remove all score files
+   system("exec rm -r ../scores/*");
 
 }
 
@@ -342,6 +341,79 @@ void GA::collect_scores(std::vector<std::vector <RunResult> > trial_results) {
 
    }
 
+   if(RANDOMLY_GENERATED_ENVS) {
+
+      //Collect rest of genomes for evaluation on test set
+      //Scan through array 3 times choosing the largest and moving down
+
+      //Set older genomes to previous generational winners
+      gen_nminus2_1 = gen_nminus1_1;
+      gen_nminus1_1 = gen_n_1;
+      gen_nminus1_2 = gen_n_2;
+
+
+      std::vector<int> previously_found_winners;
+
+      //Iterate through 3 times to get the 3 top performers
+      for(int i = 0; i < 3; i++) {
+
+         int top_genome = -1;
+         double top_genome_fitness = -1.0;      //Fitness shoud never be a negative
+
+         for(int j = 0; j < neatPop->organisms.size(); j++) {
+
+            //Ignore previously found winners (e.g. 1st and 2nd place)
+            if(std::find(previously_found_winners.begin(), previously_found_winners.end(), j) == previously_found_winners.end()) {
+
+               if (neatPop->organisms[j]->fitness > top_genome_fitness) {
+
+                  top_genome = j;
+                  top_genome_fitness = neatPop->organisms[j]->fitness;
+
+               }
+
+            }
+
+         }
+
+         //std::cout << "Top genome: " << top_genome << std::endl;
+         //std::cout << "Top genome fitness: " << top_genome_fitness << std::endl;
+
+         previously_found_winners.push_back(top_genome);
+
+         // std::cout << "Previously found winners: ";
+         // for(int k = 0; k < previously_found_winners.size(); k++)
+         //    std::cout << previously_found_winners[k] << " ";
+         // std::cout << std::endl;
+
+         //Set appropriate genomes
+         NEAT::Genome* new_genome;
+         new_genome = neatPop->organisms[top_genome]->gnome->duplicate(1);
+
+         switch(i) {
+
+            case 0:
+               gen_n_1 = new NEAT::Organism(top_genome_fitness, new_genome, 1);
+               break;
+
+            case 1:
+               gen_n_2 = new NEAT::Organism(top_genome_fitness, new_genome, 1);
+               break;
+
+            case 2:
+               gen_n_3 = new NEAT::Organism(top_genome_fitness, new_genome, 1);
+               break;
+
+         }
+
+      }
+
+      // std::cout << "gen_n_1 fitness: " << gen_n_1->fitness << std::endl;
+      // std::cout << "gen_n_2 fitness: " << gen_n_2->fitness << std::endl;
+      // std::cout << "gen_n_3 fitness: " << gen_n_3->fitness << std::endl;
+
+   }
+
    if(!HANDWRITTEN_ENVS && !RANDOMLY_GENERATED_ENVS) test_on_training_set(trial_results[maxPopOrg], overall_winner_changed);
    if(!HANDWRITTEN_ENVS) test_on_eval_set();
 
@@ -389,71 +461,87 @@ void GA::test_on_training_set(std::vector<RunResult> overall_winner_results, boo
 
 void GA::test_on_eval_set() {
 
-   //Every TEST_EVAL_GEN test the best genome on the evaluation set and
-   //write to file
+   //Create scores directory if it already does not exist
+   if (!boost::filesystem::exists("../scores/"))
+      boost::filesystem::create_directories("../scores");
 
+   //Every TEST_EVAL_GEN generation, a subset of genomes are tested on the test set
    if(m_unCurrentGeneration % TEST_EVAL_GEN == 0) {
 
       //Collect genomes to be tested
       //Here I can include overall winner if it has changed
+      std::vector<NEAT::Organism*> genomes_to_be_tested;
 
+      if(RANDOMLY_GENERATED_ENVS) {
+
+         genomes_to_be_tested.push_back(gen_n_1);
+         genomes_to_be_tested.push_back(gen_n_2);
+         genomes_to_be_tested.push_back(gen_n_3);
+         genomes_to_be_tested.push_back(gen_nminus1_1);
+         genomes_to_be_tested.push_back(gen_nminus1_2);
+         genomes_to_be_tested.push_back(gen_nminus2_1);
+
+      }
+
+      //Test overall_winner if it has changed
       if (overall_winner_change_since_last_eval) {
 
-         std::cout << "Evaluating on test set.." << std::endl;
+         /*Add it to be tested*/
+         genomes_to_be_tested.push_back(overall_winner);
+         overall_winner_change_since_last_eval = false;
+
+      }
+
+      //Test each genome on all the test envs
+      for(int i = 0; i < genomes_to_be_tested.size(); i++) {
+
+         std::cout << "Evaluating " << i << " on test set.." << std::endl;
 
          std::vector<RunResult> run_results(NUM_TEST_ENVS);
 
-         for(int i = 0; i < NUM_TEST_ENVS; i++) {
-
-            std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
-
-            //overall_winner->gnome->print_to_filename(outfile.c_str());
+         for(int j = 0; j < NUM_TEST_ENVS; j++) {
+            //std::cout << "Test env: " << j << std::endl;
+            std::string file_name = TEST_SET_PATH + std::to_string(j+1) + ".png";
 
             //Create random seed for parallel processes - it is not really needed
             //in the serial version but the method now needs one
             int rand_seed = rand();
 
-            run_results[i] = as->run(*overall_winner, file_name, (i+1), true, true,
-                                      HANDWRITTEN_ENVS, (i+1), rand_seed);
+            run_results[j] = as->run(*genomes_to_be_tested[i], file_name, (j+1), true, true,
+                                      HANDWRITTEN_ENVS, (j+1), rand_seed);
 
             //std::cout << "Eval set: " << scores[i] << std::endl;
 
          }
 
+         //See how many times robot made it to tower
          int num_finishes = 0;
 
-         for(int i = 0; i < run_results.size(); i++) {
+         for(int j = 0; j < run_results.size(); j++) {
 
-            if(run_results[i].got_to_tower) num_finishes++;
+            if(run_results[j].got_to_tower) num_finishes++;
 
          }
 
-         eval_set_finishes = num_finishes;
-         eval_set_results = run_results;
+         //Print eval results
+         std::ofstream outfile;
 
-         overall_winner_change_since_last_eval = false;
+         std::stringstream file_name;
+         file_name << "../scores/eval_scores_" << i << ".txt";
 
-      }
+         outfile.open(file_name.str(), std::ios_base::app);
+         outfile << m_unCurrentGeneration << "," << num_finishes;
 
-      std::ofstream outfile;
+         for(int i = 0; i < run_results.size(); i++) {
 
-      //Create directory if it already does not exist
-      if (!boost::filesystem::exists("../scores/"))
-         boost::filesystem::create_directories("../scores");
+            outfile << "," << run_results[i].fitness;
 
-      outfile.open("../scores/eval_scores.txt", std::ios_base::app);
-      outfile << m_unCurrentGeneration << "," << eval_set_finishes;
+         }
 
-      for(int i = 0; i < eval_set_results.size(); i++) {
-
-         outfile << "," << eval_set_results[i].fitness;
+         outfile << "\n";
+         outfile.close();
 
       }
-
-      outfile << "\n";
-      outfile.close();
-
-      std::cout << "Test set scores printed" << std::endl;
 
    }
 
@@ -500,6 +588,32 @@ void GA::flush_winners() {
    std::cout << " done.]" <<std::endl;
 
    std::cout << "Winning organism generation: " << (overall_winner->winning_gen) << std::endl;
+
+   //Print out eval winners every time they are evaluated
+   if(m_unCurrentGeneration % TEST_EVAL_GEN == 0) {
+
+      std::vector<NEAT::Organism*> genomes_to_be_printed;
+
+      genomes_to_be_printed.push_back(gen_n_1);
+      genomes_to_be_printed.push_back(gen_n_2);
+      genomes_to_be_printed.push_back(gen_n_3);
+      genomes_to_be_printed.push_back(gen_nminus1_1);
+      genomes_to_be_printed.push_back(gen_nminus1_2);
+      genomes_to_be_printed.push_back(gen_nminus2_1);
+
+      for(int i = 0; i < genomes_to_be_printed.size(); i++) {
+
+         std::stringstream outfile, outfileOrg;
+
+         outfile << "../winners/eval_winners/eval_winner_" << i << "_at_gen_" << m_unCurrentGeneration;
+         outfileOrg << "../winners/eval_winners/eval_winner_org_" << i << "_at_gen_" << m_unCurrentGeneration;
+
+         genomes_to_be_printed[i]->gnome->print_to_filename(outfile.str().c_str());
+         genomes_to_be_printed[i]->print_to_file(outfileOrg.str().c_str());
+
+      }
+
+   }
 
 }
 
