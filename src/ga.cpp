@@ -589,6 +589,10 @@ void GA::flush_winners() {
 
    std::cout << "Winning organism generation: " << (overall_winner->winning_gen) << std::endl;
 
+   //Create eval_winners directory if it already does not exist
+   if (!boost::filesystem::exists("../winners/eval_winners/"))
+      boost::filesystem::create_directories("../winners/eval_winners");
+
    //Print out eval winners every time they are evaluated
    if(m_unCurrentGeneration % TEST_EVAL_GEN == 0) {
 
