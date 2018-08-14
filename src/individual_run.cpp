@@ -13,7 +13,7 @@ IndividualRun::IndividualRun(const std::string& gf) :
    if(HANDWRITTEN_ENVS)
       as = new ARGoS_simulation("../argos_params/no_walls_10_vis.argos");
    else
-      as = new ARGoS_simulation("../argos_params/no_walls.argos");
+      as = new ARGoS_simulation("../argos_params/no_walls_vis.argos");
 
    readGenomeFile(gf);
 

@@ -35,7 +35,8 @@ private:
    void collect_scores(std::vector<std::vector <RunResult> > trial_results);
    void flush_winners();
 
-   void test_on_training_set(std::vector<RunResult> overall_winner_results, bool changed);
+   //void test_on_training_set(std::vector<RunResult> overall_winner_results, bool changed);
+   void test_on_training_set(std::vector<std::vector<RunResult> > gen_results);
    void test_on_eval_set();
 
    /** Current generation */

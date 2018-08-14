@@ -49,7 +49,8 @@ GA::GA(std::string neat_param_file) :
    if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials);
 
    //Remove all score files
-   system("exec rm -r ../scores/*");
+   system("exec rm -r ../scores/eval_scores/*");
+   system("exec rm -r ../scores/training_scores/*");
 
 }
 
@@ -414,48 +415,85 @@ void GA::collect_scores(std::vector<std::vector <RunResult> > trial_results) {
 
    }
 
-   if(!HANDWRITTEN_ENVS && !RANDOMLY_GENERATED_ENVS) test_on_training_set(trial_results[maxPopOrg], overall_winner_changed);
+   if(!HANDWRITTEN_ENVS) test_on_training_set(trial_results);
    if(!HANDWRITTEN_ENVS) test_on_eval_set();
 
 }
 
 //Record the number of finishes on the TRAINING SET for the overall winner
-void GA::test_on_training_set(std::vector<RunResult> overall_winner_results, bool changed) {
+void GA::test_on_training_set(std::vector<std::vector<RunResult> > gen_results) {
 
-   if(changed) {
+   //Extract scores and num finishes
+   std::vector<double> mean_training_scores;
+   std::vector<bool> training_num_finishes;
 
-      int finishes = 0;
+   double max_training_score = 0.0;
 
-      for(int i = 0; i < overall_winner_results.size(); i++) {
-         //std::cout << overall_winner_scores[i] << std::endl;
-         if(overall_winner_results[i].got_to_tower) finishes++;
+   //For each individual
+   for(int i = 0; i < gen_results.size(); i++) {
+
+      //Calculate mean score and add to vector
+      double total_score = 0.0;
+
+      for(int j = 0; j < gen_results[i].size(); j++) {
+
+         total_score += gen_results[i][j].fitness;
 
       }
-      //std::cout << "Finishes: " << finishes << std::endl;
-      overall_winner_num_finishes = finishes;
-      m_overall_winner_results = overall_winner_results;
+
+      double mean_score = total_score / gen_results[i].size();
+      mean_training_scores.push_back(mean_score);
+
+      //Track largest score
+      if(mean_score > max_training_score)
+         max_training_score = mean_score;
 
    }
 
+   //Calculate gen mean of scores
+   double mean_gen_fitness = std::accumulate(mean_training_scores.begin(), mean_training_scores.end(), 0.0) / mean_training_scores.size();
+
+   //Find max number of finishes and mean number of finishes
+   std::vector<int> gen_num_finishes;
+   int max_num_finishes = 0;
+   int total_num_finishes = 0;
+
+   for(int i = 0; i < gen_results.size(); i++) {
+
+      int num_finishes = 0;
+
+      for(int j = 0; j < gen_results[i].size(); j++)
+         if(gen_results[i][j].got_to_tower) num_finishes++;
+
+      gen_num_finishes.push_back(num_finishes);
+
+      if(num_finishes > max_num_finishes)
+         max_num_finishes = num_finishes;
+
+      total_num_finishes += num_finishes;
+
+   }
+
+   //Calculate mean number of finishes
+   double mean_num_finishes = (double)total_num_finishes / (double)gen_results.size();
+
+   //Print results
    std::ofstream outfile;
 
    //Create directory if it already does not exist
    if (!boost::filesystem::exists("../scores/"))
       boost::filesystem::create_directories("../scores");
 
-   outfile.open("../scores/training_scores.txt", std::ios_base::app);
-   outfile << m_unCurrentGeneration << "," << overall_winner_num_finishes;
+   outfile.open("../scores/training_scores/training_scores.txt", std::ios_base::app);
+   outfile << m_unCurrentGeneration << ",";
+   outfile << max_training_score << ",";
+   outfile << mean_gen_fitness << ",";
+   outfile << max_num_finishes << ",";
+   outfile << mean_num_finishes << "\n";
 
-   for(int i = 0; i < m_overall_winner_results.size(); i++) {
-
-      outfile << "," << m_overall_winner_results[i].fitness;
-
-   }
-
-   outfile << "\n";
    outfile.close();
 
-   std::cout << "Training set scores printed" << std::endl;
+   std::cout << "Training scores printed" << std::endl;
 
 }
 
@@ -527,7 +565,7 @@ void GA::test_on_eval_set() {
          std::ofstream outfile;
 
          std::stringstream file_name;
-         file_name << "../scores/eval_scores_" << i << ".txt";
+         file_name << "../scores/eval_scores/eval_scores_" << i << ".txt";
 
          outfile.open(file_name.str(), std::ios_base::app);
          outfile << m_unCurrentGeneration << "," << num_finishes;
