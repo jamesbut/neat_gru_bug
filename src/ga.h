@@ -3,6 +3,7 @@
 
 #include <NEAT_GRU/include/population.h>
 #include "argos/src/argos_simulation.h"
+#include "data_collection.h"
 
 /*
  * A simple GA using NEAT.
@@ -32,12 +33,10 @@ private:
 
    void nextGen();
 
-   void collect_scores(std::vector<std::vector <RunResult> > trial_results);
-   void flush_winners();
+   // void flush_winners();
 
-   //void test_on_training_set(std::vector<RunResult> overall_winner_results, bool changed);
-   void test_on_training_set(std::vector<std::vector<RunResult> > gen_results);
-   void test_on_eval_set();
+   // void test_on_training_set(std::vector<std::vector<RunResult> > gen_results);
+   // void test_on_eval_set();
 
    /** Current generation */
    int m_unCurrentGeneration;
@@ -50,17 +49,17 @@ private:
    //Keep track of overall winner over all generations.
    //I do this because it is often the case that the winner of the final
    //generation is not the overall winner of all the generations.
-   NEAT::Organism* overall_winner;
-   int overall_winner_num_finishes;
-   std::vector<RunResult> m_overall_winner_results;
+   //NEAT::Organism* overall_winner;
+   //int overall_winner_num_finishes;
+   //std::vector<RunResult> m_overall_winner_results;
 
    //Also keep track of other winners for test set evaluations
-   NEAT::Organism* gen_n_1;
-   NEAT::Organism* gen_n_2;
-   NEAT::Organism* gen_n_3;
-   NEAT::Organism* gen_nminus1_1;
-   NEAT::Organism* gen_nminus1_2;
-   NEAT::Organism* gen_nminus2_1;
+   // NEAT::Organism* gen_n_1;
+   // NEAT::Organism* gen_n_2;
+   // NEAT::Organism* gen_n_3;
+   // NEAT::Organism* gen_nminus1_1;
+   // NEAT::Organism* gen_nminus1_2;
+   // NEAT::Organism* gen_nminus2_1;
 
    std::vector<int> flush_gens;
 
@@ -83,7 +82,10 @@ private:
 
    // int eval_set_finishes_overall_winner;
    // std::vector<RunResult> eval_set_results_overall_winner;
-   bool overall_winner_change_since_last_eval;
+   //bool overall_winner_change_since_last_eval;
+
+   //Data collection
+   DataCollection* data_collection;
 
 
    //Class for shared memory management
