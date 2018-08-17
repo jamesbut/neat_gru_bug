@@ -3,8 +3,8 @@
 
 DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
                                const bool HANDWRITTEN_ENV,
-                               const bool TEST_EVAL_GEN,
-                               const bool NUM_TEST_ENVS,
+                               const int TEST_EVAL_GEN,
+                               const int NUM_TEST_ENVS,
                                const int FLUSH_EVERY,
                                const std::string TEST_SET_PATH,
                                ARGoS_simulation* argos_simulation) :

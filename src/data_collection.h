@@ -2,7 +2,7 @@
 #define DATA_COLLECTION_H_
 
 #include <vector>
-#include "argos/src/loop_functions/fitness_score.h"
+#include "argos/src/loop_functions/fitness/fitness_score.h"
 #include <NEAT_GRU/include/population.h>
 #include "argos/src/argos_simulation.h"
 
@@ -12,8 +12,8 @@ public:
 
    DataCollection(const bool RANDOMLY_GENERATED_ENVS,
                   const bool HANDWRITTEN_ENVS,
-                  const bool TEST_EVAL_GEN,
-                  const bool NUM_TEST_ENVS,
+                  const int TEST_EVAL_GEN,
+                  const int NUM_TEST_ENVS,
                   const int FLUSH_EVERY,
                   const std::string TEST_SET_PATH,
                   ARGoS_simulation* argos_simulation);
@@ -35,8 +35,8 @@ private:
 
    const bool RANDOMLY_GENERATED_ENVS;
    const bool HANDWRITTEN_ENVS;
-   const bool TEST_EVAL_GEN;
-   const bool NUM_TEST_ENVS;
+   const int TEST_EVAL_GEN;
+   const int NUM_TEST_ENVS;
    const int FLUSH_EVERY;
    const std::string TEST_SET_PATH;
 
