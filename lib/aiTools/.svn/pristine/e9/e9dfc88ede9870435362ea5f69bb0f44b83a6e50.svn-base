@@ -1,0 +1,93 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_ENDIANNESS_H_INCLUDED
+#define __AITOOLS_ENDIANNESS_H_INCLUDED
+
+#include <boost/detail/endian.hpp>
+
+#include <iostream>
+
+namespace aiTools
+{
+
+struct BigEndian
+{
+};
+
+struct LittleEndian
+{
+};
+
+struct Endianness
+{
+#ifdef BOOST_BIG_ENDIAN
+	typedef BigEndian MachineEndianness;
+#endif
+#ifdef BOOST_LITTLE_ENDIAN
+	typedef LittleEndian MachineEndianness;
+#endif
+};
+
+template <typename X, typename Y>
+struct EndianWriter
+{
+	static void write(const char* data, std::streamsize size, std::ostream& stream)
+	{
+		//conversion, classes (endianness) unequal
+		for(std::streamsize i=1;i<=size;++i)
+		{
+			stream.put(data[size-i]);
+		}
+	}
+};
+
+template <typename X>
+struct EndianWriter<X, X>
+{
+	static void write(const char* data, std::streamsize size, std::ostream& stream)
+	{
+		stream.write(data, size);
+	}
+};
+
+template <typename X, typename Y>
+struct EndianReader
+{
+	static void read(char* data, std::streamsize size, std::istream& stream)
+	{
+		//conversion, classes (endianness) unequal
+		for(std::streamsize i=1;i<=size;++i)
+		{
+			data[size-i]=stream.get();
+		}
+	}
+};
+
+template <typename X>
+struct EndianReader<X, X>
+{
+	static void read(char* data, std::streamsize length, std::istream& stream)
+	{
+		//no conversion, classes (endianness equal)
+		stream.read(data, length);
+	}
+};
+
+}
+
+#endif // __AITOOLS_ENDIANNESS_H_INCLUDED

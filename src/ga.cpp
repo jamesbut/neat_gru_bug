@@ -58,7 +58,7 @@ GA::GA(std::string neat_param_file) :
 GA::~GA() {
 
    delete neatPop;
-   //delete overall_winner;
+   delete data_collection;
    if(PARALLEL) delete shared_mem;
 
    delete as;
@@ -287,7 +287,6 @@ void GA::parallel_epoch() {
    for(size_t i = 0; i < neatPop->organisms.size(); i++)
       trial_results.push_back(shared_mem->get_run_result(i));
 
-   // collect_scores(trial_results);
    data_collection->collect_scores(trial_results, neatPop, m_unCurrentGeneration);
 
    data_collection->flush_winners(m_unCurrentGeneration);

@@ -14,16 +14,12 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
    if (GENERATE_ENVS) environment_generator_loop.Init();
 
-   trajectory_loop.Init(clever_bot);
-
 }
 
 void MasterLoopFunction::Reset() {
 
    //Get arena size for fitness function
    CVector3 arena_size =  CSimulator::GetInstance().GetSpace().GetArenaSize();
-
-   fitness_score_loop.Reset(m_indvRun, arena_size);
 
    if (GENERATE_ENVS && m_reset) {
 
@@ -35,7 +31,7 @@ void MasterLoopFunction::Reset() {
    if (m_handwritten)
       SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
 
-   if (m_indvRun) trajectory_loop.Reset(m_envNum);
+   fitness_score_loop.Reset(m_indvRun, arena_size, m_envNum, m_envPath);
 
 }
 
@@ -47,7 +43,7 @@ void MasterLoopFunction::PreStep() {
 
 void MasterLoopFunction::PostStep() {
 
-   if(m_indvRun) trajectory_loop.PostStep();
+   fitness_score_loop.PostStep();
 
 }
 
@@ -55,7 +51,7 @@ void MasterLoopFunction::PostExperiment() {
 
    fitness_score_loop.PostExperiment();
 
-   if(m_indvRun) trajectory_loop.PostExperiment();
+   // if(m_indvRun) trajectory_loop.PostExperiment();
 
    //DEBUGGING
    // std::vector<std::vector<double> > debug_data = clever_bot_controller->GetDebugData();
@@ -107,12 +103,6 @@ RunResult MasterLoopFunction::get_fitness_score() {
    return fitness_score_loop.get_fitness_score();
 
 }
-
-// double MasterLoopFunction::get_fitness_score() {
-//
-//    return fitness_score_loop.get_fitness_score();
-//
-// }
 
 void MasterLoopFunction::SetRobotPositionBasedOnMap(int map, int trial_num) {
 

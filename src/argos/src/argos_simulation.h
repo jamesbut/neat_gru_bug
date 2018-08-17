@@ -2,7 +2,7 @@
 #define ARGOS_SIMULATION_H
 
 #include <NEAT_GRU/include/organism.h>
-#include "loop_functions/fitness_score.h"
+#include "loop_functions/fitness/fitness_score.h"
 
 class ARGoS_simulation {
 

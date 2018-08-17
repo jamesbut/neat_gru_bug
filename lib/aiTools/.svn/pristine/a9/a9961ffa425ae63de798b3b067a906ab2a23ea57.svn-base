@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Quelldateien\Math">
+      <UniqueIdentifier>{a7c9d9de-ec43-41af-86ff-4d4339e2e9be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Serialization">
+      <UniqueIdentifier>{004af81f-f082-49c4-928c-3fb42a4f8b34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Time">
+      <UniqueIdentifier>{9d122949-3968-4c7a-ba2c-85e01eb4d202}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Util">
+      <UniqueIdentifier>{298ad884-dad3-4a27-8b3e-e5cf32348abe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Algorithm">
+      <UniqueIdentifier>{020b4140-9096-448a-acad-f231dd446b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\Threading">
+      <UniqueIdentifier>{86abeabd-7580-447c-80b2-b67cafbf4c1a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Math\Geometry.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\MovingAverage.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Statistics.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector2.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector3.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Distance.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\IntrinsicDatatypes.h">
+      <Filter>Quelldateien\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Serialization.h">
+      <Filter>Quelldateien\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\STLDataTypes.h">
+      <Filter>Quelldateien\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Endianness.h">
+      <Filter>Quelldateien\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="Time\Time.h">
+      <Filter>Quelldateien\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Time\WallClock.h">
+      <Filter>Quelldateien\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Time\StopWatch.h">
+      <Filter>Quelldateien\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\PlatformDetection.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Range.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\RestrictedValue.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Trie.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Functors.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Helper.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Histogram.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\MetaprogrammingHelpers.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\Dijkstra.h">
+      <Filter>Quelldateien\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\FixedPrecision.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\AStar.h">
+      <Filter>Quelldateien\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Angle.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\LinearTransformation.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Numeric.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\SparseVector.h">
+      <Filter>Quelldateien\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Threading\ParallelForEach.h">
+      <Filter>Quelldateien\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Threading\RAIIThread.h">
+      <Filter>Quelldateien\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\RestoreStreamState.h">
+      <Filter>Quelldateien\Util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Time\Time.cpp">
+      <Filter>Quelldateien\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Time\WallClock.cpp">
+      <Filter>Quelldateien\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Time\StopWatch.cpp">
+      <Filter>Quelldateien\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\Helper.cpp">
+      <Filter>Quelldateien\Util</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

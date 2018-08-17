@@ -1,0 +1,169 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_DIJKSTRA_H_INCLUDED
+#define __AITOOLS_DIJKSTRA_H_INCLUDED
+
+#include <boost/optional.hpp>
+
+#include <list>
+
+namespace aiTools
+{
+	namespace Algorithm
+	{
+		namespace dijkstra_detail
+		{
+			template <typename SearchGraphWrapper>
+			struct NodeComparator
+			{
+				typedef typename SearchGraphWrapper::value_type value_type;
+				typedef typename SearchGraphWrapper::cost_type cost_type;
+
+				NodeComparator(SearchGraphWrapper& searchGraphWrapper, value_type& goalNode);
+				void operator()(const value_type& node);
+				value_type mLowestCostNode;
+			private:
+				SearchGraphWrapper& mSearchGraphWrapper;
+			};
+
+			template <typename SearchGraphWrapper>
+			NodeComparator<SearchGraphWrapper>::NodeComparator(SearchGraphWrapper& searchGraphWrapper, value_type& goalNode)
+				:mLowestCostNode(goalNode), mSearchGraphWrapper(searchGraphWrapper)
+			{
+			}
+
+			template <typename SearchGraphWrapper>
+			void NodeComparator<SearchGraphWrapper>::operator()(const value_type& node)
+			{
+				cost_type storedCost = mSearchGraphWrapper.getCostForNode(mLowestCostNode);
+				cost_type newCost = mSearchGraphWrapper.getCostForNode(node);
+
+				if(newCost < storedCost)
+					mLowestCostNode = node;
+			}
+		}
+		template <typename SearchGraphWrapper>
+		struct DijkstraAlgorithm
+		{
+			typedef typename SearchGraphWrapper::value_type value_type;
+			typedef typename SearchGraphWrapper::cost_type cost_type;
+			typedef SearchGraphWrapper SearchGraphWrapperType;
+			typedef std::list<value_type> PathType;
+
+			DijkstraAlgorithm(SearchGraphWrapper& wrapper, value_type* startNode = NULL);
+
+			void performIteration();
+			bool isComplete() const;
+			bool wasSuccessful() const;
+
+			std::pair<typename PathType::const_iterator, typename PathType::const_iterator> getPath() const;
+		private:
+			SearchGraphWrapper& mSearchGraphWrapper;
+			bool mIsFinished;
+			bool mWasSuccessful;
+			PathType mPath;
+			void backtrackFrom(value_type& node);
+		};
+
+		template <typename SearchGraphWrapper>
+		DijkstraAlgorithm<SearchGraphWrapper>::DijkstraAlgorithm(SearchGraphWrapper& wrapper, typename SearchGraphWrapper::value_type* startNode)
+			: mSearchGraphWrapper(wrapper), mIsFinished(false), mWasSuccessful(false)
+		{
+			if(startNode)
+				mSearchGraphWrapper.updateCostSetOpen(*startNode, cost_type(0));
+		}
+
+		template <typename SearchGraphWrapper>
+		bool DijkstraAlgorithm<SearchGraphWrapper>::isComplete() const
+		{
+			return mIsFinished;
+		}
+
+		template <typename SearchGraphWrapper>
+		bool DijkstraAlgorithm<SearchGraphWrapper>::wasSuccessful() const
+		{
+			return mWasSuccessful;
+		}
+
+		template <typename SearchGraphWrapper>
+		void DijkstraAlgorithm<SearchGraphWrapper>::performIteration()
+		{
+			//TODO make this auto, then it works with pointer as well
+			boost::optional<value_type> optional_node = mSearchGraphWrapper.removeBestOpen();
+
+			if(!optional_node)
+			{
+				mPath.clear();
+				mIsFinished = true;
+				mWasSuccessful = false;
+				return;
+			}
+
+			value_type& parentNode = *optional_node; //TODO 123 check
+			mSearchGraphWrapper.setExpanded(parentNode);
+
+			cost_type parentCost = mSearchGraphWrapper.getCostForNode(parentNode);
+
+			mSearchGraphWrapper.forAllSuccessorNodes(parentNode, 
+					[this, &parentNode, &parentCost](value_type& successor)
+					{
+						if(isComplete())
+							return;
+						
+						if(mSearchGraphWrapper.isExpanded(successor))
+							return;
+						
+						const cost_type costForEdge = mSearchGraphWrapper.getCostBetween(parentNode, successor);
+						const cost_type newCostForNode = parentCost + costForEdge;
+						
+						mSearchGraphWrapper.updateCostSetOpen(successor, newCostForNode, parentNode);
+
+						if(mSearchGraphWrapper.isGoalNode(successor))
+							backtrackFrom(successor);
+					}
+				);
+		}
+
+		template <typename SearchGraphWrapper>
+		void DijkstraAlgorithm<SearchGraphWrapper>::backtrackFrom(value_type& node)
+		{
+			mPath.clear();
+
+			dijkstra_detail::NodeComparator<SearchGraphWrapper> lowestCostNodeGetter(mSearchGraphWrapper, node);
+
+			while(mSearchGraphWrapper.getCostForNode(lowestCostNodeGetter.mLowestCostNode) != cost_type(0))
+			{
+				mPath.push_front(lowestCostNodeGetter.mLowestCostNode);
+
+				mSearchGraphWrapper.forAllPredecessorNodes(mPath.front(), lowestCostNodeGetter);
+			}
+			mPath.push_front(lowestCostNodeGetter.mLowestCostNode);
+
+			mIsFinished = true;
+			mWasSuccessful = true;
+		}
+
+		template <typename SearchGraphWrapper>
+		std::pair<typename DijkstraAlgorithm<SearchGraphWrapper>::PathType::const_iterator, typename DijkstraAlgorithm<SearchGraphWrapper>::PathType::const_iterator> DijkstraAlgorithm<SearchGraphWrapper>::getPath() const
+		{
+			return std::make_pair(mPath.begin(), mPath.end());
+		}
+
+	}
+}
+#endif // __AITOOLS_DIJKSTRA_H_INCLUDED

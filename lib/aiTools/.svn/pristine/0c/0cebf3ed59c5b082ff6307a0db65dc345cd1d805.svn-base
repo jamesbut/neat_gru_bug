@@ -1,0 +1,195 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2014  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_TRIE_H_INCLUDED
+#define __AITOOLS_TRIE_H_INCLUDED
+
+#include "Util/Helper.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <map>
+#include <vector>
+#include <string>
+#include <ostream>
+
+namespace aiTools
+{
+	namespace Util
+	{
+
+		template <typename T>
+		class Trie;
+
+		template <typename T>
+		class TrieNode;
+
+		template <typename T>
+		std::ostream& operator<<(std::ostream& stream, const TrieNode<T>& trie)
+		{
+			for(typename std::map<char, boost::shared_ptr<TrieNode<T> > >::const_iterator iter=trie.mChildren.begin();iter!=trie.mChildren.end();++iter)
+			{
+				stream.put(iter->first);
+				stream  << ": ";
+
+				ASSERT(iter->second.get(), "invalid node");
+				stream << *(iter->second);
+				stream <<  std::endl;
+			}
+			return stream;
+		}
+
+		template <typename T>
+		std::ostream& operator<<(std::ostream& stream, const Trie<T>& trie)
+		{
+			stream << trie.mRootNode;
+			return stream;
+		}
+
+
+		template <typename T>
+		class TrieNode
+		{
+		public:
+			bool containsSubstring(std::string::const_iterator start, std::string::const_iterator end) const
+			{
+				if(start == end)
+					return true;
+
+				typename std::map<char, boost::shared_ptr<TrieNode<T> > >::const_iterator followupNode = mChildren.find(*start);
+				if(followupNode != mChildren.end())
+					return followupNode->second->containsSubstring(++start, end);
+
+				return false;
+			}
+
+			const T& retrieve(std::string::const_iterator start, std::string::const_iterator end) const
+			{
+				if(start == end)
+					return mStoredData;
+
+				typename std::map<char, boost::shared_ptr<TrieNode<T> > >::const_iterator followupNode = mChildren.find(*start);
+				if(followupNode != mChildren.end())
+					return followupNode->second->retrieve(++start, end);
+
+				return mStoredData;
+			}
+
+			void insertSubstring(std::string::const_iterator start, std::string::const_iterator end, const T& data = 0)
+			{
+				if(start == end)
+				{
+					mStoredData = data;
+					return;
+				}
+
+				boost::shared_ptr<TrieNode> childNode;
+
+				// if one branch of the tree is not yet present, we create a child, continue adding the substrings
+				// an only if all of them succeed, we add the child to the tree.
+
+				// if the child already exists, we simply continue...
+
+				typename std::map<char, boost::shared_ptr<TrieNode<T> > >::const_iterator childNodePtr = mChildren.find(*start);
+				if(childNodePtr == mChildren.end())
+				{
+					childNode.reset(new TrieNode());
+
+					std::string::const_iterator insertWhere = start;
+
+					childNode->insertSubstring(++start, end, data);
+					mChildren[*insertWhere] = childNode;
+				}
+				else
+				{
+					childNode = childNodePtr->second;
+					childNode->insertSubstring(++start, end, data);
+				}
+			}
+
+			template <typename Action, typename Condition>
+			void traverse(std::vector<char>& word, Action& action, const Condition& condition) const
+			{
+				if(condition(mStoredData))
+					action(std::string(word.begin(), word.end()), mStoredData);
+
+				//todo: can this be made strongly exception safe?
+
+				for(typename std::map<char, boost::shared_ptr<TrieNode<T> > >::const_iterator iter=mChildren.begin();iter!=mChildren.end();++iter)
+				{
+					word.push_back(iter->first);
+					iter->second->traverse(word, action, condition);
+					word.pop_back();
+				}
+			}
+
+			template <typename U>
+			friend std::ostream& operator<<(std::ostream& stream, const TrieNode<U>& trie);
+
+		private:
+			std::map<char, boost::shared_ptr<TrieNode> > mChildren;
+			T mStoredData;
+		};
+
+		template <typename T>
+		class Trie
+		{
+		public:
+			bool contains(const std::string& entry)
+			{
+				return mRootNode.containsSubstring(entry.begin(), entry.end());
+			}
+
+			const T& retrieve(const std::string& entry) const
+			{
+				return mRootNode.retrieve(entry.begin(), entry.end());
+			}
+
+			void insert(const std::string& entry, const T& data = T())
+			{
+				mRootNode.insertSubstring(entry.begin(), entry.end(), data);
+			}
+
+			void insert(const char* entry, const T& data = T())
+			{
+				std::string temp(entry);
+				mRootNode.insertSubstring(temp.begin(), temp.end(), data);
+			}
+
+			template <typename Action, typename Condition>
+			void traverse(Action& action, const Condition& condition) const
+			{
+				std::vector<char> word;
+				mRootNode.traverse(word, action, condition);
+			}
+
+			void clear()
+			{
+				mRootNode = TrieNode<T>();
+			}
+
+
+			template <typename U>
+			friend std::ostream& operator<<(std::ostream& stream, const Trie<U>& trie);
+
+		private:
+			TrieNode<T> mRootNode;
+		};
+	}
+}
+
+#endif // __AITOOLS_TRIE_H_INCLUDED

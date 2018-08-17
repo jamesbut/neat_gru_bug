@@ -1,0 +1,57 @@
+#ifndef _SEARCH_GRID_WRAPPER_H_
+#define _SEARCH_GRID_WRAPPER_H_
+
+#include <aiTools/Algorithm/AStar.h>
+#include <aiTools/Util/Grid.h>
+#include <aiTools/Math/Vector2.h>
+
+struct SearchNode
+{
+	typedef int cost_type;
+
+	cost_type cost{-1};
+	cost_type traversalCost{1};
+	bool isOpen{false};
+	bool isClosed{false};
+	bool isBlocked{false};
+	bool isGoal{false};
+	bool isPath{false};
+};
+
+struct SearchGridWrapper : public aiTools::Algorithm::SampleAStarSearchGraphWrapper<aiTools::Grid<SearchNode>::GridIndex, SearchNode::cost_type>
+{
+	typedef aiTools::Grid<SearchNode> GridType;
+	typedef GridType::GridIndex GridIndex;
+
+	//methods that star needs:
+	void updateCostSetOpen(value_type& node, cost_type cost);
+	void updateCostSetOpen(value_type& node, cost_type newCosts, value_type& parentNode);
+
+	cost_type getCostForNode(const value_type& node);
+	void setExpanded(value_type& node);
+	bool isExpanded(value_type& node);
+	bool isGoalNode(value_type& node);
+	boost::optional<value_type> removeBestOpen();
+	cost_type getCostBetween(value_type& parent, value_type& child);
+
+	void forAllSuccessorNodes(value_type& node, std::function<void(value_type&)> action);
+	void forAllPredecessorNodes(value_type& node, BacktrackAction& action);
+
+	//methods that astar (additionally) needs:
+
+	bool reOpenIf(value_type& node, std::function<bool(const value_type&)> action);
+	cost_type getHeuristic(const value_type& node);
+
+	static aiTools::Grid<SearchNode> gridFromPng(const std::string& filename);
+	static void printGridToPng(const std::string& filename, aiTools::Grid<SearchNode>& grid);
+
+	//now, own stuff:
+	//SearchGridWrapper(const std::string& initialLayout);
+	SearchGridWrapper(const std::string& filePath, const aiTools::Math::Vector2<int> start_pos,
+							const aiTools::Math::Vector2<int> goal_pos);
+
+	aiTools::Grid<SearchNode> mData;
+	GridIndex mGoalIndex;
+};
+
+#endif

@@ -1,0 +1,187 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_ASTAR_H_INCLUDED
+#define __AITOOLS_ASTAR_H_INCLUDED
+
+#include <boost/optional.hpp>
+
+#include <list>
+
+namespace aiTools
+{
+	namespace Algorithm
+	{
+		namespace astar_detail
+		{
+			template <typename SearchGraphWrapper>
+			struct NodeComparator
+			{
+				typedef typename SearchGraphWrapper::value_type value_type;
+				typedef typename SearchGraphWrapper::cost_type cost_type;
+
+				NodeComparator(SearchGraphWrapper& searchGraphWrapper, value_type& goalNode);
+				void operator()(const value_type& node);
+				value_type mLowestCostNode;
+			private:
+				SearchGraphWrapper& mSearchGraphWrapper;
+			};
+
+			template <typename SearchGraphWrapper>
+			NodeComparator<SearchGraphWrapper>::NodeComparator(SearchGraphWrapper& searchGraphWrapper, value_type& goalNode)
+				:mLowestCostNode(goalNode), mSearchGraphWrapper(searchGraphWrapper)
+			{
+			}
+
+			template <typename SearchGraphWrapper>
+			void NodeComparator<SearchGraphWrapper>::operator()(const value_type& node)
+			{
+				cost_type storedCost = mSearchGraphWrapper.getCostForNode(mLowestCostNode);
+				cost_type newCost = mSearchGraphWrapper.getCostForNode(node);
+
+				if(newCost < storedCost)
+					mLowestCostNode = node;
+				if(newCost == storedCost) //tie-breaking over heuristic, if possible:
+				{
+					cost_type storedHeuristic = mSearchGraphWrapper.getHeuristic(mLowestCostNode);
+					cost_type newHeuristic = mSearchGraphWrapper.getHeuristic(node);
+					if(newHeuristic < storedHeuristic)
+						mLowestCostNode = node;
+				}
+			}
+		}
+
+		template <typename SearchGraphWrapper>
+		struct AStarAlgorithm
+		{
+			typedef typename SearchGraphWrapper::value_type value_type;
+			typedef typename SearchGraphWrapper::cost_type cost_type;
+			typedef SearchGraphWrapper SearchGraphWrapperType;
+			typedef std::list<value_type> PathType;
+
+			AStarAlgorithm(SearchGraphWrapper& wrapper, value_type* startNode = NULL);
+
+			void performIteration();
+			bool isComplete() const;
+			bool wasSuccessful() const;
+
+			void backtrackFrom(value_type& node);
+
+			std::pair<typename PathType::const_iterator, typename PathType::const_iterator> getPath() const;
+		private:
+			SearchGraphWrapper& mSearchGraphWrapper;
+			bool mIsFinished;
+			bool mWasSuccessful;
+			PathType mPath;
+		};
+
+		template <typename SearchGraphWrapper>
+		AStarAlgorithm<SearchGraphWrapper>::AStarAlgorithm(SearchGraphWrapper& wrapper, typename SearchGraphWrapper::value_type* startNode)
+			: mSearchGraphWrapper(wrapper), mIsFinished(false), mWasSuccessful(false)
+		{
+			if(startNode)
+				mSearchGraphWrapper.updateCostSetOpen(*startNode, cost_type(0));
+		}
+
+		template <typename SearchGraphWrapper>
+		bool AStarAlgorithm<SearchGraphWrapper>::isComplete() const
+		{
+			return mIsFinished;
+		}
+
+		template <typename SearchGraphWrapper>
+		bool AStarAlgorithm<SearchGraphWrapper>::wasSuccessful() const
+		{
+			return mWasSuccessful;
+		}
+
+		template <typename SearchGraphWrapper>
+		void AStarAlgorithm<SearchGraphWrapper>::performIteration()
+		{
+			boost::optional<value_type> optional_node = mSearchGraphWrapper.removeBestOpen();
+
+			if(!optional_node)
+			{
+				mPath.clear();
+				mIsFinished = true;
+				mWasSuccessful = false;
+				return;
+			}
+
+			value_type& parentNode = *optional_node; //TODO 123 check
+			mSearchGraphWrapper.setExpanded(parentNode);
+
+			cost_type parentCost = mSearchGraphWrapper.getCostForNode(parentNode);
+
+			mSearchGraphWrapper.forAllSuccessorNodes(parentNode, 
+					[this, &parentNode, &parentCost](value_type& successor)
+					{
+						if(isComplete())
+							return;
+						
+						const cost_type costForEdge = mSearchGraphWrapper.getCostBetween(parentNode, successor);
+						const cost_type newCostForNode = parentCost + costForEdge;
+
+						//might save calculating heuristic here by taking it from closed list node
+
+						bool maySkipNode = mSearchGraphWrapper.reOpenIf(successor, 
+								[this, &newCostForNode](const value_type& closedNode)
+								{
+									const cost_type costStoredInCLosedList = mSearchGraphWrapper.getCostForNode(closedNode);
+									return costStoredInCLosedList > newCostForNode;
+								}
+							);
+						if(maySkipNode)
+							return;
+						
+						mSearchGraphWrapper.updateCostSetOpen(successor, newCostForNode, parentNode);
+
+						if(mSearchGraphWrapper.isGoalNode(successor))
+							backtrackFrom(successor);
+					}
+				);
+		}
+
+		template <typename SearchGraphWrapper>
+		void AStarAlgorithm<SearchGraphWrapper>::backtrackFrom(value_type& node)
+		{
+			mPath.clear();
+
+			astar_detail::NodeComparator<SearchGraphWrapper> lowestCostNodeGetter(mSearchGraphWrapper, node);
+
+			while(mSearchGraphWrapper.getCostForNode(lowestCostNodeGetter.mLowestCostNode) != cost_type(0))
+			{
+				mPath.push_front(lowestCostNodeGetter.mLowestCostNode);
+
+				mSearchGraphWrapper.forAllPredecessorNodes(mPath.front(), lowestCostNodeGetter);
+			}
+			mPath.push_front(lowestCostNodeGetter.mLowestCostNode);
+
+			mIsFinished = true;
+			mWasSuccessful = true;
+		}
+
+		template <typename SearchGraphWrapper>
+		std::pair<typename AStarAlgorithm<SearchGraphWrapper>::PathType::const_iterator, typename AStarAlgorithm<SearchGraphWrapper>::PathType::const_iterator> AStarAlgorithm<SearchGraphWrapper>::getPath() const
+		{
+			return std::make_pair(mPath.begin(), mPath.end());
+		}
+
+	}
+}
+
+#endif // __AITOOLS_ASTAR_H_INCLUDED

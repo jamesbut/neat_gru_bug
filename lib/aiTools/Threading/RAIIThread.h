@@ -1,0 +1,97 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_RAII_THREAD_H_INCLUDED
+#define __AITOOLS_RAII_THREAD_H_INCLUDED
+
+#include <thread>
+
+namespace aiTools
+{
+	namespace Threading
+	{
+		enum class OnThreadDestruction
+		{
+			join,
+			detach,
+			none
+		};
+
+		// inspired by Scott Meyer's "ThreadRAII" class in "Effective Modern C++"
+		template <OnThreadDestruction ActionOnClose = OnThreadDestruction::join>
+		class VariableActionOnCloseThread
+		{
+		public:
+			VariableActionOnCloseThread()
+			{
+			}
+
+			template <typename Func, typename ...Args>
+			explicit VariableActionOnCloseThread(Func&& func, Args&&... args)
+						: mThread(std::move(func), std::forward<Args>(args)...)
+			{
+			}
+
+			~VariableActionOnCloseThread()
+			{
+				if(mThread.joinable())
+					Destruct(mThread);
+			}
+
+			std::thread& get()
+			{
+				return mThread;
+			}
+			std::thread& operator*()
+			{
+				return mThread;
+			}
+
+			//enable moving
+			VariableActionOnCloseThread(VariableActionOnCloseThread&&) = default;
+			VariableActionOnCloseThread& operator=(VariableActionOnCloseThread&&) = default;
+
+		private:
+			std::thread mThread;
+
+			template <OnThreadDestruction DestructAction = ActionOnClose>
+			static typename std::enable_if<DestructAction == OnThreadDestruction::join, void>::type
+			Destruct(std::thread& thread)
+			{
+				thread.join();
+			}
+
+			template <OnThreadDestruction DestructAction = ActionOnClose>
+			static typename std::enable_if<DestructAction == OnThreadDestruction::detach, void>::type
+			Destruct(std::thread& thread)
+			{
+				thread.detach();
+			}
+
+			template <OnThreadDestruction DestructAction = ActionOnClose>
+			static typename std::enable_if<DestructAction == OnThreadDestruction::none, void>::type
+			Destruct(std::thread&)
+			{
+			}
+		};
+
+		using RAIIThread = VariableActionOnCloseThread<OnThreadDestruction::join>;
+		using DetachedThread = VariableActionOnCloseThread<OnThreadDestruction::detach>;
+		using WrappedThread = VariableActionOnCloseThread<OnThreadDestruction::none>;
+	}
+}
+#endif // __AITOOLS_RAII_THREAD_H_INCLUDED

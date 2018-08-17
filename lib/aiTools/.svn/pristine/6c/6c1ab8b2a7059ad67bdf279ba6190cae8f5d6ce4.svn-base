@@ -1,0 +1,228 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+
+#include "Time.h"
+#include "WallClock.h"
+
+#include <limits>
+
+namespace aiTools
+{
+
+	const Time Time::ZERO(0);
+	const Time Time::MAX(std::numeric_limits<long long>::max());
+
+	Time::Time() : mTicks(0)
+	{
+	}
+
+	Time::Time(long long ticks) : mTicks(ticks)
+	{
+	}
+
+	long long Time::getTicks() const
+	{
+		return mTicks;
+	}
+
+	long long Time::getMilliseconds() const
+	{
+		return static_cast<long long>(static_cast<double>(mTicks) * (1000.0 / static_cast<double>(WallClock::getResolution())));
+	}
+
+	long long Time::getMicroseconds() const
+	{
+		return static_cast<long long>(static_cast<double>(mTicks) * (1000000.0 / static_cast<double>(WallClock::getResolution())));
+	}
+
+	double Time::getSeconds() const
+	{
+		return static_cast<double>(static_cast<double>(mTicks) / static_cast<double>(WallClock::getResolution()));
+	}
+
+	double Time::getMinutes() const
+	{
+		return getSeconds()/60.0;
+	}
+
+	double Time::getHours() const
+	{
+		return getSeconds() / 3600;
+	}
+
+	Time Time::fromMilliseconds(double milliseconds)
+	{
+		const double ticks = milliseconds * (static_cast<double>(WallClock::getResolution()) / 1000.0);
+
+		if (ticks == std::numeric_limits<double>::infinity())
+			return Time::MAX;
+
+		return Time(static_cast<long long>(ticks));
+	}
+
+	Time Time::fromSeconds(float seconds)
+	{
+		const double ticks = seconds * static_cast<double>(WallClock::getResolution());
+
+		if (ticks == std::numeric_limits<double>::infinity())
+			return Time::MAX;
+
+		return Time(static_cast<long long>(ticks));
+	}
+
+	Time Time::fromMinutes(float minutes)
+	{
+		const double ticks = minutes * 60 * static_cast<double>(WallClock::getResolution());
+
+		if (ticks == std::numeric_limits<double>::infinity())
+			return Time::MAX;
+
+		return Time(static_cast<long long>(ticks));
+	}
+
+
+	Time Time::fromHours(float hours)
+	{
+		const double ticks = hours * 3600 * static_cast<double>(WallClock::getResolution());
+
+		if (ticks == std::numeric_limits<double>::infinity())
+			return Time::MAX;
+
+		return Time(static_cast<long long>(ticks));
+	}
+
+	Time Time::fromMicroseconds(long long microseconds)
+	{
+		const double ticks = static_cast<double>(microseconds) * (static_cast<double>(WallClock::getResolution()) / 1000000.0);
+
+		return Time(static_cast<long long>(ticks));
+	}
+
+	Time& Time::operator+=(const Time& arg1)
+	{
+		mTicks=mTicks+arg1.mTicks;
+		return *this;
+	}
+
+	Time& Time::operator-=(const Time& arg1)
+	{
+		mTicks=mTicks-arg1.mTicks;
+		return *this;
+	}
+
+	Time operator+ (const Time& arg1, const Time& arg2)
+	{
+		return Time(arg1.mTicks + arg2.mTicks);
+	}
+
+	Time operator- (const Time& arg1, const Time& arg2)
+	{
+		return Time(arg1.mTicks - arg2.mTicks);
+	}
+
+	Time operator- (const Time& arg1)
+	{
+		return Time(-arg1.mTicks);
+	}
+
+	Time operator* (const Time& arg1, double arg2)
+	{
+		return Time(static_cast<long long>(static_cast<double>(arg1.mTicks) * arg2)); //rely on sufficient size of 64bit data type
+	}
+
+	Time operator/ (const Time& arg1, double arg2)
+	{
+		return Time(static_cast<long long>(static_cast<double>(arg1.mTicks) / arg2)); //rely on sufficient size of 64bit data type
+	}
+
+	double operator/ (const Time& arg1, const Time& arg2)
+	{
+		return static_cast<double>(arg1.mTicks) / static_cast<double>(arg2.mTicks);
+	}
+
+	Time operator* (const Time& arg1, long long arg2)
+	{
+		return Time(arg1.mTicks*arg2);
+	}
+
+	Time operator/ (const Time& arg1, long long arg2)
+	{
+		return Time(arg1.mTicks/arg2);
+	}
+
+	Time operator* (const Time& arg1, unsigned int arg2)
+	{
+		return Time(arg1.mTicks*arg2);
+	}
+
+	Time operator/ (const Time& arg1, unsigned int arg2)
+	{
+		return Time(arg1.mTicks/arg2);
+	}
+
+	Time operator* (const Time& arg1, int arg2)
+	{
+		return Time(arg1.mTicks*arg2);
+	}
+
+	Time operator/ (const Time& arg1, int arg2)
+	{
+		return Time(arg1.mTicks/arg2);
+	}
+
+	Time operator* (const Time& arg1, unsigned long long arg2)
+	{
+		return Time(arg1.mTicks*arg2);
+	}
+
+	Time operator/ (const Time& arg1, unsigned long long arg2)
+	{
+		return Time(arg1.mTicks/arg2);
+	}
+
+	bool operator< (const Time& arg1, const Time& arg2)
+	{
+		return arg1.mTicks < arg2.mTicks;
+	}
+
+	bool operator> (const Time& arg1, const Time& arg2)
+	{
+		return arg1.mTicks > arg2.mTicks;
+	}
+
+	bool operator== (const Time& arg1, const Time& arg2)
+	{
+		return arg1.mTicks == arg2.mTicks;
+	}
+
+	bool operator!= (const Time& arg1, const Time& arg2)
+	{
+		return arg1.mTicks != arg2.mTicks;
+	}
+
+	bool operator>= (const Time& arg1, const Time& arg2)
+	{
+		return arg1.mTicks >= arg2.mTicks;
+	}
+
+	bool operator<= (const Time& arg1, const Time& arg2)
+	{
+		return arg1.mTicks <= arg2.mTicks;
+	}
+
+}

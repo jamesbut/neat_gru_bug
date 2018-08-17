@@ -1,0 +1,92 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+#ifndef __AITOOLS_RANDOMIZED_FOREACH_H__INCLUDED
+#define __AITOOLS_RANDOMIZED_FOREACH_H__INCLUDED
+
+#include <algorithm>
+#include <iterator>
+#include <vector>
+
+namespace aiTools
+{
+	///iterates over a container in a random order in O(3n) using std::random_shuffle as random source without modifying the container.
+	template <typename ForwardIterator, typename Action, typename RandomNumberGenerator>
+	typename std::enable_if<std::is_base_of<std::forward_iterator_tag, typename ForwardIterator::iterator_category>::value, Action>::type
+	randomized_for_each(ForwardIterator first, ForwardIterator last, Action action, RandomNumberGenerator& gen)
+	{
+		std::vector<ForwardIterator> iterators;
+		for(ForwardIterator iter = first;iter != last; ++iter)
+			iterators.emplace_back(iter);
+
+		std::random_shuffle(iterators.begin(), iterators.end(), gen);
+
+		std::for_each(iterators.begin(), iterators.end(),
+				[&action](const auto& elem)
+				{
+					action(*elem);
+				}
+			);
+
+		return action;
+	}
+
+	//to be compatible to std::random_shuffle
+	///iterates over a container in a random order in O(3n) using std::random_shuffle as random source without modifying the container.
+	template <typename ForwardIterator, typename Action>
+	typename std::enable_if<std::is_base_of<std::forward_iterator_tag, typename ForwardIterator::iterator_category>::value, Action>::type
+	randomized_for_each(ForwardIterator first, ForwardIterator last, Action action)
+	{
+		std::vector<ForwardIterator> iterators;
+		for(ForwardIterator iter = first;iter != last; ++iter)
+			iterators.emplace_back(iter);
+
+		std::random_shuffle(iterators.begin(), iterators.end());
+
+		std::for_each(iterators.begin(), iterators.end(),
+				[&action](const auto& elem)
+				{
+					action(*elem);
+				}
+			);
+
+		return action;
+	}
+
+	//to be compatible to std::shuffle
+	///iterates over a container in a random order in O(3n) using std::shuffle as random source without modifying the container.
+	template <typename ForwardIterator, typename Action, typename RandomNumberGenerator>
+	typename std::enable_if<std::is_base_of<std::forward_iterator_tag, typename ForwardIterator::iterator_category>::value, Action>::type
+	shuffled_for_each(ForwardIterator first, ForwardIterator last, Action action, RandomNumberGenerator&& gen)
+	{
+		std::vector<ForwardIterator> iterators;
+		for(ForwardIterator iter = first;iter != last; ++iter)
+			iterators.emplace_back(iter);
+
+		std::shuffle(iterators.begin(), iterators.end(), gen);
+
+		std::for_each(iterators.begin(), iterators.end(),
+				[&action](const auto& elem)
+				{
+					action(*elem);
+				}
+			);
+
+		return action;
+	}
+}
+
+#endif // __AITOOLS_RANDOMIZED_FOREACH_H__INCLUDED

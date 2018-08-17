@@ -1,0 +1,49 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_WALL_CLOCK_H_INCLUDED
+#define __AITOOLS_WALL_CLOCK_H_INCLUDED
+
+#include "Time.h"
+
+namespace aiTools
+{
+
+	/**
+	 * \brief A platform-independent (WinVC, Win & *nix GCC) wall clock implementation
+	 *
+	 * This class allows for wall clock time measurements. On Windows machines (anywhere where _MSC_VER is defined)
+	 * the performance counter is used, on other platforms  gettimeofday() is used.
+	 *
+	 */
+	class WallClock
+	{
+	public:
+		WallClock();
+		/// returns the current wall time
+		Time now() const;
+
+		/// returns the resolution of the clock, to convert ticks to seconds etc.
+		static long long getResolution();
+
+	private:
+		long long mSimulationFrequency;
+	};
+
+}
+
+#endif //__AITOOLS_WALL_CLOCK_H_INCLUDED

@@ -1,0 +1,60 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_METAPROGRAMMING_HELPERS_H_INCLUDED
+#define __AITOOLS_METAPROGRAMMING_HELPERS_H_INCLUDED
+
+#include <utility>
+
+namespace aiTools
+{
+	///find out whether a class is a std::pair (pair needs to be known)
+	template <class T>
+	struct is_pair
+	{
+	   static const bool value = false;
+	};
+
+	template <class T1, class T2>
+	struct is_pair<std::pair<T1, T2>>
+	{
+	   static const bool value = true;
+	};
+
+	//a tag class used to indicate that contents of certain classes should - for performance reasons - not be initialized (if wished to overwrite them later anyway.)
+	struct do_not_initialize
+	{};
+
+	//template metaprogramming way to find the log10 of a number at compile time (every program needs this.):
+	template <unsigned long long N>
+	struct static_log10
+	{
+		enum { value = 1 + static_log10<N/10>::value };
+	};
+
+	template <>
+	struct static_log10<0>
+	{
+		enum { value = 0 };
+	};
+
+}
+
+//#define AITOOLS_STATIC_ASSERT(condition) switch(0){case 0:case (condition):;}
+#define AITOOLS_STATIC_ASSERT(condition) static_assert(condition, "static assert failed. also, don't use this macro any more, as static_assert is a language feature now.");
+
+#endif // __AITOOLS_METAPROGRAMMING_HELPERS_H_INCLUDED

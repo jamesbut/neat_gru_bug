@@ -1,8 +1,11 @@
-
 #include "individual_run.h"
 #include "ga.h"
 
+#include "argos/src/loop_functions/fitness/astar_on_env.h"
+
 int main(int argc, char *argv[]) {
+
+   //std::vector<CVector2> path = astar_on_env("../argos_params/environments/kim_envs/rand_env_1.png");
 
    // Seed random number generator with time
    srand((unsigned)time(NULL));

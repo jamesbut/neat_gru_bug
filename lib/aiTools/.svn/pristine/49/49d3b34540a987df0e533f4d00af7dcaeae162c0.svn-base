@@ -1,0 +1,297 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+
+
+//include all aiTools headers
+#include <aiTools/Algorithm/AStar.h>
+#include <aiTools/Algorithm/Dijkstra.h>
+#include <aiTools/Classification/ConfusionMatrix.h>
+#include <aiTools/Math/Angle.h>
+#include <aiTools/Math/Distance.h>
+#include <aiTools/Math/FixedPrecision.h>
+#include <aiTools/Math/Geometry.h>
+#include <aiTools/Math/LinearTransformation.h>
+#include <aiTools/Math/MovingAverage.h>
+#include <aiTools/Math/Numeric.h>
+#include <aiTools/Math/SparseVector.h>
+#include <aiTools/Math/Statistics.h>
+#include <aiTools/Math/Vector.h>
+#include <aiTools/Math/Vector2.h>
+#include <aiTools/Math/Vector3.h>
+#include <aiTools/Serialization/Endianness.h>
+#include <aiTools/Serialization/IntrinsicDatatypes.h>
+#include <aiTools/Serialization/Serialization.h>
+#include <aiTools/Serialization/STLDataTypes.h>
+#include <aiTools/Threading/ParallelForEach.h>
+#include <aiTools/Threading/RAIIThread.h>
+#include <aiTools/Threading/TaskQueue.h>
+#include <aiTools/Time/StopWatch.h>
+#include <aiTools/Time/Time.h>
+#include <aiTools/Time/WallClock.h>
+#include <aiTools/Util/ForEachPair.h>
+#include <aiTools/Util/Functors.h>
+#include <aiTools/Util/Helper.h>
+#include <aiTools/Util/Histogram.h>
+#include <aiTools/Util/MetaprogrammingHelpers.h>
+#include <aiTools/Util/PlatformDetection.h>
+#include <aiTools/Util/RandomizedForEach.h>
+#include <aiTools/Util/Range.h>
+#include <aiTools/Util/RestoreStreamState.h>
+#include <aiTools/Util/RestrictedValue.h>
+#include <aiTools/Util/Trie.h>
+
+#include <iostream>
+
+
+void testRandomizedForEach()
+{
+	const auto size = 30;
+	const std::vector<int> firstDefaultShuffled =  {4, 28, 11, 15, 24, 16, 17, 29, 26, 9, 3, 22, 19, 2, 0, 23, 25, 18, 13, 8, 5, 21, 7, 12, 14, 20, 27, 6, 10, 1};
+	const std::vector<int> secondDefaultShuffled = {5, 12, 20, 6, 25, 0, 21, 15, 26, 27, 11, 13, 8, 17, 9, 7, 24, 4, 2, 3, 29, 14, 28, 19, 10, 22, 1, 18, 23, 16};
+	const std::vector<int> seed0shuffled =         {18, 20, 27, 5, 11, 3, 12, 19, 0, 21, 10, 13, 29, 1, 26, 22, 8, 9, 28, 2, 6, 16, 25, 24, 7, 14, 23, 4, 15, 17};
+
+
+	std::vector<int> test1;
+	std::set<int> test2;
+
+	for(auto value = 0; value < size; ++value)
+	{
+		test1.push_back(value);
+		test2.insert(value);
+	}
+
+	//random shuffle analogue
+	int index = 0;
+	aiTools::randomized_for_each(test1.begin(), test1.end(),
+									[&firstDefaultShuffled, &index](int val)
+									{
+										QASSERT(val == firstDefaultShuffled[index++]);
+									}
+								);
+	index = 0;
+	aiTools::randomized_for_each(test2.begin(), test2.end(),
+									[&secondDefaultShuffled, &index](int val)
+									{
+										//std::cout << val << ", ";
+										QASSERT(val == secondDefaultShuffled[index++]);
+									}
+								);
+
+	//random shuffle analogue with custom rand func
+	auto badrandfunc = [](int i){return i-1;};
+
+	index = 0;
+	aiTools::randomized_for_each(test1.begin(), test1.end(),
+									[&index](int val)
+									{
+										QASSERT(val == index++);
+									},
+									badrandfunc
+								);
+	index = 0;
+	aiTools::randomized_for_each(test2.begin(), test2.end(),
+									[&index](int val)
+									{
+										//std::cout << val << ", ";
+										QASSERT(val == index++);
+									},
+									badrandfunc
+								);
+
+
+	//std::shuffle analogue
+	const unsigned seed = 0;
+	index = 0;
+	aiTools::shuffled_for_each(test1.begin(), test1.end(),
+									[&seed0shuffled, &index](int val)
+									{
+										//std::cout << val << ", ";
+										QASSERT(val == seed0shuffled[index++]);
+									},
+									std::default_random_engine(seed)
+								);
+	index = 0;
+	std::cout << std::endl;
+	aiTools::shuffled_for_each(test2.begin(), test2.end(),
+									[&seed0shuffled, &index](int val)
+									{
+										//std::cout << val << ", ";
+										QASSERT(val == seed0shuffled[index++]);
+									},
+									std::default_random_engine(seed)
+								);
+}
+
+template <typename T>
+void testRangeForType()
+{
+	const T lower = 0;
+	const T upper = 10;
+	aiTools::Range<T> range01(lower, upper);
+	aiTools::Range<T> range02(upper, lower);
+
+	QASSERT(!range01.isInside(lower-1));
+	QASSERT(range02.isInside(lower-1));
+
+	for(T i = lower;i<upper;++i)
+	{
+		QASSERT(range01.isInside(i));
+		QASSERT(!range02.isInside(i));
+	}
+
+	QASSERT(!range01.isInside(upper));
+	QASSERT(!range01.isInside(upper+1));
+	QASSERT(range02.isInside(upper));
+	QASSERT(range02.isInside(upper+1));
+}
+
+void testRange()
+{
+	testRangeForType<int>();
+	testRangeForType<float>();
+}
+
+void testRestoreStreamState()
+{
+	std::stringstream stream;
+
+	stream << aiTools::Math::PI;
+	const std::string defaultPiStr("3.14159");
+	QASSERT(stream.str() == defaultPiStr);//less stream test, more of a locale test, not needed
+	stream.str("");
+
+	{
+		auto restorer = aiTools::RestoreStreamState(stream);
+
+		stream.precision(3);
+		stream << std::fixed;
+		stream << aiTools::Math::PI;
+		const std::string defaultPi3Str("3.142");
+		QASSERT(stream.str() == defaultPi3Str);
+		stream.str("");
+	}
+
+	stream << aiTools::Math::PI;
+	QASSERT(stream.str() == defaultPiStr);//could also test against "value before".
+
+	//TODO in theory one could test more here.
+}
+
+void testTrie()
+{
+	aiTools::Trie<int> trie;
+
+	std::vector<std::string> strings = {"nom", "a", "b", "ab", "test"};
+	int nr = 0;
+
+	for(const auto& str : strings)
+	{
+		trie.insert(str, nr++);
+	}
+
+	nr = 0;
+	for(const auto& str : strings)
+	{
+		for(std::size_t iter = 0; iter != str.length(); ++iter)
+		{
+			auto shortstr = str.substr(0, iter);
+			QASSERT(trie.contains(shortstr));
+		}
+		QASSERT(trie.contains(str));
+		int currentVal = nr++;
+
+		QASSERT(trie.retrieve(str) == currentVal);
+		QASSERT(trie.hasValue(str));
+		QASSERT(trie.tryRetrieve(str));
+		QASSERT(*trie.tryRetrieve(str) == currentVal);
+	}
+
+	//with current implementation, can not test a lot more
+	QASSERT(! trie.contains("common sense"));
+	QASSERT(trie.tryRetrieve("common sense") == nullptr);
+	QASSERT(! trie.hasValue("common sense"));
+
+	trie.clear();
+	nr = 0;
+	QASSERT(trie.contains(""));
+	for(const auto& str : strings)
+	{
+		QASSERT(!trie.contains(str));
+		QASSERT(!trie.hasValue(str));
+		QASSERT(!trie.tryRetrieve(str));
+	}
+
+	std::string lstr("long string");
+	trie.insert(lstr);
+	QASSERT(trie.contains(lstr));
+	QASSERT(trie.hasValue(lstr));
+
+	for(std::size_t iter = 0; iter != lstr.length(); ++iter)
+	{
+		auto shortstr = lstr.substr(0, iter);
+		QASSERT(trie.contains(shortstr));
+		QASSERT(!trie.hasValue(shortstr));
+	}
+}
+
+
+void run_all_tests()
+{
+	testRandomizedForEach();
+	testRange();
+	testRestoreStreamState();
+	testTrie();
+}
+
+
+
+
+int main()
+{
+//	auto action = [](const int left, const int right)
+//					{
+//						std::cout << "{" << left << ", " << right << "}";
+//					};
+//		//ompile time rr
+
+//	std::vector<int> t1 = {1, 2, 3, 4, 5, 6};
+
+//	aiTools::for_each_pair(t1.begin(), t1.end(), action);
+//	std::cout << std::endl;
+	try
+	{
+		run_all_tests();
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "exception caught: " << e.what() << std::endl;
+		std::cerr << "test failed." << std::endl;
+		return 1;
+	}
+	catch(...)
+	{
+		std::cerr << "something else caught." << std::endl;
+		std::cerr << "test failed." << std::endl;
+		return 1;
+	}
+
+	std::cout << "all tests succeeded" << std::endl;
+
+	return 0;
+}
+

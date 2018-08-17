@@ -1,0 +1,354 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_FUNCTORS_H__INCLUDED
+#define __AITOOLS_FUNCTORS_H__INCLUDED
+
+#include "MetaprogrammingHelpers.h"
+#include <iterator>
+#include <functional>
+
+namespace aiTools
+{
+	namespace Util
+	{
+		/// Allows using std::transform to perform an arbitrary Action instead of outputting onto (this) iterator
+		/// by redirecting this "iterator"'s "container"'s insert() method to the supplied action
+		/// contruct one by providing the desired action, then use get_insert_iterator to get an insert iterator you can use in transform (or any algorithm)
+		template <typename ExpectedType, typename Action>
+		struct InserterWrapper
+		{
+			InserterWrapper(Action& action) : mAction(action)
+			{}
+
+			//TODO: void possible?
+			typedef int iterator; //bogus iterator
+			//typedef const int const_iterator;
+			typedef ExpectedType value_type;
+
+			auto get_insert_iterator() -> decltype(std::inserter(*this, 0)) const
+			{
+				return std::inserter(*this, 0);
+			}
+
+			iterator insert(iterator i, ExpectedType&& element)
+			{
+				mAction(element);
+				return i;
+			}
+
+			Action& mAction;
+		};
+
+		template <typename T>
+		struct Range;
+
+		template <typename T>
+		struct AlwaysTrue
+		{
+			typedef T value_type;
+
+			bool operator()(const T&) const
+			{
+				return true;
+			}
+
+			bool operator()() const
+			{
+				return true;
+			}
+		};
+
+		//TODO: can't these all be replaced by std::-stuff?
+		template <typename FunctorType>
+		struct Not
+		{
+			typedef typename FunctorType::value_type value_type;
+
+			Not(FunctorType functor = FunctorType()) :
+				mUnderlyingFunctor(functor)
+			{}
+
+			Not(value_type value = FunctorType::value_type()) :
+				mUnderlyingFunctor(value)
+			{}
+
+			bool operator()(const value_type& value) const
+			{
+				return !mUnderlyingFunctor(value);
+			}
+		private:
+			const FunctorType mUnderlyingFunctor;
+		};
+
+		template <typename FunctorTypeLHS, typename FunctorTypeRHS>
+		struct LogicalAnd
+		{
+			typedef typename FunctorTypeLHS::value_type value_type;
+
+			LogicalAnd(FunctorTypeLHS functorL = FunctorTypeLHS(), FunctorTypeRHS functorR = FunctorTypeRHS()) :
+				mLHSFunctor(functorL),
+				mRHSFunctor(functorR)
+			{
+				typedef same_types<typename FunctorTypeLHS::value_type, typename FunctorTypeRHS::value_type> condition;
+				AITOOLS_STATIC_ASSERT(condition::value);
+			}
+
+			bool operator()(const value_type& value) const
+			{
+				return mLHSFunctor(value) && mRHSFunctor(value);
+			}
+		private:
+			const FunctorTypeLHS mLHSFunctor;
+			const FunctorTypeRHS mRHSFunctor;
+		};
+
+		template <typename FunctorTypeLHS, typename FunctorTypeRHS>
+		struct LogicalOr
+		{
+			typedef typename FunctorTypeLHS::value_type value_type;
+
+			LogicalOr(FunctorTypeLHS functorL = FunctorTypeLHS(), FunctorTypeRHS functorR = FunctorTypeRHS()) :
+				mLHSFunctor(functorL),
+				mRHSFunctor(functorR)
+			{
+				typedef same_types<typename FunctorTypeLHS::value_type, typename FunctorTypeRHS::value_type> condition;
+				AITOOLS_STATIC_ASSERT(condition::value);
+			}
+
+			bool operator()(const value_type& value) const
+			{
+				return mLHSFunctor(value) || mRHSFunctor(value);
+			}
+		private:
+			const FunctorTypeLHS mLHSFunctor;
+			const FunctorTypeRHS mRHSFunctor;
+		};
+
+		template <typename T>
+		struct GreaterThan
+		{
+			typedef T value_type;
+
+			GreaterThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value > mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct SmallerThan
+		{
+			typedef T value_type;
+
+			SmallerThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value < mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct GreaterEqualsThan
+		{
+			typedef T value_type;
+
+			GreaterEqualsThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value >= mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct SmallerEqualsThan
+		{
+			typedef T value_type;
+
+			SmallerEqualsThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value <= mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct Equals
+		{
+			typedef T value_type;
+
+			Equals(const T& value = T(0)) : mCompareTo(value)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value == mCompareTo;
+			}
+		private:
+			const unsigned int mCompareTo;
+		};
+
+		template <typename T>
+		struct InRangeFunctor
+		{
+			typedef T value_type;
+
+			InRangeFunctor(Range<T> range) : mRange(range)
+			{}
+
+			InRangeFunctor(value_type left, value_type right) : mRange(left, right)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return mRange.isInside(value);
+			}
+		private:
+			const Range<T> mRange;
+		};
+
+		template<typename Action>
+		struct ModifyPairFirst
+		{
+			ModifyPairFirst(Action action) : mAction(action)
+			{}
+
+			template <typename Pair>
+			Pair operator()(Pair& pair)
+			{
+				pair.first = mAction(pair.first);
+				return pair;
+			}
+
+			template <typename Pair>
+			Pair operator()(Pair& pair) const
+			{
+				pair.first = mAction(pair.first);
+				return pair;
+			}
+
+		private:
+			Action mAction;
+		};
+
+		template<typename Action>
+		struct ModifyPairSecond
+		{
+			ModifyPairSecond(Action action) : mAction(action)
+			{}
+
+			template <typename Pair>
+			Pair operator()(Pair& pair)
+			{
+				mAction(pair.second);
+				return pair;
+			}
+
+			template <typename Pair>
+			Pair operator()(const Pair& pair) const
+			{
+				return std::make_pair(pair.first, mAction(pair.second));
+			}
+
+			template <typename Pair>
+			Pair operator()(Pair& pair) const
+			{
+				pair.second = mAction(pair.second);
+				return pair;
+			}
+
+		private:
+			Action mAction;
+		};
+
+		template <typename T>
+		using ascending = std::less<T>;
+
+		template <typename T>
+		using descending = std::greater<T>;
+
+
+		///use like this: std::sort(data.begin(), data.end(), aiTools::Util::SortByFirst<>());
+		///or this: std::sort(data.begin(), data.end(), aiTools::Util::SortByFirst<aiTools::Util::ascending>());
+		///or this: std::sort(data.begin(), data.end(), aiTools::Util::SortByFirst<std::greater>());
+		template <template<class> class Comparator = ascending>
+		struct SortByFirst
+		{
+			template <typename Pair>
+			bool operator()(const Pair& lhs, const Pair& rhs)
+			{
+				Comparator<typename Pair::first_type> comp;
+				return comp(lhs.first, rhs.first);
+			}
+		};
+
+		///use like this: std::sort(data.begin(), data.end(), aiTools::Util::SortBySecond<>());
+		///or this: std::sort(data.begin(), data.end(), aiTools::Util::SortBySecond<aiTools::Util::descending>());
+		///or this: std::sort(data.begin(), data.end(), aiTools::Util::SortBySecond<std::less>());
+		template <template<class> class Comparator = ascending>
+		struct SortBySecond
+		{
+			template <typename Pair>
+			bool operator()(const Pair& lhs, const Pair& rhs)
+			{
+				Comparator<typename Pair::second_type> comp;
+				return comp(lhs.second, rhs.second);
+			}
+		};
+
+		template<typename BinaryOperator, typename RhsType>
+		struct ModifyWith
+		{
+			ModifyWith(const RhsType& value) : mOperator(), mValue(value)
+			{}
+
+			template <typename LhsType>
+			const LhsType operator()(LhsType& value) const
+			{
+				return mOperator(value, mValue);
+			}
+
+			template <typename LhsType>
+			const LhsType operator()(const LhsType& value) const
+			{
+				return mOperator(value, mValue);
+			}
+		private:
+			const BinaryOperator mOperator;
+			const RhsType mValue;
+		};
+	}
+}
+
+#endif // __AITOOLS_FUNCTORS_H__INCLUDED

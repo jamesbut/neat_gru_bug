@@ -1,0 +1,295 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_DISTANCE_H_INCLUDED
+#define __AITOOLS_DISTANCE_H_INCLUDED
+
+#include "Util/MetaprogrammingHelpers.h"
+#include "Util/Helper.h"
+#include "Util/Functors.h"
+
+#include <cmath>
+#include <iterator>
+
+namespace aiTools
+{
+	namespace Math
+	{
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		typename std::enable_if<!is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		manhattan_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			using std::abs;
+
+			while(lhsBegin != lhsEnd && rhsBegin != rhsEnd)
+			{
+				result += abs(*lhsBegin++ - *rhsBegin++);
+			}
+
+			return result;
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		typename std::enable_if<is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		manhattan_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			auto lambda = [&result](typename FwdIterType::value_type& value)
+			{
+				using std::abs;
+				result += abs(value.second);
+			};
+			Util::InserterWrapper<typename FwdIterType::value_type, decltype(lambda)> inserterWrapper(lambda);
+			std::minus<ResultType> modifier;
+
+			sparse_transform(lhsBegin, lhsEnd,
+							 rhsBegin, rhsEnd,
+							 inserterWrapper.get_insert_iterator(), modifier);
+
+			return result;
+		}
+
+		template <typename VectorType, typename OtherVectorType, typename ResultType = double>
+		ResultType manhattan_distance(const VectorType& lhs, const OtherVectorType& rhs)
+		{
+			return manhattan_distance<VectorType::const_iterator, OtherVectorType::const_iterator, ResultType>(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		}
+
+		template <typename FwdIterType, typename ResultType = double>
+		typename std::enable_if<!is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		manhattan_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			using std::abs;
+
+			while(lhsBegin != lhsEnd)
+			{
+				result += abs(*lhsBegin++);
+			}
+
+			return result;
+		}
+
+		template <typename FwdIterType, typename ResultType = double>
+		typename std::enable_if<is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		manhattan_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			using std::abs;
+
+			while(lhsBegin != lhsEnd)
+			{
+				result += abs(lhsBegin->second);
+				++lhsBegin;
+			}
+
+			return result;
+		}
+
+		template <typename VectorType, typename ResultType = double>
+		ResultType manhattan_length(const VectorType& lhs)
+		{
+			return manhattan_length<VectorType::const_iterator, ResultType>(lhs.begin(), lhs.end());
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		typename std::enable_if<!is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		euclidean_distance_squared(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			while(lhsBegin != lhsEnd && rhsBegin != rhsEnd)
+			{
+				ResultType difference = *lhsBegin - *rhsBegin;
+				result += difference * difference;
+
+				++lhsBegin;
+				++rhsBegin;
+			}
+
+			return result;
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		typename std::enable_if<is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		euclidean_distance_squared(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			auto lambda = [&result](typename FwdIterType::value_type& value)
+			{
+				result += (value.second * value.second);
+			};
+			Util::InserterWrapper<typename FwdIterType::value_type, decltype(lambda)> inserterWrapper(lambda);
+			std::minus<ResultType> modifier;
+
+			sparse_transform(lhsBegin, lhsEnd,
+							 rhsBegin, rhsEnd,
+							 inserterWrapper.get_insert_iterator(), modifier);
+
+			return result;
+		}
+
+		template <typename VectorType, typename OtherVectorType, typename ResultType = double>
+		ResultType euclidean_distance_squared(const VectorType& lhs, const OtherVectorType& rhs)
+		{
+			return euclidean_distance_squared<VectorType::const_iterator, OtherVectorType::const_iterator, ResultType>(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		}
+
+		template <typename FwdIterType, typename ResultType = double>
+		typename std::enable_if<!is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		euclidean_length_squared(FwdIterType begin, FwdIterType end)
+		{
+			ResultType result = ResultType(0);
+
+			while(begin != end)
+			{
+				result += *begin * *begin;
+				++begin;
+			}
+
+			return result;
+		}
+
+		template <typename FwdIterType, typename ResultType = double>
+		typename std::enable_if<is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		euclidean_length_squared(FwdIterType begin, FwdIterType end)
+		{
+			ResultType result = ResultType(0);
+
+			while(begin != end)
+			{
+				result += begin->second * begin->second;
+				++begin;
+			}
+
+			return result;
+		}
+
+		template <typename VectorType, typename ResultType = double>
+		ResultType euclidean_length_squared(const VectorType& lhs)
+		{
+			return euclidean_length_squared<VectorType::const_iterator, ResultType>(lhs.begin(), lhs.end());
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		ResultType euclidean_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+		{
+			ResultType result = euclidean_distance_squared<FwdIterType, OtherFwdIterType, ResultType>(lhsBegin, lhsEnd, rhsBegin, rhsEnd);
+
+			using std::sqrt;
+			return sqrt(result);
+		}
+
+		template <typename VectorType, typename OtherVectorType, typename ResultType = double>
+		ResultType euclidean_distance(const VectorType& lhs, const OtherVectorType& rhs)
+		{
+			return euclidean_distance<typename VectorType::const_iterator, typename OtherVectorType::const_iterator, ResultType>(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		}
+
+		template <typename FwdIterType, typename ResultType = double>
+		ResultType euclidean_length(FwdIterType begin, FwdIterType end)
+		{
+			ResultType result = euclidean_length_squared<FwdIterType, ResultType>(begin, end);
+
+			using std::sqrt;
+			return sqrt(result);
+		}
+
+		template <typename VectorType, typename ResultType = double>
+		ResultType euclidean_length(const VectorType& lhs)
+		{
+            return euclidean_length<typename VectorType::const_iterator, ResultType>(lhs.begin(), lhs.end());
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		typename std::enable_if<!is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		chebyshev_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			using std::abs;
+			using std::max;
+
+			while(lhsBegin != lhsEnd && rhsBegin != rhsEnd)
+			{
+				result = max(result, static_cast<ResultType>(abs(*lhsBegin - *rhsBegin)));
+
+				++lhsBegin;
+				++rhsBegin;
+			}
+
+			return result;
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		typename std::enable_if<is_pair<typename FwdIterType::value_type>::value, ResultType>::type
+		chebyshev_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			auto lambda = [&result](typename FwdIterType::value_type& value)
+			{
+				using std::abs;
+				using std::max;
+				result = max(result, static_cast<ResultType>(abs(value.second)));
+			};
+			Util::InserterWrapper<typename FwdIterType::value_type, decltype(lambda)> inserterWrapper(lambda);
+			std::minus<ResultType> modifier;
+
+			sparse_transform(lhsBegin, lhsEnd,
+							 rhsBegin, rhsEnd,
+							 inserterWrapper.get_insert_iterator(), modifier);
+
+			return result;
+		}
+
+		template <typename VectorType, typename OtherVectorType, typename ResultType = double>
+		ResultType chebyshev_distance(const VectorType& lhs, const OtherVectorType& rhs)
+		{
+            return chebyshev_distance<typename VectorType::const_iterator, typename OtherVectorType::const_iterator, ResultType>(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		}
+
+		template <typename FwdIterType, typename ResultType = double>
+		ResultType chebyshev_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+		{
+			ResultType result = ResultType(0);
+
+			using std::abs;
+			using std::max;
+
+			while(lhsBegin != lhsEnd)
+			{
+				result = max(result, static_cast<ResultType>(abs(*lhsBegin++)));
+			}
+
+			return result;
+		}
+
+		template <typename VectorType, typename ResultType = double>
+		ResultType chebyshev_length(const VectorType& lhs)
+		{
+            return chebyshev_length<typename VectorType::const_iterator, ResultType>(lhs.begin(), lhs.end());
+		}
+	}
+}
+#endif // __AITOOLS_DISTANCE_H_INCLUDED

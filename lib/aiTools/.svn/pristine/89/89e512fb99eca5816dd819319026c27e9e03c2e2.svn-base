@@ -1,0 +1,543 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_SPARSE_VECTOR_H_INCLUDED
+#define __AITOOLS_SPARSE_VECTOR_H_INCLUDED
+
+#include <Util/MetaprogrammingHelpers.h>
+#include <Util/Functors.h>
+#include "Distance.h"
+
+#include <functional>
+#include <iterator>
+#include <map>
+
+namespace aiTools
+{
+	namespace Math
+	{
+
+		/**
+		 * \brief A sparse vector class, wrapping a std::map
+		 *
+		 * Features overloaded plus and minus operators and a (squared)/length getter.
+		 *
+		 */
+		template <typename T>
+		struct SparseVector
+		{
+			typedef std::size_t key_type;
+			typedef T mapped_type;
+			typedef std::map<key_type, mapped_type> Container;
+
+			typedef typename Container::value_type value_type;
+			typedef typename Container::iterator iterator;
+			typedef typename Container::const_iterator const_iterator;
+
+			SparseVector()
+			{
+			}
+
+			template <typename OtherType>
+			explicit SparseVector(const OtherType& other) : SparseVector(other.begin(), other.end())
+			{
+			}
+
+			template <typename X, template <typename> class OtherSparseVector>
+			explicit SparseVector(const OtherSparseVector<X>& other)
+			{
+				data = other.data;
+			}
+
+			template <typename FwdIter>
+			explicit SparseVector(FwdIter obegin, FwdIter oend, typename std::enable_if<!is_pair<typename FwdIter::value_type>::value, int>::type = 0)
+			{
+				auto insertIterator = std::inserter(*this, begin());
+				std::size_t count = 0;
+
+				std::transform(obegin, oend, insertIterator,
+							[&count](const typename FwdIter::value_type& otherValue)
+							{
+								return std::make_pair(count++, static_cast<T>(otherValue));
+							}
+						);
+			}
+
+			template <typename FwdIter>
+			explicit SparseVector(FwdIter obegin, FwdIter oend, typename std::enable_if<is_pair<typename FwdIter::value_type>::value, int>::type = 0)
+			{
+				auto insertIterator = std::inserter(*this, begin());
+				std::copy(obegin, oend, insertIterator);
+
+				//TODO: should also use transform to cast type? (apparently is done in std::copy...)
+			}
+
+			Container data;
+
+			iterator begin()
+			{
+				return data.begin();
+			}
+
+			iterator end()
+			{
+				return data.end();
+			}
+
+			const_iterator begin() const
+			{
+				return data.begin();
+			}
+
+			const_iterator end() const
+			{
+				return data.end();
+			}
+
+			T lengthSquared() const
+			{
+				return euclidean_length_squared(begin(), end());
+			}
+
+			template <typename ReturnType=T>
+			ReturnType length() const
+			{
+				return euclidean_length<const_iterator, ReturnType>(begin(), end());
+			}
+
+			template <typename LengthType=T>
+			void setLength(LengthType l)
+			{
+				const LengthType formerLength = length<LengthType>();
+				ASSERT(formerLength != 0, "cannot scale vector of zero length");
+				auto scaleFactor = l / formerLength;
+				Util::ModifyPairSecond<Util::ModifyWith<std::multiplies<T>, LengthType>> modifier(scaleFactor);
+
+				//TODO: why not for_each??
+				std::transform(begin(), end(), std::inserter(*this, end()), modifier);
+			}
+
+			// contrary to the wrapped map, this insert function *overwrites* values that already exist.
+			// the position hint is ignored as well.
+			// also, if element equals ZeroElement, it is not inserted, and end() is returned
+			// ALSO, if element equals ZeroElement (as this container overwrites), existing elements are ERASED.
+			iterator insert(const_iterator, const value_type& element)
+			{
+				if(element.second == ZeroElement)
+				{
+					data.erase(element.first);
+					return data.end();
+				}
+
+				auto iter = data.insert(element);
+
+				if (!iter.second) //was not inserted
+				{
+					iter.first->second = element.second; //assign manually
+				}
+				return iter.first;
+			}
+
+			iterator insert(const_iterator, value_type&& element)
+			{
+				if(element.second == ZeroElement)
+				{
+					data.erase(element.first);
+					return data.end();
+				}
+
+				auto iter = data.insert(std::forward<value_type>(element));
+
+				if (!iter.second) //was not inserted
+				{
+					iter.first->second = element.second; //assign manually
+				}
+				return iter.first;
+			}
+
+			void normalize()
+			{
+				setLength(1);
+			}
+
+			void clear()
+			{
+				data.clear();
+			}
+
+			std::size_t size() const
+			{
+				return data.size();
+			}
+
+			SparseVector<T> getNormalized() const
+			{
+				SparseVector<T> temp(*this);
+				temp.normalize();
+				return temp;
+			}
+
+			T& operator[](std::size_t index)
+			{
+				return data[index];
+			}
+
+			const T& operator[](std::size_t index) const
+			{
+				auto& iter = data.find(index);
+				if(iter == data.end())
+					return ZeroElement;
+				return iter.second;
+			}
+
+		private:
+			static constexpr T ZeroElement = T(0);
+		};
+
+
+		//TODO: also for the singular type
+		template<typename InputIterator1, typename InputIterator2,
+				 typename OutputIterator, typename Action>
+		OutputIterator sparse_transform(InputIterator1 beginA, InputIterator1 endA,
+										InputIterator2 beginB, InputIterator2 endB,
+										OutputIterator output, Action action)
+		{
+			const typename InputIterator1::value_type::second_type zeroA(0);
+			const typename InputIterator2::value_type::second_type zeroB(0);
+
+
+			while(beginA != endA || beginB != endB)
+			{
+				if (beginB == endB || (beginA != endA && beginA->first < beginB->first))
+				{
+					//there is an element in A, that is not in B. call with zero for B
+					auto currentA = beginA++;
+					*output = std::make_pair(currentA->first,
+								action(currentA->second, zeroB));
+				}
+				else if (beginA == endA || (beginB != endB && beginB->first < beginA->first))
+				{
+					//there is an element in B, that is not in A. call with zero for A
+					auto currentB = beginB++;
+					*output = std::make_pair(currentB->first,
+								action(zeroA, currentB->second));
+				}
+				else //equal:
+				{
+					//there is an element in both A and B
+					auto currentA = beginA++;
+					auto currentB = beginB++;
+
+					*output = std::make_pair(currentA->first,
+								action(currentA->second, currentB->second));
+				}
+				++output;
+			}
+//			QASSERT(beginA == endA);
+//			QASSERT(beginB == endB);
+
+			return output;
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename ResultType = double>
+		ResultType sparse_jaccard_similarity(FwdIterType beginA, FwdIterType endA, OtherFwdIterType beginB, OtherFwdIterType endB)
+		{
+			unsigned int cAnd = 0;
+			unsigned int cOr = 0;
+
+			const typename FwdIterType::value_type::second_type zeroA(0);
+			const typename OtherFwdIterType::value_type::second_type zeroB(0);
+
+			while(beginA != endA || beginB != endB)
+			{
+				if (beginB == endB || (beginA != endA && beginA->first < beginB->first))
+				{
+					//there is an element in A, that is not in B
+					//element might still be zero, so check that.
+					cOr += beginA->second != zeroA;
+					++beginA;
+				}
+				else if (beginA == endA || (beginB != endB && beginB->first < beginA->first))
+				{
+					//there is an element in B, that is not in A. call with zero for A
+					//element might still be zero, so check that.
+					cOr += beginB->second != zeroB;
+					++beginB;
+				}
+				else //equal:
+				{
+					//there is an element in both A and B
+					//either element might still be zero, so check that.
+					cAnd += beginA->second && beginB->second;
+					cOr  += beginA->second || beginB->second;
+
+					++beginA;++beginB;
+				}
+			}
+
+			return static_cast<ResultType>(cAnd) / static_cast<ResultType>(cOr);
+		}
+
+		template<typename InputIterator1, typename InputIterator2, template <typename> class Predicate = std::equal_to>
+		bool sparse_equals(InputIterator1 beginA, InputIterator1 endA,
+										InputIterator2 beginB, InputIterator2 endB)
+		{
+			typedef typename InputIterator1::value_type::second_type T;
+			const T zeroA(0);
+			const T zeroB(0);
+
+			while(beginA != endA && beginB != endB) // &&, because we can stop as soon as the smaller one ends -> dissimilar
+			{
+				if (beginA->first < beginB->first)
+				{
+					//there is an element in A, that is not in B. if elemA is not zero, dissimilar.
+					if(!Predicate<T>(beginA->second, zeroA))
+						return false;
+					++beginA; //if it was zero, go on
+				}
+				else if (beginB->first < beginA->first)
+				{
+					//there is an element in B, that is not in A. if elemB is not zero, dissimilar.
+					if(!Predicate<T>(beginB->second, zeroB))
+						return false;
+					++beginB; //if it was zero, go on
+				}
+				else //equal index:
+				{
+					//there is an element in both A and B, compare
+					if(!Predicate<T>(beginA->second, beginB->second))
+						return false;
+					++beginA;++beginB;
+				}
+			}
+//			QASSERT(beginA == endA);
+//			QASSERT(beginB == endB);
+
+			return true;
+		}
+
+
+		template <typename T, typename U>
+		SparseVector<T>& operator-=(SparseVector<T>& lhs, const SparseVector<U>& rhs)
+		{
+			std::minus<T> modifier;
+			sparse_transform(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+				std::inserter(lhs, lhs.end()), modifier);
+			return lhs;
+		}
+
+		template <typename T, typename U>
+		SparseVector<T>& operator+=(SparseVector<T>& lhs, const SparseVector<U>& rhs)
+		{
+			std::plus<T> modifier;
+			sparse_transform(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+				std::inserter(lhs, lhs.end()), modifier);
+			return lhs;
+		}
+
+		template <typename T, typename U>
+		SparseVector<T>& operator*=(SparseVector<T>& lhs, const U& rhs)
+		{
+			Util::ModifyPairSecond<Util::ModifyWith<std::multiplies<T>, U>> modifier(rhs);
+
+			std::transform(lhs.begin(), lhs.end(),
+				std::inserter(lhs, lhs.end()), modifier);
+			return lhs;
+		}
+
+		template <typename T, typename U>
+		SparseVector<T>& operator/=(SparseVector<T>& lhs, const U& rhs)
+		{
+			Util::ModifyPairSecond<Util::ModifyWith<std::divides<T>, U>> modifier(rhs);
+
+			std::transform(lhs.begin(), lhs.end(),
+				std::inserter(lhs, lhs.end()), modifier);
+			return lhs;
+		}
+
+		template <typename T, typename U, unsigned int C>
+		SparseVector<T> operator-(const SparseVector<T>& lhs, const SparseVector<U>& rhs)
+		{
+			std::minus<T> modifier;
+
+			SparseVector<T> result;
+			sparse_transform(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+				std::inserter(result, result.end()), modifier);
+			return result;
+		}
+
+		template <typename T, typename U, unsigned int C>
+		SparseVector<T> operator+(const SparseVector<T>& lhs, const SparseVector<U>& rhs)
+		{
+			std::plus<T> modifier;
+
+			SparseVector<T> result;
+			sparse_transform(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+				std::inserter(result, result.end()), modifier);
+			return result;
+		}
+
+		template <typename T, typename U>
+		SparseVector<T> operator*(const SparseVector<T>& lhs, const U& rhs)
+		{
+			Util::ModifyPairSecond<Util::ModifyWith<std::multiplies<T>, U>> modifier(rhs);
+
+			SparseVector<T> result;
+			std::transform(lhs.begin(), lhs.end(),
+				std::inserter(result, result.end()), modifier);
+			return result;
+		}
+
+		template <typename T, typename U>
+		SparseVector<T> operator*(const U& lhs, const SparseVector<T>& rhs)
+		{
+			Util::ModifyPairSecond<Util::ModifyWith<std::multiplies<T>, U>> modifier(lhs);
+
+			SparseVector<T> result;
+			std::transform(rhs.begin(), rhs.end(),
+				std::inserter(result, result.end()), modifier);
+			return result;
+		}
+
+		template <typename T, typename U>
+		SparseVector<T> operator/(const SparseVector<T>& lhs, const U& rhs)
+		{
+			Util::ModifyPairSecond<Util::ModifyWith<std::divides<T>, U>> modifier(rhs);
+
+			SparseVector<T> result;
+			std::transform(lhs.begin(), lhs.end(),
+				std::inserter(result, result.end()), modifier);
+			return result;
+		}
+
+		template <typename T, typename U>
+		bool operator==(const SparseVector<T>& lhs, const SparseVector<U>& rhs)
+		{
+			return sparse_equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		}
+
+		template <typename T, typename U>
+		bool operator!=(const SparseVector<T>& lhs, const SparseVector<U>& rhs)
+		{
+			return !sparse_equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		}
+
+
+		template <typename T>
+		SparseVector<T> operator-(const SparseVector<T>& lhs)
+		{
+			Util::ModifyPairSecond<std::negate<T>> modifier;
+
+			SparseVector<T> result;
+			std::transform(lhs.begin(), lhs.end(),
+				std::inserter(result, result.end()), modifier);
+			return result;
+		}
+
+		template <typename MapIterType, typename OtherMapIterType, typename ResultType = double>
+		typename std::enable_if<is_pair<typename MapIterType::value_type>::value, ResultType>::type
+		dot_product(MapIterType beginA, MapIterType endA, OtherMapIterType beginB, OtherMapIterType endB)
+		{
+			ResultType sum = ResultType(0);
+
+			while(beginA != endA && beginB != endB) //run until first one ends, we increment the smaller one, so get whole intersection
+			{
+				if (beginA->first < beginB->first)
+				 ++beginA;
+				else if (beginB->first < beginA->first)
+				 ++beginB;
+				else //equal:
+				{
+					sum += beginA->second * beginB->second;
+					++beginA;++beginB;
+				}
+			}
+			return sum;
+		}
+
+		template <typename FwdIterType, typename ResultType, template <typename> class Plus, template <typename> class Divides>
+		ResultType sparse_average(FwdIterType begin, FwdIterType end, const std::size_t vectorSize)
+		{
+			ResultType result = ResultType(0);
+
+			Plus<ResultType> plus;
+			Divides<ResultType> divides;
+
+			while(begin != end)
+				result = plus(result, (begin++)->second);
+
+			return divides(result, vectorSize);
+		}
+
+		template <typename FwdIterType, typename ResultType = double>
+		ResultType sparse_average(FwdIterType begin, FwdIterType end, const std::size_t vectorSize)
+		{
+			return sparse_average<FwdIterType, ResultType, std::plus, std::divides>(begin, end, vectorSize);
+		}
+
+		template <typename T, typename ResultType = double>
+		ResultType dot_product(const SparseVector<T>& lhs, const SparseVector<T>& rhs)
+		{
+			return dot_product(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		}
+
+		template <typename FwdIterType, typename OtherFwdIterType, typename OutputIterType>
+		void piecewise_multiplication(FwdIterType beginA, FwdIterType endA, OtherFwdIterType beginB, OtherFwdIterType endB, OutputIterType output)
+		{
+			typedef typename FwdIterType::value_type::second_type T;
+			sparse_transform(beginA, endA, beginB, endB, output, std::multiplies<T>());
+		}
+
+		template <typename T>
+		SparseVector<T> piecewise_multiplication(const SparseVector<T>& lhs, const SparseVector<T>& rhs)
+		{
+			SparseVector<T> result;
+			piecewise_multiplication(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+				std::inserter(result, result.end()));
+			return result;
+		}
+	}
+}
+
+#include "Serialization/Serialization.h"
+
+namespace aiTools
+{
+	template <typename T>
+	class SerializationTraits<Math::SparseVector<T>>
+	{
+	public:
+		typedef Math::SparseVector<T> ProxyType;
+		typedef aiTools::is_user_defined TypeOrigin;
+
+		template<typename E>
+		static void serialize(const Math::SparseVector<T>& data, std::ostream& stream)
+		{
+			Serialize<E>(data.data, stream);
+		}
+
+		template<typename E>
+		static ProxyType deserialize(std::istream& stream)
+		{
+			Math::SparseVector<T> temp;
+			temp.data = Deserialize<E, decltype(temp.data)>(stream);
+			return temp;
+		}
+	};
+}
+
+#endif // __AITOOLS_SPARSE_VECTOR_H_INCLUDED

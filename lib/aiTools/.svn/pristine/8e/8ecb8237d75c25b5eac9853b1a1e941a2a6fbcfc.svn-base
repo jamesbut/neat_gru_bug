@@ -1,0 +1,62 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_CONFUSION_MATRIX_H_INCLUDED
+#define __AITOOLS_CONFUSION_MATRIX_H_INCLUDED
+
+#include <vector>
+#include <iosfwd>
+
+namespace aiTools
+{
+	namespace Classification
+	{
+		struct ConfusionMatrixAccessor;
+
+		class ConfusionMatrix
+		{
+		public:
+			ConfusionMatrix(std::size_t numberClasses);
+			ConfusionMatrix(std::vector<std::vector<unsigned int>>& matrix);
+
+			ConfusionMatrixAccessor registerValue(std::size_t actualClass);
+			std::vector<double> calculatePrecisions() const;
+			std::vector<double> calculateRecalls() const;
+			double calculateAccurracy() const;
+
+
+			std::vector<std::vector<unsigned int>> mMatrix;
+		private:
+			static std::vector<std::vector<unsigned int>>& ensureSquareMatrix(std::vector<std::vector<unsigned int>>& matrix);
+		};
+
+		ConfusionMatrix& operator+=(ConfusionMatrix& lhs, const ConfusionMatrix& rhs);
+		std::ostream& operator << (std::ostream& ostream, const ConfusionMatrix& matrix);
+
+		struct ConfusionMatrixAccessor
+		{
+			ConfusionMatrixAccessor(std::vector<unsigned int>& data);
+			void classifiedAs(std::size_t predictedClass);
+
+		private:
+			std::vector<unsigned int>& mData;
+		};
+	}
+}
+
+
+#endif // __AITOOLS_CONFUSION_MATRIX_H_INCLUDED

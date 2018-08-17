@@ -1,0 +1,202 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2014  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_STL_DATA_TYPES_H_INCLUDED
+#define __AITOOLS_STL_DATA_TYPES_H_INCLUDED
+
+#include "Serialization.h"
+#include "IntrinsicDatatypes.h"
+
+#include <vector>
+#include <string>
+#include <set>
+#include <map>
+
+namespace aiTools
+{
+	namespace detail
+	{
+		template<typename T, typename E>
+		void serializeMany(std::size_t count, const T* data, std::ostream& stream)
+		{
+			for(std::size_t i=0; i<count; ++i)
+				Serialize<E, T>(data[i], stream);
+		}
+
+		template<typename IterType, typename E>
+		void serializeMany(IterType begin, IterType end, std::ostream& stream)
+		{
+			while(begin != end)
+				Serialize<E, typename IterType::value_type>(*(begin++), stream);
+		}
+
+		template<typename T, typename E>
+		void deserializeMany(std::size_t count, T* data, std::istream& stream)
+		{
+			for(std::size_t i=0; i<count; ++i)
+				data[i] = Deserialize<E, T>(stream);
+		}
+
+		template<typename T, typename E>
+		void deserializeMany(std::size_t count, T& container, std::istream& stream)
+		{
+			typename T::iterator iter = container.begin();
+
+			for(std::size_t i=0; i<count; ++i)
+				iter = container.insert(iter, Deserialize<E, typename T::value_type>(stream));
+		}
+	}
+
+
+	template <>
+	struct SerializationTraits<std::string>
+	{
+		typedef std::string ProxyType;
+		typedef is_user_defined TypeOrigin;
+
+		template<typename E>
+		static void serialize(const std::string& data, std::ostream& stream)
+		{
+			const std::size_t size = data.size();
+
+			Serialize<E>(size, stream);
+			detail::serializeMany<char, E>(size, data.data(), stream);
+		}
+
+		template<typename E>
+		static ProxyType deserialize(std::istream& stream)
+		{
+			const std::size_t size = Deserialize<E, size_t>(stream);
+			ProxyType temp(size, 0);
+
+			char* data = const_cast<char*>(temp.data());
+
+			detail::deserializeMany<char, E>(size, data, stream);
+			return temp;
+		}
+	};
+
+	template <typename T>
+	struct SerializationTraits<std::vector<T> >
+	{
+		typedef std::vector<T> ProxyType;
+		typedef is_user_defined TypeOrigin;
+
+		template<typename E>
+		static void serialize(const std::vector<T>& data, std::ostream& stream)
+		{
+			const std::size_t size = data.size();
+
+			Serialize<E>(size, stream);
+			detail::serializeMany<T, E>(size, data.data(), stream);
+		}
+
+		template<typename E>
+		static ProxyType deserialize(std::istream& stream)
+		{
+			const std::size_t size = Deserialize<E, size_t>(stream);
+			ProxyType temp(size, T());
+
+			T* data = const_cast<T*>(temp.data());
+
+			detail::deserializeMany<T, E>(size, data, stream);
+			return temp;
+		}
+	};
+
+	template <typename T>
+	struct SerializationTraits<std::set<T> >
+	{
+		typedef std::set<T> ProxyType;
+		typedef is_user_defined TypeOrigin;
+
+		template<typename E>
+		static void serialize(const std::set<T>& data, std::ostream& stream)
+		{
+			const std::size_t size = data.size();
+
+			Serialize<E>(size, stream);
+			detail::serializeMany<typename std::set<T>::const_iterator, E>(data.begin(), data.end(), stream);
+		}
+
+		template<typename E>
+		static ProxyType deserialize(std::istream& stream)
+		{
+			const std::size_t size = Deserialize<E, size_t>(stream);
+			ProxyType temp;
+
+			detail::deserializeMany<ProxyType, E>(size, temp, stream);
+			return temp;
+		}
+	};
+
+	template <typename T, typename V>
+	struct SerializationTraits<std::map<T, V> >
+	{
+		typedef std::map<T, V> ProxyType;
+		typedef is_user_defined TypeOrigin;
+
+		template<typename E>
+		static void serialize(const std::map<T, V>& data, std::ostream& stream)
+		{
+			const std::size_t size = data.size();
+
+			Serialize<E>(size, stream);
+			detail::serializeMany<typename std::map<T, V>::const_iterator, E>(data.begin(), data.end(), stream);
+		}
+
+		template<typename E>
+		static ProxyType deserialize(std::istream& stream)
+		{
+			const std::size_t size = Deserialize<E, size_t>(stream);
+			ProxyType temp;
+
+			typename std::map<T, V>::iterator iter = temp.begin();
+
+			for(std::size_t i=0; i<size; ++i)
+				iter = temp.insert(iter, Deserialize<E, std::pair<T, V> >(stream));
+
+			return temp;
+		}
+	};
+
+	template <typename T, typename V>
+	struct SerializationTraits<std::pair<T, V> >
+	{
+		typedef std::pair<T, V> ProxyType;
+		typedef is_user_defined TypeOrigin;
+
+		template<typename E>
+		static void serialize(const std::pair<T, V>& data, std::ostream& stream)
+		{
+			Serialize<E>(data.first, stream);
+			Serialize<E>(data.second, stream);
+		}
+
+		template<typename E>
+		static ProxyType deserialize(std::istream& stream)
+		{
+			ProxyType temp;
+			temp.first = Deserialize<E, T>(stream);
+			temp.second = Deserialize<E, V>(stream);
+			return temp;
+		}
+	};
+}
+
+
+#endif // __AITOOLS_STL_DATA_TYPES_H_INCLUDED

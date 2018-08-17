@@ -1,0 +1,230 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_VECTOR3_H_INCLUDED
+#define __AITOOLS_VECTOR3_H_INCLUDED
+
+#include <Util/Helper.h>
+#include <Util/RestrictedValue.h>
+
+#include <cmath>
+
+namespace aiTools
+{
+	namespace Math
+	{
+
+		/**
+		 * \brief A simple 3d-vector class
+		 *
+		 * Features overloaded plus and minus operators and a (squared)/length getter.
+		 *
+		 */
+		template <typename T>
+		struct Vector3
+		{
+			typedef T value_type;
+			typedef T* iterator;
+			typedef const T* const_iterator;
+			const static std::size_t SIZE = 3;
+
+			Vector3(T x_=T(0), T y_=T(0), T z_=T(0)) : x(x_), y(y_), z(z_)
+			{
+			}
+
+			template <typename OtherType>
+			explicit Vector3(const OtherType& other) :
+				x(static_cast<T>(other[0])),
+				y(static_cast<T>(other[1])),
+				z(static_cast<T>(other[2]))
+			{
+			}
+
+			union
+			{
+				struct
+				{
+					T x;
+					T y;
+					T z;
+				};
+				T data[3];
+			};
+
+			T lengthSquared() const
+			{
+				return x*x + y*y + z*z;
+			}
+
+			template <typename ReturnType=T>
+			ReturnType length() const
+			{
+				using std::sqrt;
+
+				T squaredLength = lengthSquared();
+				ReturnType conv = static_cast<ReturnType>(squaredLength);
+				return sqrt(conv);
+			}
+
+			void setLength(T l)
+			{
+				const T formerLength = length();
+				ASSERT(formerLength != 0, "cannot scale vector of zero length");
+
+				*this *= (l / formerLength);
+			}
+
+			void normalize()
+			{
+				setLength(1);
+			}
+
+			std::size_t size() const
+			{
+				return SIZE;
+			}
+
+			iterator begin()
+			{
+				return &data[0];
+			}
+
+			iterator end()
+			{
+				return &data[3];
+			}
+
+			const_iterator begin() const
+			{
+				return &data[0];
+			}
+
+			const_iterator end() const
+			{
+				return &data[3];
+			}
+
+			Vector3<T> getNormalized() const
+			{
+				Vector3<T> temp(*this);
+				temp.normalize();
+				return temp;
+			}
+
+			T& operator[](unsigned index)
+			{
+				return data[index];
+			}
+
+			const T& operator[](unsigned index) const
+			{
+				return data[index];
+			}
+		};
+
+		template <typename T, typename U>
+		Vector3<T>& operator-=(Vector3<T>& lhs, const Vector3<U>& rhs)
+		{
+			lhs.x -= rhs.x;
+			lhs.y -= rhs.y;
+			lhs.z -= rhs.z;
+			return lhs;
+		}
+
+		template <typename T, typename U>
+		Vector3<T>& operator+=(Vector3<T>& lhs, const Vector3<U>& rhs)
+		{
+			lhs.x += rhs.x;
+			lhs.y += rhs.y;
+			lhs.z += rhs.z;
+			return lhs;
+		}
+
+		template <typename T, typename U>
+		Vector3<T>& operator*=(Vector3<T>& lhs, U rhs)
+		{
+			lhs.x *= rhs;
+			lhs.y *= rhs;
+			lhs.z *= rhs;
+			return lhs;
+		}
+
+		template <typename T, typename U>
+		Vector3<T>& operator/=(Vector3<T>& lhs, U rhs)
+		{
+			U temp = 1/rhs;
+			return lhs *= temp;
+		}
+
+		template <typename T, typename U>
+		Vector3<T> operator-(const Vector3<T>& lhs, const Vector3<U>& rhs)
+		{
+			return Vector3<T>(lhs.x-rhs.x, lhs.y-rhs.y, lhs.z-rhs.z);
+		}
+
+		template <typename T, typename U>
+		Vector3<T> operator+(const Vector3<T>& lhs, const Vector3<U>& rhs)
+		{
+			return Vector3<T>(lhs.x+rhs.x, lhs.y+rhs.y, lhs.z+rhs.z);
+		}
+
+		template <typename T, typename U>
+		Vector3<T> operator*(const Vector3<T>& lhs, U rhs)
+		{
+			return Vector3<T>(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
+		}
+
+		template <typename T, typename U>
+		Vector3<T> operator*(U lhs, const Vector3<T>& rhs)
+		{
+			return Vector3<T>(lhs*rhs.x, lhs*rhs.y, lhs*rhs.z);
+		}
+
+		template <typename T, typename U>
+		Vector3<T> operator/(const Vector3<T>& lhs, U rhs)
+		{
+			U temp = 1/rhs;
+			return lhs * temp;
+		}
+
+		template <typename T, typename U>
+		bool operator==(const Vector3<T>& lhs, const Vector3<U>& rhs)
+		{
+			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+		}
+
+		template <typename T, typename U>
+		bool operator!=(const Vector3<T>& lhs, const Vector3<U>& rhs)
+		{
+			return !(lhs == rhs);
+		}
+
+		template <typename T>
+		Vector3<T> operator-(const Vector3<T>& vec)
+		{
+			return Vector2<T>(-vec.x, -vec.y, -vec.z);
+		}
+
+		typedef Vector3<double> Vector3d;
+		typedef Vector3<float> Vector3f;
+
+		typedef Util::RestrictedValue<Util::NormalizedRestriction<Vector3d>> NormalizedVector3d;
+		typedef Util::RestrictedValue<Util::NormalizedRestriction<Vector3f>> NormalizedVector3f;
+	}
+}
+
+#endif // __AITOOLS_VECTOR3_H_INCLUDED

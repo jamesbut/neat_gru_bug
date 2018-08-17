@@ -1,0 +1,67 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#include <aiTools/Time/WallClock.h>
+
+#include <aiTools/Util/Helper.h>
+#include <aiTools/Util/PlatformDetection.h>
+
+#ifdef _MSC_VER
+#include "Windows.h"
+#else
+	#include <sys/time.h>
+#endif
+
+namespace aiTools
+{
+
+	WallClock::WallClock() :
+		mSimulationFrequency(getResolution())
+	{
+	}
+
+	long long WallClock::getResolution()
+	{
+#ifdef __AITOOLS_OS_WINDOWS
+		LARGE_INTEGER perf_freq;
+		const bool initSuccess = QueryPerformanceFrequency(&perf_freq) != FALSE;
+		
+		ASSERT(initSuccess, "performance counter is broken");
+		return perf_freq.QuadPart;
+#else
+		return 1000000LL;
+#endif
+	}
+
+	Time WallClock::now() const
+	{
+#ifdef __AITOOLS_OS_WINDOWS
+		LARGE_INTEGER now;
+
+		const bool querySuccess = QueryPerformanceCounter(&now) != FALSE;
+		ASSERT(querySuccess, "clock could not be read");
+
+		return Time(now.QuadPart);
+#else
+		struct timeval now;
+
+		gettimeofday(&now, NULL);
+
+		return Time(mSimulationFrequency * (now.tv_sec) + now.tv_usec);
+#endif
+	}
+}

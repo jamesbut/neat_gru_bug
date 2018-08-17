@@ -1,0 +1,188 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_DISTANCE_H_INCLUDED
+#define __AITOOLS_DISTANCE_H_INCLUDED
+
+#include "Util/Helper.h"
+
+#include <cmath>
+
+template <typename FwdIterType, typename OtherFwdIterType, typename ResultType/* = double*/>
+ResultType manhattan_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	ResultType result = ResultType(0);
+
+	using std::abs;
+
+	while(lhsBegin != lhsEnd && rhsBegin != rhsEnd)
+	{
+		result += abs(*lhsBegin++ - *rhsBegin++);
+	}
+
+	return result;
+}
+
+template <typename FwdIterType, typename OtherFwdIterType>
+double manhattan_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	return manhattan_distance<FwdIterType, OtherFwdIterType, double>(lhsBegin, lhsEnd, rhsBegin, rhsEnd);
+}
+
+template <typename FwdIterType, typename ResultType/* = double*/>
+ResultType manhattan_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+{
+	ResultType result = ResultType(0);
+
+	using std::abs;
+
+	while(lhsBegin != lhsEnd)
+	{
+		result += abs(*lhsBegin++);
+	}
+
+	return result;
+}
+
+template <typename FwdIterType>
+double manhattan_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+{
+	return manhattan_length<FwdIterType, double>(lhsBegin, lhsEnd);
+}
+
+template <typename FwdIterType, typename OtherFwdIterType, typename ResultType/* = double*/>
+ResultType euclidean_distance_squared(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	ResultType result = ResultType(0);
+
+	while(lhsBegin != lhsEnd && rhsBegin != rhsEnd)
+	{
+		ResultType difference = *lhsBegin - *rhsBegin;
+		result += difference * difference;
+
+		++lhsBegin;
+		++rhsBegin;
+	}
+
+	return result;
+}
+
+template <typename FwdIterType, typename OtherFwdIterType>
+double euclidean_distance_squared(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	return euclidean_distance_squared<FwdIterType, OtherFwdIterType, double>(lhsBegin, lhsEnd, rhsBegin, rhsEnd);
+}
+
+template <typename FwdIterType, typename ResultType/* = double*/>
+ResultType euclidean_length_squared(FwdIterType begin, FwdIterType end)
+{
+	ResultType result = ResultType(0);
+
+	while(begin != end)
+	{
+		result += *begin * *begin;
+		++begin;
+	}
+
+	return result;
+}
+
+template <typename FwdIterType>
+double euclidean_length_squared(FwdIterType lhsBegin, FwdIterType lhsEnd)
+{
+	return euclidean_length_squared<FwdIterType, double>(lhsBegin, lhsEnd);
+}
+
+template <typename FwdIterType, typename OtherFwdIterType, typename ResultType/* = double*/>
+ResultType euclidean_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	ResultType result = euclidean_distance_squared<FwdIterType, OtherFwdIterType, ResultType>(lhsBegin, lhsEnd, rhsBegin, rhsEnd);
+
+	using std::sqrt;
+	return sqrt(result);
+}
+
+template <typename FwdIterType, typename OtherFwdIterType>
+double euclidean_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	return euclidean_distance<FwdIterType, OtherFwdIterType, double>(lhsBegin, lhsEnd, rhsBegin, rhsEnd);
+}
+
+template <typename FwdIterType, typename ResultType/* = double*/>
+ResultType euclidean_length(FwdIterType begin, FwdIterType end)
+{
+	ResultType result = euclidean_length_squared<FwdIterType, ResultType>(begin, end);
+
+	using std::sqrt;
+	return sqrt(result);
+}
+
+template <typename FwdIterType>
+double euclidean_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+{
+	return euclidean_length<FwdIterType, double>(lhsBegin, lhsEnd);
+}
+
+template <typename FwdIterType, typename OtherFwdIterType, typename ResultType/* = double*/>
+ResultType chebyshev_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	ResultType result = ResultType(0);
+
+	using std::abs;
+	using std::max;
+
+	while(lhsBegin != lhsEnd && rhsBegin != rhsEnd)
+	{
+		result = max(result, static_cast<ResultType>(abs(*lhsBegin - *rhsBegin)));
+
+		++lhsBegin;
+		++rhsBegin;
+	}
+
+	return result;
+}
+
+template <typename FwdIterType, typename OtherFwdIterType>
+double chebyshev_distance(FwdIterType lhsBegin, FwdIterType lhsEnd, OtherFwdIterType rhsBegin, OtherFwdIterType rhsEnd)
+{
+	return chebyshev_distance<FwdIterType, OtherFwdIterType, double>(lhsBegin, lhsEnd, rhsBegin, rhsEnd);
+}
+
+
+template <typename FwdIterType, typename ResultType/* = double*/>
+ResultType chebyshev_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+{
+	ResultType result = ResultType(0);
+
+	using std::abs;
+	using std::max;
+
+	while(lhsBegin != lhsEnd)
+	{
+		result = max(result, static_cast<ResultType>(abs(*lhsBegin++)));
+	}
+
+	return result;
+}
+
+template <typename FwdIterType>
+double chebyshev_length(FwdIterType lhsBegin, FwdIterType lhsEnd)
+{
+	return chebyshev_length<FwdIterType, double>(lhsBegin, lhsEnd);
+}
+
+#endif // __AITOOLS_DISTANCE_H_INCLUDED

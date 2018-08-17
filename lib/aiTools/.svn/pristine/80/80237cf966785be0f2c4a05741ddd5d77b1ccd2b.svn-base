@@ -1,0 +1,58 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_INTRINSIC_DATA_TYPES_H_INCLUDED
+#define __AITOOLS_INTRINSIC_DATA_TYPES_H_INCLUDED
+
+
+#include "Serialization.h"
+
+namespace aiTools
+{
+	namespace detail
+	{
+		template<> struct is_POD<char>{public: enum {value = true};};
+		template<> struct is_POD<unsigned char>{public: enum {value = true};};
+		template<> struct is_POD<short>{public: enum {value = true};};
+		template<> struct is_POD<unsigned short>{public: enum {value = true};};
+		template<> struct is_POD<int>{public: enum {value = true};};
+		template<> struct is_POD<unsigned int>{public: enum {value = true};};
+		template<> struct is_POD<float>{public: enum {value = true};};
+		template<> struct is_POD<long>{public: enum {value = true};};
+		template<> struct is_POD<unsigned long>{public: enum {value = true};};
+		template<> struct is_POD<long long>{public: enum {value = true};};
+		template<> struct is_POD<unsigned long long>{public: enum {value = true};};
+		template<> struct is_POD<double>{public: enum {value = true};};
+		template<> struct is_POD<long double>{public: enum {value = true};};
+
+		template<> struct type_origin<char>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<unsigned char>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<short>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<unsigned short>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<int>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<unsigned int>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<float>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<long>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<unsigned long>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<long long>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<unsigned long long>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<double>{typedef is_intrinsic_type value;};
+		template<> struct type_origin<long double>{typedef is_intrinsic_type value;};
+	}
+}
+
+#endif // __AITOOLS_INTRINSIC_DATA_TYPES_H_INCLUDED

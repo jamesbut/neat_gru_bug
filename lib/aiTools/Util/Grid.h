@@ -1,0 +1,434 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+#ifndef __AITOOLS_GRID_H__INCLUDED
+#define __AITOOLS_GRID_H__INCLUDED
+
+#include <aiTools/Util/RestrictedValue.h>
+#include <aiTools/Util/Range.h>
+
+#include <tuple>
+
+namespace aiTools
+{
+	struct WrapIndices
+	{
+		template <typename T>
+		using EnforcerType = aiTools::WrapAround<aiTools::Range<T>>;
+	};
+
+	struct ClampIndices
+	{
+		template <typename T>
+		using EnforcerType = aiTools::Clamp<aiTools::Range<T>>;
+	};
+
+	struct AssertIndices
+	{
+		template <typename T>
+		using EnforcerType = aiTools::AssertIfOutsideRange<aiTools::Range<T>>;
+	};
+
+	struct Direction
+	{
+		enum Type
+		{
+			Left,
+			Up,
+			Right,
+			Down,
+
+			LeftUp,
+			RightUp,
+			LeftDown,
+			RightDown
+		};
+
+		static const std::vector<Type> AllDirections;
+		static const std::vector<Type> VonNeumannDirections;
+		static const std::vector<Type> MooreDirections;
+	};
+
+	template <typename IndexType, typename IndexRestriction = AssertIndices>
+	struct GridIndexWrapper
+	{
+		using GridIndex = std::tuple<IndexType, IndexType>;
+
+		GridIndexWrapper(std::size_t w, std::size_t h) : mWidth(w), mHeight(h), mXIndexRestriction({0, IndexType(w)}), mYIndexRestriction({0, IndexType(h)})
+		{
+			ASSERT(w != 0, "can not index grid with zero width");
+			ASSERT(h != 0, "can not index grid with zero height");
+		}
+
+		std::size_t operator()(GridIndex index) const
+		{
+			IndexType x, y;
+			std::tie(x, y) = index;
+			return this->operator ()(x, y);
+		}
+
+		std::size_t operator()(IndexType x, IndexType y) const
+		{
+			x = mXIndexRestriction(x);
+			y = mYIndexRestriction(y);
+
+			return static_cast<std::size_t>(y*mWidth + x);
+		}
+
+		GridIndex operator()(std::size_t i) const
+		{
+			IndexType x, y;
+
+			x = i % mWidth;
+			y = i / mWidth;
+
+			y = mYIndexRestriction(y);
+
+			return std::make_tuple(x, y);
+		}
+
+		const std::size_t mWidth;
+		const std::size_t mHeight;
+		const typename IndexRestriction::template EnforcerType<IndexType> mXIndexRestriction;
+		const typename IndexRestriction::template EnforcerType<IndexType> mYIndexRestriction;
+	};
+
+	///this class is meant as an accessor to the grid user data, combined with position info. Do not use after the grid is destroyed.
+	template <typename GridType>
+	struct GridNode
+	{
+		typedef typename GridType::value_type value_type;
+		typedef typename GridType::index_type index_type;
+
+		const index_type x;
+		const index_type y;
+		const std::size_t index;
+
+		bool hasNeighbor(Direction::Type dir) const
+		{
+			return mParentGrid.hasNodeNeighbor(x, y, dir);
+		}
+
+		GridNode getNeighbor(Direction::Type dir) const
+		{
+			return mParentGrid.getNeighborOf(x, y, dir);
+		}
+
+		GridType& mParentGrid;
+		value_type& mData;
+	};
+
+	template <typename T>
+	struct Grid
+	{
+		typedef T value_type;
+		typedef GridNode<Grid> node_type;
+		typedef std::size_t index_type;
+		using GridIndex = std::tuple<index_type, index_type>;
+
+		Grid(std::size_t w, std::size_t h) : mWidth(w), mHeight(h), mData(w*h, T()), mIndexWrapper(w, h)
+		{
+		}
+
+		node_type at(index_type x, index_type y)
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+			std::size_t i = mIndexWrapper(x, y);
+			return {x, y, i, *this, mData.at(i)};
+		}
+
+		node_type at(GridIndex index)
+		{
+			index_type x, y;
+			std::tie(x, y) = index;
+
+			return at(x, y);
+		}
+
+		node_type getNeighborOf(index_type x, index_type y, Direction::Type dir)
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+
+			switch(dir)
+			{
+				case Direction::Left:
+					return at(x-1, y);
+				case Direction::Up:
+					return at(x, y-1);
+				case Direction::Right:
+					return at(x+1, y);
+				case Direction::Down:
+					return at(x, y+1);
+				case Direction::LeftUp:
+					return at(x-1, y-1);
+				case Direction::RightUp:
+					return at(x+1, y-1);
+				case Direction::LeftDown:
+					return at(x-1, y+1);
+				case Direction::RightDown:
+					return at(x+1, y+1);
+			}
+			THROW_RUNTIME_ERROR("unknown direction.");
+		}
+
+		bool hasNodeNeighbor(index_type x, index_type y, Direction::Type dir) const
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+
+			switch(dir)
+			{
+				case Direction::Left:
+					return x != 0;
+				case Direction::Up:
+					return y != 0;
+				case Direction::Right:
+					return x != mWidth-1;
+				case Direction::Down:
+					return y != mHeight-1;
+				case Direction::LeftUp:
+					return x != 0 && y != 0;
+				case Direction::RightUp:
+					return x != mWidth-1 && y != 0;
+				case Direction::LeftDown:
+					return x != 0 && y != mHeight-1;
+				case Direction::RightDown:
+					return x != mWidth-1 && y != mHeight-1;
+			}
+			THROW_RUNTIME_ERROR("unknown direction.");
+		}
+
+		template <typename Action>
+		Action forAll4NeighborsDo(GridIndex index, Action action)
+		{
+			index_type x, y;
+			std::tie(x, y) = index;
+
+			return forAll4NeighborsDo(x, y, action);
+		}
+
+		template <typename Action>
+		Action forAll8NeighborsDo(GridIndex index, Action action)
+		{
+			index_type x, y;
+			std::tie(x, y) = index;
+
+			return forAll8NeighborsDo(x, y, action);
+		}
+
+	//	template <typename Action>
+	//	Action forAll4NeighborsDo(GridIndex index, Action action) const
+	//	{
+	//		index_type x, y;
+	//		std::tie(x, y) = index;
+
+	//		return forAll4NeighborsDo(x, y, action);
+	//	}
+
+		template <typename Action>
+		Action forAll4NeighborsDo(index_type x, index_type y, Action action) //TODO const version
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+
+			if(x != 0)
+				action(at(x-1, y));
+			if(y != 0)
+				action(at(x, y-1));
+			if(x != mWidth-1)
+				action(at(x+1, y));
+			if(y != mHeight-1)
+				action(at(x, y+1));
+
+			return std::move(action);
+		}
+
+	//	template <typename Action>
+	//	Action forAll4NeighborsDo(index_type x, index_type y, Action action) const
+	//	{
+	//		x = mIndexWrapper.mXIndexRestriction(x);
+	//		y = mIndexWrapper.mYIndexRestriction(y);
+
+	//		if(x != 0)
+	//			action(at(x-1, y));
+	//		if(y != 0)
+	//			action(at(x, y-1));
+	//		if(x != mWidth-1)
+	//			action(at(x+1, y));
+	//		if(y != mHeight-1)
+	//			action(at(x, y+1));
+
+	//		return std::move(action);
+	//	}
+
+		template <typename Action>
+		Action forAll8NeighborsDo(index_type x, index_type y, Action action) //TODO const version
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+
+			bool notLeftBorder = x != 0;
+			bool notRightBorder = x != mWidth-1;
+			bool notTopBorder = y != 0;
+			bool notBottomBorder = y != mHeight-1;
+
+			if(notLeftBorder)
+			{
+				if(notTopBorder)
+					action(at(x-1, y-1));
+
+				action(at(x-1, y));
+
+				if(notBottomBorder)
+					action(at(x-1, y+1));
+			}
+
+			if(notTopBorder)
+				action(at(x, y-1));
+
+			if(notRightBorder)
+			{
+				if(notTopBorder)
+					action(at(x+1, y-1));
+
+				action(at(x+1, y));
+
+				if(notBottomBorder)
+					action(at(x+1, y+1));
+			}
+
+			if(notBottomBorder)
+				action(at(x, y+1));
+
+			return std::move(action);
+		}
+
+		const std::size_t mWidth;
+		const std::size_t mHeight;
+		std::vector<T> mData;
+		const GridIndexWrapper<index_type, AssertIndices> mIndexWrapper;
+	};
+
+	template <typename T>
+	struct TorusGrid
+	{
+		typedef T value_type;
+		typedef GridNode<TorusGrid> node_type;
+		typedef std::make_signed_t<std::size_t> index_type;
+		using GridIndex = std::tuple<index_type, index_type>;
+
+		TorusGrid(std::size_t w, std::size_t h) : mWidth(w), mHeight(h), mData(w*h, T()), mIndexWrapper(w, h)
+		{
+		}
+
+		node_type at(index_type x, index_type y)
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+			std::size_t i = mIndexWrapper(x, y);
+			return {x, y, i, *this, mData.at(i)};
+		}
+
+		node_type at(GridIndex index)
+		{
+			index_type x, y;
+			std::tie(x, y) = index;
+
+			return at(x, y);
+		}
+
+		node_type getNeighborOf(index_type x, index_type y, Direction::Type dir)
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+
+			switch(dir)
+			{
+				case Direction::Left:
+					return at(x-1, y);
+				case Direction::Up:
+					return at(x, y-1);
+				case Direction::Right:
+					return at(x+1, y);
+				case Direction::Down:
+					return at(x, y+1);
+				case Direction::LeftUp:
+					return at(x-1, y-1);
+				case Direction::RightUp:
+					return at(x+1, y-1);
+				case Direction::LeftDown:
+					return at(x-1, y+1);
+				case Direction::RightDown:
+					return at(x+1, y+1);
+			}
+			THROW_RUNTIME_ERROR("unknown direction.");
+		}
+
+		bool hasNodeNeighbor(index_type, index_type, Direction::Type) const
+		{
+			return true; //at least, always it's own neighbors (d'awwwwww....)
+		}
+
+		template <typename Action>
+		Action forAll4NeighborsDo(GridIndex index, Action action)
+		{
+			index_type x, y;
+			std::tie(x, y) = index;
+
+			forAll4NeighborsDo(x, y, action);
+		}
+
+		template <typename Action>
+		Action forAll4NeighborsDo(index_type x, index_type y, Action action) //TODO const version
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+
+			action(at(x-1, y));
+			action(at(x, y-1));
+			action(at(x+1, y));
+			action(at(x, y+1));
+
+			return std::move(action);
+		}
+
+		template <typename Action>
+		Action forAll8NeighborsDo(index_type x, index_type y, Action action)
+		{
+			x = mIndexWrapper.mXIndexRestriction(x);
+			y = mIndexWrapper.mYIndexRestriction(y);
+
+			action(at(x-1, y-1));
+			action(at(x-1, y));
+			action(at(x-1, y+1));
+			action(at(x, y-1));
+			action(at(x+1, y-1));
+			action(at(x+1, y));
+			action(at(x+1, y+1));
+			action(at(x, y+1));
+
+			return std::move(action);
+		}
+
+		const std::size_t mWidth;
+		const std::size_t mHeight;
+		std::vector<T> mData;
+		const GridIndexWrapper<index_type, WrapIndices> mIndexWrapper;
+	};
+}
+#endif // __AITOOLS_GRID_H__INCLUDED

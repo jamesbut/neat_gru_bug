@@ -1,0 +1,13 @@
+About:
+The aiTools library is a pre-alpha state C++ library designed to assist with low-level prorgamming difficulties. It is licenced under the GPL v3+.
+
+How to use:
+Much functionality is header-only. To build, a QtCreator project file is supplied; alternatively, a makefile is delivered along.
+
+Dependencies:
+The library uses the C++ Standard Template Library and some parts of the boost C++ libraries, currently of version 1.46.
+Neither of these libraries is supplied with the aiTools sourcecode.
+
+Recommendation:
+Because of it's pre-alpha state, usage of this library is discouraged.
+

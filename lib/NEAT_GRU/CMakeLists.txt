@@ -4,7 +4,6 @@ PROJECT( neat_gru )
 
 include_directories(include)
 
-FILE(GLOB HEADER_FILES include/*.h)
 FILE(GLOB neat_sources src/*.cpp)
 
-add_library(neatGRULib SHARED ${neat_sources} ${HEADER_FILES})
+add_library(neatGRULib SHARED ${neat_sources})

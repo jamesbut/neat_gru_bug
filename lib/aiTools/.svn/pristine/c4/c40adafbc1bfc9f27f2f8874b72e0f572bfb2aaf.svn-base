@@ -1,0 +1,145 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2014  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_SERIALIZATION_H_INCLUDED
+#define __AITOOLS_SERIALIZATION_H_INCLUDED
+
+#include "Endianness.h"
+#include <Util/MetaprogrammingHelpers.h>
+
+#include <iostream>
+
+namespace aiTools
+{
+
+	template <typename T>
+	class SerializationTraits;
+
+	template<typename T>
+	void Serialize(const T& data, std::ostream& stream);
+
+	template<typename T>
+	typename SerializationTraits<T>::ProxyType Deserialize(std::istream& stream);
+
+	struct is_intrinsic_type {};
+	struct is_user_defined {};
+
+
+		namespace detail
+		{
+			template <typename T>
+			struct is_POD
+			{
+				enum {value = false};
+			};
+
+			template <typename T>
+			struct type_origin
+			{
+				typedef is_user_defined value;
+			};
+
+
+			template<typename T, typename E>
+			void serialize(const T& data, std::ostream& stream, const is_user_defined&)
+			{
+				//TODO another POD static assert here?
+
+				stream.write(reinterpret_cast<const char*>(&data), sizeof(data));
+			}
+
+			template<typename T, typename E>
+			void serialize(const T& data, std::ostream& stream, const is_intrinsic_type&)
+			{
+				EndianWriter<Endianness::MachineEndianness, E>::write(reinterpret_cast<const char*>(&data), sizeof(data), stream);
+			}
+
+			template<typename T, typename E>
+			void deserialize(T& data, std::istream& stream, const is_user_defined&)
+			{
+				//TODO another POD static assert here?
+
+				stream.read(reinterpret_cast<char*>(&data), sizeof(data));
+			}
+
+			template<typename T, typename E>
+			void deserialize(T& data, std::istream& stream, const is_intrinsic_type&)
+			{
+				EndianReader<Endianness::MachineEndianness, E>::read(reinterpret_cast<char*>(&data), sizeof(data), stream);
+			}
+		}
+
+	template<typename E, typename T>
+	void Serialize(const T& data, std::ostream& stream)
+	{
+		SerializationTraits<T>::template serialize<E>(data, stream);
+	}
+
+	template<typename T>
+	void Serialize(const T& data, std::ostream& stream)
+	{
+		Serialize<Endianness::MachineEndianness, T>(data, stream);
+	}
+
+	template<typename E, typename T>
+	typename SerializationTraits<T>::ProxyType Deserialize(std::istream& stream)
+	{
+		return SerializationTraits<T>::template deserialize<E>(stream);
+	}
+
+	template<typename T>
+	typename SerializationTraits<T>::ProxyType Deserialize(std::istream& stream)
+	{
+		return Deserialize<Endianness::MachineEndianness, T>(stream);
+	}
+
+	template <typename T>
+	class SerializationTraits
+	{
+	public:
+		typedef T ProxyType;
+		typedef typename detail::type_origin<T>::value TypeOrigin;
+
+		template<typename E>
+		static void serialize(const T& data, std::ostream& stream)
+		{
+			/*********************************************************
+			 * Reaching this static assert, you should specialize a
+			 * SerializationTraits<T> class for your datatype
+			 *********************************************************/
+			AITOOLS_STATIC_ASSERT(detail::is_POD<T>::value);
+
+			detail::serialize<T, E>(data, stream, TypeOrigin());
+		}
+
+		template<typename E>
+		static ProxyType deserialize(std::istream& stream)
+		{
+			/*********************************************************
+			 * Reaching this static assert, you should specialize a
+			 * SerializationTraits<T> class for your datatype
+			 *********************************************************/
+			AITOOLS_STATIC_ASSERT(detail::is_POD<T>::value);
+
+			ProxyType temp;
+			detail::deserialize<T, E>(temp, stream, TypeOrigin());
+			return temp;
+		}
+	};
+}
+
+#endif // __AITOOLS_SERIALIZATION_H_INCLUDED

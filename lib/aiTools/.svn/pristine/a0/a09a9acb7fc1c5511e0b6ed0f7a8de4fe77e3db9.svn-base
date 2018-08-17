@@ -1,0 +1,129 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_HISTOGRAM_H_INCLUDED
+#define __AITOOLS_HISTOGRAM_H_INCLUDED
+
+#include <aiTools/Util/Range.h>
+
+#include <map>
+#include <vector>
+#include <cmath>
+
+namespace aiTools
+{
+	///counts how often certain values are used, using a provided std::map of same-valued keys and unsigned int value type
+	template<typename InputIterator>
+	void makeHistogram(InputIterator first, InputIterator last, std::map<typename InputIterator::value_type, unsigned int>& result)
+	{
+		while(first != last)
+			++result[*first++];
+	}
+
+	///counts how often certain values are used, using a std::map of same-valued keys and unsigned int value type
+	template<typename InputIterator>
+	std::map<typename InputIterator::value_type, unsigned int> makeHistogram(InputIterator first, InputIterator last)
+	{
+		std::map<typename InputIterator::value_type, unsigned int> result;
+
+		makeHistogram(first, last, result);
+
+		return result;
+	}
+
+	template<typename InputIterator, typename HistogramType>
+	typename HistogramType::ReturnType makeHistogram(InputIterator first, InputIterator last, HistogramType& histogram = HistogramType())
+	{
+		while(first != last)
+		{
+			auto& bin = histogram.getBin(*first);
+			++bin;
+			++first;
+		}
+
+		return histogram.getResult();
+	}
+
+	template <typename T>
+	struct EvenlySpacedHistogram
+	{
+		typedef T value_type;
+
+		EvenlySpacedHistogram(Range<T> range, unsigned int noBins, bool useOutlierBin) :
+			data(noBins+useOutlierBin, 0),
+			mNoBins(noBins),
+			mRange(range),
+			mUseOutlierBin(useOutlierBin),
+			mOutliersIfNotCounted(0)
+		{
+		}
+
+		std::size_t& getBin(const T& value)
+		{
+			bool isIncluded = mRange.isInside(value);
+			if(isIncluded)
+			{
+				T o = (value-mRange.mLower)/(mRange.mUpper-mRange.mLower);
+				T t = o * static_cast<T>(mNoBins);
+
+				using std::floor;
+
+				std::size_t target = static_cast<std::size_t>(floor(t));
+
+				return data.at(target);
+			}
+
+			if(mUseOutlierBin)
+				return data.back();
+			return mOutliersIfNotCounted;
+		}
+
+		/// returns a vector holding all the bins generated
+		std::vector<Range<T>> generateBinRanges() const
+		{
+			std::vector<Range<T>> result(mNoBins, Range<T>());
+
+			const T rangeWidth = mRange.mUpper - mRange.mLower;
+			const T binWidth = rangeWidth / mNoBins;
+
+			for(unsigned int i=0;i<mNoBins;++i)
+			{
+				T mLower;//uhm... TODO..?
+				T mUpper;
+
+				result[i] = RangeType(mLower, mUpper);
+			}
+
+			return result;
+		}
+
+		const std::vector<std::size_t>& getResult()
+		{
+			return data;
+		}
+
+	private:
+		std::vector<std::size_t> data;
+		const unsigned int mNoBins;
+		const Range<T> mRange;
+		const bool mUseOutlierBin;
+		std::size_t mOutliersIfNotCounted;
+	};
+}
+
+
+#endif // __AITOOLS_HISTOGRAM_H_INCLUDED

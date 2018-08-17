@@ -1,0 +1,64 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_HELPER_H__INCLUDED
+#define __AITOOLS_HELPER_H__INCLUDED
+
+#include <stdexcept>
+#include <sstream>
+#include <algorithm>
+#include <type_traits>
+
+/// throw a runtime error with a message.
+#define THROW_RUNTIME_ERROR(what) {std::ostringstream stream; stream << what;throw std::runtime_error(stream.str());}
+
+/// asserts on a value, throws an exception with a message if assert does not hold.
+#define ASSERT(condition, what) {if(!(condition)){std::ostringstream stream; stream << what;throw std::runtime_error(stream.str());}}
+
+/// quickly asserts on a value, throws an exception with a message that holds the condition
+#define QASSERT(condition) {if(!(condition)){throw std::runtime_error(#condition);}}
+
+namespace aiTools
+{
+	void assertTrue(bool condition, const std::string& what);
+	void assertTrue(bool condition, const char* what);
+
+	//overload for floating point types
+	template <typename T>
+	typename std::enable_if<std::is_floating_point<T>::value>::type assert_nan_and_inf(const T& value)
+	{
+		ASSERT(!isnan(value), "value is NaN");
+		ASSERT(!isinf(value), "value is inf");
+	}
+
+	//overload for non floating point types - does nothing
+	template <typename T>
+	typename std::enable_if<!std::is_floating_point<T>::value>::type assert_nan_and_inf(const T&)
+	{
+	}
+
+
+	template <typename Map, typename T>
+	void map_erase_if(Map& map, T pred)
+	{
+		for (typename Map::iterator i = map.begin();
+			 (i = std::find_if(i, map.end(), pred)) != map.end();
+			 map.erase(i++));
+	}
+}
+#endif // __AITOOLS_HELPER_H__INCLUDED
+

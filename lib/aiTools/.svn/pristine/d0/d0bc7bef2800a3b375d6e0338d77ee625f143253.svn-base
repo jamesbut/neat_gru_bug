@@ -1,0 +1,79 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2016  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_RESTORE_STREAM_STATE_H_INCLUDED
+#define __AITOOLS_RESTORE_STREAM_STATE_H_INCLUDED
+
+#include <iomanip>
+#include <iostream>
+
+namespace aiTools
+{
+	template <typename T>
+	struct RestoreStreamState_impl;
+
+	template <typename T>
+	RestoreStreamState_impl<T> RestoreStreamState(T& stream)
+	{
+		return RestoreStreamState_impl<T>(stream);
+	}
+
+
+	/// small class designed to reset the state of a stream to the one at object construction. must not outlive the stream it operates on.
+	/// create using the RestoreStreamState factory method.
+	template <typename T>
+	struct RestoreStreamState_impl
+	{
+		RestoreStreamState_impl(T& stream) :
+			mStream(stream),
+			mPrecision(stream.precision()),
+			mFlags(stream.flags()),
+			mExceptionMask(stream.exceptions())
+		{}
+
+		~RestoreStreamState_impl()
+		{
+			// try very had to restore every part, but swallow exceptions silently
+			// these following calls might - in theory - throw, but probably won't
+			try
+			{
+				mStream.precision(mPrecision);
+			}
+			catch(const std::exception&){}
+
+			try
+			{
+				mStream.flags(mFlags);
+			}
+			catch(const std::exception&){}
+
+			try
+			{
+				mStream.exceptions(mExceptionMask);
+			}
+			catch(const std::exception&){}
+		}
+
+		T& mStream;
+		const std::streamsize mPrecision;
+		const std::ios_base::fmtflags mFlags;
+		const std::ios_base::iostate mExceptionMask;
+	};
+}
+
+
+#endif //__AITOOLS_RESTORE_STREAM_STATE_H_INCLUDED

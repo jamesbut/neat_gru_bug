@@ -1,0 +1,184 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_FIXED_PRECISION_H_INCLUDED
+#define __AITOOLS_FIXED_PRECISION_H_INCLUDED
+
+#include <Util/MetaprogrammingHelpers.h>
+#include <Util/Helper.h>
+
+#include <iostream>
+#include <iomanip>
+
+namespace aiTools
+{
+	namespace Math
+	{
+		template<typename T, unsigned int Decimals>
+		struct FixedPrecision
+		{
+			static_assert(Decimals > 0, "division by zero in FixedPrecision");
+
+			typedef T value_type;
+
+			explicit FixedPrecision(do_not_initialize)
+			{}
+
+			template<unsigned int OtherDecimals>
+			FixedPrecision(FixedPrecision<T, OtherDecimals> other) : mValue((other.mValue * Decimals) / OtherDecimals)
+			{}
+
+			FixedPrecision(float value) : mValue(static_cast<value_type>(value * static_cast<float>(Decimals)))
+			{}
+
+			/*operator float() const
+			{
+				return static_cast<float>(mValue) / Decimals;
+			}*/
+
+			float to_float() const
+			{
+				return static_cast<float>(mValue) / Decimals;
+			}
+
+			T mValue;
+		};
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals> operator+(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			FixedPrecision<T, Decimals> temp((do_not_initialize()));
+			temp.mValue = lhs.mValue + rhs.mValue;
+			return temp;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals> operator-(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			FixedPrecision<T, Decimals> temp((do_not_initialize()));
+			temp.mValue = lhs.mValue - rhs.mValue;
+			return temp;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals> operator-(const FixedPrecision<T, Decimals>& lhs)
+		{
+			FixedPrecision<T, Decimals> temp(lhs);
+			temp.mValue = -temp.mValue;
+			return temp;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals> operator/(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			FixedPrecision<T, Decimals / Decimals> temp((do_not_initialize()));
+	
+			ASSERT(rhs.mValue != 0, "division by zero in FixedPrecision");
+			temp.mValue = lhs.mValue / rhs.mValue;
+	
+			return temp;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals> operator*(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			FixedPrecision<T, Decimals * Decimals> temp((do_not_initialize()));
+			temp.mValue = (lhs.mValue * rhs.mValue);
+			return temp;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals>& operator+=(FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			lhs.mValue += rhs.mValue;
+			return lhs;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals>& operator-=(FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			lhs.mValue -= rhs.mValue;
+			return lhs;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals>& operator*=(FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			lhs = lhs * rhs;
+			return lhs;
+		}
+
+		template<typename T, unsigned int Decimals>
+		FixedPrecision<T, Decimals>& operator/=(FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			ASSERT(rhs.mValue != 0, "division by zero in FixedPrecision");
+			lhs = lhs / rhs;
+			return lhs;
+		}
+
+		template<typename T, unsigned int Decimals>
+		bool operator==(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			return lhs.mValue == rhs.mValue;
+		}
+
+		template<typename T, unsigned int Decimals>
+		bool operator!=(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			return lhs.mValue != rhs.mValue;
+		}
+
+		template<typename T, unsigned int Decimals>
+		bool operator<(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			return lhs.mValue < rhs.mValue;
+		}
+
+		template<typename T, unsigned int Decimals>
+		bool operator>(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			return lhs.mValue > rhs.mValue;
+		}
+
+		template<typename T, unsigned int Decimals>
+		bool operator<=(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			return lhs.mValue <= rhs.mValue;
+		}
+
+		template<typename T, unsigned int Decimals>
+		bool operator>=(const FixedPrecision<T, Decimals>& lhs, const FixedPrecision<T, Decimals>& rhs)
+		{
+			return lhs.mValue >= rhs.mValue;
+		}
+
+		template<typename T, unsigned int Decimals>
+		std::ostream& operator<<(std::ostream& stream, const FixedPrecision<T, Decimals>& value)
+		{
+			std::ios_base::fmtflags flag_bup = stream.flags();
+			
+			static const unsigned int precision = static_log10<Decimals>::value;
+			
+			stream << std::fixed << std::setprecision(precision) << value.to_float();
+			stream.flags(flag_bup);
+
+			return stream;
+		}
+	}
+}
+
+#endif //__AITOOLS_FIXED_PRECISION_H_INCLUDED

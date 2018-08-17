@@ -1,0 +1,66 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2015  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_PARALLEL_FOREACH_H_INCLUDED
+#define __AITOOLS_PARALLEL_FOREACH_H_INCLUDED
+
+#include "RAIIThread.h"
+
+#include <type_traits>
+#include <iterator>
+
+namespace aiTools
+{
+	namespace Threading
+	{
+		constexpr std::size_t numThreads = 8;
+
+		template <typename InputIterator, typename Action>
+		typename std::enable_if<std::is_same<typename InputIterator::iterator_category, std::random_access_iterator_tag>::value, Action>::type
+		parallel_for_each(InputIterator first, InputIterator last, Action action)
+		{
+			std::vector<RAIIThread> workingThreads;
+
+			const auto count = std::distance(first, last);
+			ASSERT(count >= 0, "iterators in wrong order, first should be <= last");
+
+			const auto per_thread = count / numThreads;
+			const auto overhang = count % numThreads;
+
+			//prevents creation of additional, empty threads for empty ranges
+			const auto countUntil = std::min(static_cast<std::size_t>(count), numThreads);
+
+			for(std::size_t i = 0; i< countUntil; ++i)
+			{
+				auto endOfSegment = first + per_thread + (i < overhang);
+				workingThreads.emplace_back(
+							[first, endOfSegment, &action]()
+							{
+								std::for_each(first, endOfSegment, action);
+							}
+						);
+
+				first = endOfSegment;
+			}
+			return std::move(action);
+		}
+	}
+}
+
+
+
+#endif // __AITOOLS_PARALLEL_FOREACH_H_INCLUDED

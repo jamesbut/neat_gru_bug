@@ -1,0 +1,249 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2014  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_ANGLE_H_INCLUDED
+#define __AITOOLS_ANGLE_H_INCLUDED
+
+#include <Util/RestrictedValue.h>
+
+namespace aiTools
+{
+	namespace Math
+	{
+		template <typename T>
+		struct Degrees;
+
+		template <typename T = double>
+		struct Radians
+		{
+			typedef T value_type;
+
+			explicit Radians(value_type value = value_type(0)) : mValue(value)
+			{}
+
+			template <typename U>
+			Radians(Radians<U> radians) : mValue(radians.mValue)
+			{}
+
+			template <typename U>
+			Radians(Degrees<U> degrees) : mValue(degrees.mValue * detail::_PI_OVER_180)
+			{}
+
+			operator value_type() const
+			{
+				return mValue;
+			}
+
+			value_type mValue;
+		};
+
+		template <typename T = short>
+		struct Degrees
+		{
+			typedef T value_type;
+
+			explicit Degrees(value_type value = value_type(0)) : mValue(value)
+			{}
+
+			template <typename U>
+			Degrees(Degrees<U> degrees) : mValue(degrees.mValue)
+			{}
+
+			template <typename U>
+			Degrees(Radians<U> radians) : mValue(T(radians.mValue * detail::_180_OVER_PI))
+			{}
+
+			operator value_type() const
+			{
+				return mValue;
+			}
+
+			value_type mValue;
+		};
+		
+		
+		template <typename T = Radians<>, typename AngleRange = Util::MinusPiToPi<T::value_type>>
+		struct Angle
+		{
+			typedef T value_type;
+			typedef typename T::value_type wrapped_type;
+			typedef AngleRange range_type;
+
+			static const typename T::value_type MIN_VAL;
+			static const typename T::value_type MAX_VAL;
+
+			Angle() : mValue(value_type(0))
+			{}
+			
+			Angle(T value) : mValue(value)
+			{}
+
+			Angle& operator=(Radians<wrapped_type> value)
+			{
+				mValue = value_type(value);
+				return *this;
+			}
+
+			Angle& operator=(Degrees<wrapped_type> value)
+			{
+				mValue = value_type(value);
+				return *this;
+			}
+
+			operator value_type() const
+			{
+				return value_type(mValue.mValue);
+			}
+
+			template <typename U/* = Degrees<>::value_type*/>
+			Degrees<U> getDegrees() const
+			{
+				value_type value(mValue.mValue);
+				
+				return Degrees<U>(value);
+			}
+
+			template <typename U/* = Radians<>::value_type*/>
+			Radians<U> getRadians() const
+			{
+				value_type value(mValue.mValue);
+				
+				return Radians<U>(value);
+			}
+
+			//repetition because template default is not allowed yet for functions
+			Degrees<> getDegrees() const
+			{
+				value_type value(mValue.mValue);
+				
+				return Degrees<>(value);
+			}
+
+			Radians<> getRadians() const
+			{
+				value_type value(mValue.mValue);
+				
+				return Radians<>(value);
+			}
+
+			Util::RestrictedValue<Util::IntervalRestriction<AngleRange, Util::WrapAround>> mValue;
+		};
+
+		template <typename T, typename AngleRange>
+		const typename T::value_type Angle<T, AngleRange>::MIN_VAL = AngleRange::getLowerBound();
+		
+		template <typename T, typename AngleRange>
+		const typename T::value_type Angle<T, AngleRange>::MAX_VAL = AngleRange::getUpperBound();
+
+		template <typename T, typename AngleRange>
+		typename std::enable_if<std::is_unsigned<typename T::value_type>::value, Angle<T, AngleRange>&>::type operator-=(Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			lhs.mValue = lhs.mValue + (-rhs).mValue;
+			return lhs;
+		}
+
+		template <typename T, typename AngleRange>
+		typename std::enable_if<std::is_signed<typename T::value_type>::value, Angle<T, AngleRange>&>::type operator-=(Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			lhs.mValue = lhs.mValue - rhs.mValue;
+			return lhs;
+		}
+
+		template <typename T, typename AngleRange>
+		Angle<T, AngleRange>& operator+=(Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			lhs.mValue = lhs.mValue + rhs.mValue;
+			return lhs;
+		}
+		
+		template <typename T, typename AngleRange>
+		Angle<T, AngleRange>& operator*=(Angle<T, AngleRange>& lhs, const typename T::value_type& rhs)
+		{
+			lhs.mValue = lhs.mValue * rhs;
+			return lhs;
+		}
+
+		template <typename T, typename AngleRange>
+		Angle<T, AngleRange>& operator/=(Angle<T, AngleRange>& lhs, const typename T::value_type& rhs)
+		{
+			lhs.mValue = lhs.mValue / rhs;
+			return lhs;
+		}
+
+		template <typename T, typename AngleRange>
+		typename std::enable_if<std::is_unsigned<typename T::value_type>::value, Angle<T, AngleRange>>::type operator-(const Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			return Angle<T, AngleRange>(T(lhs.mValue + (-rhs).mValue));
+		}
+
+		template <typename T, typename AngleRange>
+		typename std::enable_if<std::is_signed<typename T::value_type>::value, Angle<T, AngleRange>>::type operator-(const Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			return Angle<T, AngleRange>(T(lhs.mValue - rhs.mValue));
+		}
+		
+		template <typename T, typename AngleRange>
+		Angle<T, AngleRange> operator+(const Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			return Angle<T, AngleRange>(T(lhs.mValue + rhs.mValue));
+		}
+
+		template <typename T, typename AngleRange>
+		Angle<T, AngleRange> operator*(const Angle<T, AngleRange>& lhs, const typename T::value_type& rhs)
+		{
+			return Angle<T, AngleRange>(T(lhs.mValue * rhs));
+		}
+
+		template <typename T, typename AngleRange>
+		Angle<T, AngleRange> operator*(const typename T::value_type& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			return Angle<T, AngleRange>(T(rhs.mValue * lhs));
+		}
+
+		template <typename T, typename AngleRange>
+		Angle<T, AngleRange> operator/(const Angle<T, AngleRange>& lhs, const typename T::value_type& rhs)
+		{
+			return Angle<T, AngleRange>(T(lhs.mValue / rhs));
+		}
+
+		template <typename T, typename AngleRange>
+		bool operator==(const Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			return lhs.mValue == rhs.mValue;
+		}
+
+		template <typename T, typename AngleRange>
+		bool operator!=(const Angle<T, AngleRange>& lhs, const Angle<T, AngleRange>& rhs)
+		{
+			return lhs.mValue != rhs.mValue;
+		}
+
+		template <typename T, typename AngleRange>
+		typename std::enable_if<std::is_unsigned<typename T::value_type>::value, Angle<T, AngleRange>>::type operator-(const Angle<T, AngleRange>& lhs)
+		{
+			return Angle<T, AngleRange>(T(Angle<T, AngleRange>::MAX_VAL - lhs.mValue));
+		}
+
+		template <typename T, typename AngleRange>
+		typename std::enable_if<std::is_signed<typename T::value_type>::value, Angle<T, AngleRange>>::type operator-(const Angle<T, AngleRange>& lhs)
+		{
+			return Angle<T, AngleRange>(T(-lhs.mValue));
+		}
+	}
+}
+
+#endif //__AITOOLS_ANGLE_H_INCLUDED

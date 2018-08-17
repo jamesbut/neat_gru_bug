@@ -1,0 +1,229 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013 - 2014  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_FUNCTORS_H__INCLUDED
+#define __AITOOLS_FUNCTORS_H__INCLUDED
+
+#include "MetaprogrammingHelpers.h"
+
+namespace aiTools
+{
+	namespace Util
+	{
+		template <typename T>
+		struct Range;
+
+		template <typename T>
+		struct AlwaysTrue
+		{
+			typedef T value_type;
+
+			bool operator()(const T&) const
+			{
+				return true;
+			}
+
+			bool operator()() const
+			{
+				return true;
+			}
+		};
+
+		template <typename FunctorType>
+		struct Not
+		{
+			typedef typename FunctorType::value_type value_type;
+
+			Not(FunctorType functor = FunctorType()) :
+				mUnderlyingFunctor(functor)
+			{}
+
+			Not(value_type value = FunctorType::value_type()) :
+				mUnderlyingFunctor(value)
+			{}
+
+			bool operator()(const value_type& value) const
+			{
+				return !mUnderlyingFunctor(value);
+			}
+		private:
+			const FunctorType mUnderlyingFunctor;
+		};
+
+		template <typename FunctorTypeLHS, typename FunctorTypeRHS>
+		struct LogicalAnd
+		{
+			typedef typename FunctorTypeLHS::value_type value_type;
+
+			LogicalAnd(FunctorTypeLHS functorL = FunctorTypeLHS(), FunctorTypeRHS functorR = FunctorTypeRHS()) :
+				mLHSFunctor(functorL),
+				mRHSFunctor(functorR)
+			{
+				typedef same_types<typename FunctorTypeLHS::value_type, typename FunctorTypeRHS::value_type> condition;
+				AITOOLS_STATIC_ASSERT(condition::value);
+			}
+
+			bool operator()(const value_type& value) const
+			{
+				return mLHSFunctor(value) && mRHSFunctor(value);
+			}
+		private:
+			const FunctorTypeLHS mLHSFunctor;
+			const FunctorTypeRHS mRHSFunctor;
+		};
+
+		template <typename FunctorTypeLHS, typename FunctorTypeRHS>
+		struct LogicalOr
+		{
+			typedef typename FunctorTypeLHS::value_type value_type;
+
+			LogicalOr(FunctorTypeLHS functorL = FunctorTypeLHS(), FunctorTypeRHS functorR = FunctorTypeRHS()) :
+				mLHSFunctor(functorL),
+				mRHSFunctor(functorR)
+			{
+				typedef same_types<typename FunctorTypeLHS::value_type, typename FunctorTypeRHS::value_type> condition;
+				AITOOLS_STATIC_ASSERT(condition::value);
+			}
+
+			bool operator()(const value_type& value) const
+			{
+				return mLHSFunctor(value) || mRHSFunctor(value);
+			}
+		private:
+			const FunctorTypeLHS mLHSFunctor;
+			const FunctorTypeRHS mRHSFunctor;
+		};
+
+		template <typename T>
+		struct GreaterThan
+		{
+			typedef T value_type;
+
+			GreaterThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value > mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct SmallerThan
+		{
+			typedef T value_type;
+
+			SmallerThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value < mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct GreaterEqualsThan
+		{
+			typedef T value_type;
+
+			GreaterEqualsThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value >= mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct SmallerEqualsThan
+		{
+			typedef T value_type;
+
+			SmallerEqualsThan(const T& num = T(0)) : mThreshold(num)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value <= mThreshold;
+			}
+		private:
+			const unsigned int mThreshold;
+		};
+
+		template <typename T>
+		struct Equals
+		{
+			typedef T value_type;
+
+			Equals(const T& value = T(0)) : mCompareTo(value)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return value == mCompareTo;
+			}
+		private:
+			const unsigned int mCompareTo;
+		};
+
+		template <typename T>
+		struct InRangeFunctor
+		{
+			typedef T value_type;
+
+			InRangeFunctor(Range<T> range) : mRange(range)
+			{}
+
+			InRangeFunctor(value_type left, value_type right) : mRange(left, right)
+			{}
+
+			bool operator()(const T& value) const
+			{
+				return mRange.isInside(value);
+			}
+		private:
+			const Range<T> mRange;
+		};
+
+		template<typename BinaryOperator, typename RhsType>
+		struct ModifyWith
+		{
+			typedef typename BinaryOperator::first_argument_type value_type;
+
+			ModifyWith(const RhsType& value) : mOperator(), mValue(value)
+			{}
+
+			const value_type& operator()(value_type& value) const
+			{
+				return mOperator(value, mValue);
+			}
+		private:
+			const BinaryOperator mOperator;
+			const RhsType mValue;
+		};
+	}
+}
+
+#endif // __AITOOLS_FUNCTORS_H__INCLUDED

@@ -1,0 +1,103 @@
+// aiTools is a free C++ library of AI tools.
+// Copyright (C) 2013  Benjamin Schnieders
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program, see file LICENCE.txt.
+// Alternativley, see <http://www.gnu.org/licenses/>.
+
+#ifndef __AITOOLS_TIME_H_INCLUDED
+#define __AITOOLS_TIME_H_INCLUDED
+
+namespace aiTools
+{
+
+/**
+ * \brief A class for measuring time.
+ *
+ * Keeps a time saved as ticks - obtained from a WallClock - and converts it to any time format needed.
+ *
+ */
+class Time
+{
+	friend Time operator+ (const Time& arg1, const Time& arg2);
+	friend Time operator- (const Time& arg1, const Time& arg2);
+	friend Time operator* (const Time& arg1, double arg2);
+	friend Time operator/ (const Time& arg1, double arg2);
+	friend Time operator* (const Time& arg1, long long arg2);
+	friend Time operator/ (const Time& arg1, long long arg2);
+	friend Time operator* (const Time& arg1, unsigned long long arg2);
+	friend Time operator/ (const Time& arg1, unsigned long long arg2);
+	friend Time operator* (const Time& arg1, unsigned int arg2);
+	friend Time operator/ (const Time& arg1, unsigned int arg2);
+	friend Time operator* (const Time& arg1, int arg2);
+	friend Time operator/ (const Time& arg1, int arg2);
+	friend double operator/ (const Time& arg1, const Time& arg2);
+	friend bool operator< (const Time& arg1, const Time& arg2);
+	friend bool operator> (const Time& arg1, const Time& arg2);
+	friend bool operator== (const Time& arg1, const Time& arg2);
+	friend bool operator!= (const Time& arg1, const Time& arg2);
+	friend bool operator>= (const Time& arg1, const Time& arg2);
+	friend bool operator<= (const Time& arg1, const Time& arg2);
+
+public:
+	Time();
+	explicit Time(long long ticks);
+
+	/// returns the time in ticks
+	long long getTicks() const;
+
+	/// returns the time milliseconds
+	long long getMilliseconds() const;
+
+	/// returns the time in microseconds
+	long long getMicroseconds() const;
+
+	/// returns the time in seconds
+	double getSeconds() const;
+
+	/// returns the time in minutes
+	double getMinutes() const;
+
+	/// returns the time in hours
+	double getHours() const;
+	
+	/// constructs a time from seconds
+	static Time fromSeconds(float seconds);
+
+	/// constructs a time from minutes
+	static Time fromMinutes(float minutes);
+
+	/// constructs a time from hours
+	static Time fromHours(float hours);
+
+	/// constructs a time from milliseconds
+	static Time fromMilliseconds(double milliseconds);
+
+	/// constructs a time from microseconds
+	static Time fromMicroseconds(long long microseconds);
+
+	/// zero time span
+	static const Time ZERO;
+
+	/// longest possible timespan
+	static const Time MAX;
+
+	Time& operator+=(const Time& arg1);
+	Time& operator-=(const Time& arg1);
+private:
+	long long mTicks;
+};
+
+}
+
+#endif //__AITOOLS_TIME_H_INCLUDED
