@@ -2,8 +2,8 @@ clear all, clc
 
 path_to_trajectories = '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/trajectories_temp/';
 path_to_envs = '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/argos_params/environments/kim_envs/';
-num_of_envs = 209;
-%num_of_envs = 1;
+%num_of_envs = 209;
+num_of_envs = 1;
 
 %Read data
 

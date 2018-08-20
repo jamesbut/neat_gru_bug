@@ -174,8 +174,9 @@ void MasterLoopFunction::SetRobotPositionBasedOnMap(int map, int trial_num) {
           false                                 // this is not a check, leave the robot there
       );
 
-   if((!dead_placed) || (!clever_placed))
+   if((!dead_placed) || (!clever_placed)) {
       std::cout << "COULD NOT PLACE ROBOT!" << std::endl;
+   }
 
 }
 

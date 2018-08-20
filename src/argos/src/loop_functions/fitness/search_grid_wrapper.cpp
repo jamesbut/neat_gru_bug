@@ -3,6 +3,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <aiTools/Math/Distance.h>
+#include <aiTools/Math/LinearTransformation.h>
+#include <algorithm>
 
 using namespace cv;
 
@@ -19,6 +21,13 @@ SearchGridWrapper::SearchGridWrapper(const std::string& filePath,
       //Set goal
       mGoalIndex = GridIndex(goal_pos.x, goal_pos.y);
       mData.at(goal_pos.x, goal_pos.y).mData.isGoal = true;
+
+      // for(size_t y = 0; y < mData.mHeight; y++) {
+      //    for(size_t x = 0; x < mData.mWidth; x++) {
+      //       if(mData.at(x,y).mData.isOpen)
+      //          std::cout << x << " " << y << std::endl;
+      //    }
+      // }
 
 }
 
@@ -76,7 +85,7 @@ boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen
 
    boost::optional<SearchGridWrapper::value_type> result;
    SearchGridWrapper::cost_type bestCosts{};
-
+   //std::cout << "--------------" << std::endl;
    	for(std::size_t y = 0;y<mData.mHeight;++y)
    	{
    		for(std::size_t x = 0;x<mData.mWidth;++x)
@@ -84,17 +93,22 @@ boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen
    			value_type current{x, y};
    			auto& node = mData.at(current).mData;
 
-   			if(!node.isOpen) //only ever look at open nodes
-   				continue;
+   			if(!node.isOpen) {
+               //std::cout << mData.at(current).x << " " << mData.at(current).y << std::endl;
+               continue;
+            }
 
+            //std::cout << mData.at(current).x << " " << mData.at(current).y << std::endl;
    			if(!result)
    			{
    				result = current;
    				bestCosts = node.cost;
    				//std::cout << "first open node is " << x << "," << y << ", cost: " << bestCosts << ", h: " << getHeuristic(current) << std::endl;
+               //std::cout << mData.at(*result).x << " " << mData.at(*result).y << std::endl;
    			}
    			else
    			{
+               //std::cout << "else" <<std::endl;
    				auto totalEstCostFirst = node.cost + getHeuristic(current);
    				auto totalEstCostSecond = bestCosts + getHeuristic(*result);
 
@@ -125,8 +139,11 @@ boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen
    	//std::cout << std::endl<< std::endl<< std::endl;
 
    	//*remove* best open - mark as not open anymore
-   	if(result)
-   		mData.at(*result).mData.isOpen = false;
+   	if(result) {
+         //std::cout << mData.at(*result).x << " " << mData.at(*result).y << std::endl;
+         mData.at(*result).mData.isOpen = false;
+      }
+
 
    	return result;
 
@@ -197,7 +214,7 @@ SearchGridWrapper::cost_type SearchGridWrapper::getHeuristic(const value_type& n
 	//euclidean_distance
 	//chebyshev_distance
 
-	 return cost_type(distance);
+	return cost_type(distance);
 
 }
 
@@ -208,51 +225,76 @@ aiTools::Grid<SearchNode> SearchGridWrapper::gridFromPng(const std::string& file
 
    if(!read_img.data) std::cout << "Could not read image for astar" << std::endl;
 
-   aiTools::Grid<SearchNode> map(read_img.cols, read_img.rows);
+   aiTools::Grid<SearchNode> map(read_img.rows, read_img.cols);
 
    for(size_t y = 0; y < map.mHeight; y++) {
 
       for(size_t x = 0; x < map.mWidth; x++) {
 
-         int img_value = read_img.at<int>(x,y);
+         int img_value = static_cast<int>(read_img.at<uchar>(x,y));
+
          if(img_value == 255)
             map.at(x, y).mData.isBlocked = true;
          else
             map.at(x, y).mData.traversalCost = 1;
 
-         //Add start state
-
       }
 
    }
-
-   // for(int i = 0; i < read_img.rows; i++) {
-   //    const int* img_col_ptr = read_img.ptr<int>(i);
-   //    for(int j = 0; j < read_img.cols; j++){
-   //       std::cout << img_col_ptr[j] << " ";
-   //    }
-   //    std::cout << std::endl;
-   // }
-
-   //std::vector<std::vector<bool>> occupancy_grid(read_img.rows, std::vector<bool>(read_img.cols, false));
-
-   // for(int i = 0; i < occupancy_grid.size(); i++) {
-   //    for(int j = 0; j < occupancy_grid[i].size(); j++) {
-   //       if(read_img.at<int>(i,j) == 255) occupancy_grid[i][j] = true;
-   //       std::cout << occupancy_grid[i][j];
-   //    }
-   //    std::cout << std::endl;
-   // }
 
    // namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
    // imshow( "Display window", read_img );                   // Show our image inside it.
    //
    // waitKey(0);
 
+   return map;
 
 }
 
-// static void SearchGridWrapper::printGridToPng(const std::string& filename, aiTools::Grid<SearchNode>& grid) {}
+SearchNode::cost_type findHighestCost(aiTools::Grid<SearchNode>& grid) {
+
+	SearchNode::cost_type maxCost = 0;
+
+	std::for_each(grid.mData.begin(), grid.mData.end(),
+			[&maxCost](SearchNode& sn)
+			{
+				if(!sn.isBlocked)
+					maxCost = std::max(maxCost, sn.cost);
+			});
+
+	return maxCost;
+
+}
+
+void SearchGridWrapper::printGridToPng(const std::string& filename, aiTools::Grid<SearchNode>& grid) {
+   //std::cout << "PNG print out :" << std::endl;
+   Mat img(grid.mHeight, grid.mWidth, CV_8UC3, Scalar(0, 0, 0));
+
+   for(size_t y = 0; y < grid.mHeight; y++) {
+
+      for(size_t x = 0; x < grid.mWidth; x++) {
+
+         auto& cell = grid.at(x,y).mData;
+
+         if(cell.isBlocked)
+            img.at<Vec3b>(x,y) = Vec3b(255, 255, 255);
+         if(cell.isClosed) {
+            //std::cout << x << " " << y << std::endl;
+            img.at<Vec3b>(x,y) = Vec3b(255, 0, 0);
+         }
+         if(cell.isGoal)
+            img.at<Vec3b>(x,y) = Vec3b(0, 255, 0);
+
+      }
+
+   }
+
+   namedWindow("Astar search", WINDOW_AUTOSIZE);// Create a window for display.
+   imshow("Astar search", img);                   // Show our image inside it.
+
+   waitKey(0);
+
+}
 
 namespace aiTools {
 

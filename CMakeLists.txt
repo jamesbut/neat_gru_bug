@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.5)
 set (CMAKE_CXX_STANDARD 14)
 #set (CMAKE_CXX_FLAGS "-Wreorder")
+#set (CMAKE_CXX_FLAGS "-O2")
 project(neat_gru_bug)
 
 add_subdirectory(lib/NEAT_GRU)

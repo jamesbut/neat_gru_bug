@@ -2,7 +2,7 @@
 #include <boost/filesystem.hpp>
 
 DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
-                               const bool HANDWRITTEN_ENV,
+                               const bool HANDWRITTEN_ENVS,
                                const int TEST_EVAL_GEN,
                                const int NUM_TEST_ENVS,
                                const int FLUSH_EVERY,
@@ -272,6 +272,8 @@ void DataCollection::test_on_eval_set(int current_gen) {
             //Create random seed for parallel processes - it is not really needed
             //in the serial version but the method now needs one
             int rand_seed = rand();
+
+            //std::cout << "Handwritten envs: " << HANDWRITTEN_ENVS << std::endl;
 
             run_results[j] = as->run(*genomes_to_be_tested[i], file_name, (j+1), true, true,
                                       HANDWRITTEN_ENVS, (j+1), rand_seed);
