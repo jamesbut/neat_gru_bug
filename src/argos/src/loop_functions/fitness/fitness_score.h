@@ -21,12 +21,14 @@ public:
    FitnessScore();
 
    void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
-   void Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path);
+   void Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs);
    void PreStep();
    void PostStep();
    void PostExperiment();
 
    RunResult get_fitness_score();
+   double calculate_trajectory_per_optimal_path(const std::vector<CVector2>& trajectory);
+   double calculate_trajectory_length(const std::vector<CVector2>& traj);
 
 private:
 
@@ -47,8 +49,15 @@ private:
    bool hit_tower;
 
    bool m_indvRun;
+   bool m_testEnvs;
+   int m_envNum;
    std::string m_envPath;
 
+   const std::string TEST_ENV_LENGTHS_PATH;
+   const std::string GENERATED_ENVS_MAP_PATH;
+
 };
+
+double get_value_at_line(std::string file_name, unsigned int num);
 
 #endif

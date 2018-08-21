@@ -151,13 +151,27 @@ boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen
 
 SearchGridWrapper::cost_type SearchGridWrapper::getCostBetween(value_type& parent, value_type& child) {
 
-   return 1;
+   typedef aiTools::Math::Vector2<std::size_t> Vec;
+	Vec from{parent};
+	Vec to{child};
+
+	double distance = (to-from).length<double>();
+
+	cost_type parentCost = mData.at(parent).mData.traversalCost;
+	cost_type childCost = mData.at(child).mData.traversalCost;
+
+	double avg = (parentCost+childCost) / 2.;
+	double cost = avg * distance;
+
+	return cost_type(cost);
+
+   //return 1;
 
 }
 
 void SearchGridWrapper::forAllSuccessorNodes(SearchGridWrapper::value_type& parent, std::function<void(SearchGridWrapper::value_type&)> action) {
 
-   mData.forAll4NeighborsDo(parent,
+   mData.forAll8NeighborsDo(parent,
 								[this, action](GridType::node_type neighbor)
 								{
 									auto node = neighbor.mData;
@@ -173,7 +187,7 @@ void SearchGridWrapper::forAllSuccessorNodes(SearchGridWrapper::value_type& pare
 
 void SearchGridWrapper::forAllPredecessorNodes(SearchGridWrapper::value_type& parent, BacktrackAction& action) {
 
-   mData.forAll4NeighborsDo(parent,
+   mData.forAll8NeighborsDo(parent,
 								[this, &action](GridType::node_type neighbor)
 								{
 									auto node = neighbor.mData;
@@ -210,10 +224,11 @@ SearchGridWrapper::cost_type SearchGridWrapper::getHeuristic(const value_type& n
 	Vec nowPos{node};
 
 	double distance = aiTools::Math::manhattan_distance(goalPos.begin(), goalPos.end(), nowPos.begin(), nowPos.end());
+   //double distance = aiTools::Math::euclidean_distance(goalPos.begin(), goalPos.end(), nowPos.begin(), nowPos.end());
 	//manhattan_distance
 	//euclidean_distance
 	//chebyshev_distance
-
+   //return 0;
 	return cost_type(distance);
 
 }

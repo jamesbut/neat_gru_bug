@@ -59,19 +59,12 @@ for i = 1:length(environments)
         optimal_path_length = sum(sqrt(diff_optimal_path(:,1).^2+diff_optimal_path(:,2).^2))/10;
         %disp(optimal_path_length)
         
-%         num_straights = 0;
-%         num_diagonals = 0;
+        num_straights = 0;
+        num_diagonals = 0;
         
-%         for j = 1:length(diff_optimal_path)
-%             if (and((diff_optimal_path(j,1) ~= 0), (diff_optimal_path(j,2) ~= 0)))
-%                 num_diagonals = num_diagonals + 1;
-%             elseif (or((diff_optimal_path(j,1) ~= 0), (diff_optimal_path(j,2) ~= 0)))
-%                 num_straights = num_straights + 1;
-%             end
-%         end
-        
-%         disp(num_straights)
-%         disp(num_diagonals)
+        for i
+        if 
+        end
         
         run_path_diff = diff(environments(i).trajectory);
         %disp(environments(i).trajectory)

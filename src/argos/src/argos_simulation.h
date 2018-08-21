@@ -14,7 +14,8 @@ public:
 
    //Runs the experiment and returns the fitness score
    RunResult run(NEAT::Organism &org, std::string env_path, int env_num,
-      bool reset, bool indv_run, bool handwritten, int trial_num, int rand_seed);
+      bool reset, bool indv_run, bool handwritten, bool test_envs, int trial_num,
+      int rand_seed);
 
 private:
 

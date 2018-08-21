@@ -1,7 +1,7 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
-   //NUM_RUNS(5),
+   //NUM_RUNS(1),
    NUM_RUNS(209),
    RANDOM_ENVS(false),
    HANDWRITTEN_ENVS(false),
@@ -40,6 +40,7 @@ void IndividualRun::run() {
       std::string file_name;
       int env_num;
       bool reset = false;
+      bool test_envs = false;
 
       if(RANDOM_ENVS) file_name = "";
       else if (HANDWRITTEN_ENVS) {
@@ -47,6 +48,7 @@ void IndividualRun::run() {
          env_num = 15;
       }
       else {
+         test_envs = true;
          file_name = ENV_PATH + std::to_string(i+1) + ".png";
          env_num = i+1;
          reset = true;
@@ -58,7 +60,8 @@ void IndividualRun::run() {
 
       //double fitness = as->run(*org, file_name, env_num, reset, true, HANDWRITTEN_ENVS, (i+1));
       RunResult rr = as->run(*org, file_name, env_num, reset, true,
-                              HANDWRITTEN_ENVS, (i+1), rand_seed);
+                              HANDWRITTEN_ENVS, test_envs, (i+1),
+                              rand_seed);
 
       //total_score += fitness;
       total_score += rr.fitness;
@@ -66,7 +69,6 @@ void IndividualRun::run() {
       //std::cout << fitness << std::endl;
       std::cout << rr.fitness << std::endl;
 
-      //if (fitness > 13.2) num_finishes++;
       if(rr.got_to_tower) num_finishes++;
       else struggling_envs.push_back(i);
 

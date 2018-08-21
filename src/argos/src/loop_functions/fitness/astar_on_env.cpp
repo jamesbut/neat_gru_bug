@@ -13,9 +13,6 @@ std::vector<CVector2> astar_on_env(const std::string env_path) {
    SearchGridWrapper searchGrid(env_path, start_pos, goal_pos);
    Algorithm::AStarAlgorithm<Algorithm::SampleAStarSearchGraphWrapper<Grid<SearchNode>::GridIndex, SearchNode::cost_type>> algorithm(searchGrid);
 
-   //auto coords = SearchGridWrapper::value_type(start_pos.x, goal_pos.y);
-	//searchGrid.updateCostSetOpen(coords, 0);
-
    unsigned int iterations = 0;
    while(!algorithm.isComplete()) {
 			++iterations;
@@ -24,27 +21,24 @@ std::vector<CVector2> astar_on_env(const std::string env_path) {
 			algorithm.performIteration();
 	}
 
+   //Retrieve astar path
    auto path = algorithm.getPath();
 
+   std::vector<CVector2> path_vec;
+
+   //Print path
    for(auto iterator = path.first; iterator != path.second; iterator++) {
       size_t x, y;
       std::tie(x, y) = *iterator;
-      std::cout << x << " " << y << std::endl;
 
+      //Convert returned astar into vector of CVector2
+      path_vec.push_back(CVector2(x, y));
+
+      //std::cout << x << " " << y << std::endl;
    }
 
-   SearchGridWrapper::printGridToPng("", searchGrid.mData);
+   //SearchGridWrapper::printGridToPng("Astar search", searchGrid.mData);
 
-   //Convert environment into appropriate form for astar library
-
-   //Retrieve astar path
-
-   //Convert returned astar into vector of CVector2
-
-   //Default return for now
-   CVector2 vec = CVector2(0.0, 0.0);
-   std::vector<CVector2> vec_of_vecs;
-   vec_of_vecs.push_back(vec);
-   return vec_of_vecs;
+   return path_vec;
 
 }

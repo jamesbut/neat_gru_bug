@@ -16,13 +16,15 @@ void TrajectoryLogger::Reset(int env_num) {
    trajectory.clear();
 
    //Add initial position
-   trajectory.push_back(m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position);
+   CVector3 pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+   trajectory.push_back(CVector2(pos.GetX(), pos.GetY()));
 
 }
 
 void TrajectoryLogger::PostStep() {
 
-   trajectory.push_back(m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position);
+   CVector3 pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+   trajectory.push_back(CVector2(pos.GetX(), pos.GetY()));
 
 }
 

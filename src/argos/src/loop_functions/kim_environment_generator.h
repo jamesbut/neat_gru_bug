@@ -100,6 +100,8 @@ private:
 
   int _map_request_type;
 
+  const std::string GENERATED_ENVS_MAP_PATH;
+
 };
 
 

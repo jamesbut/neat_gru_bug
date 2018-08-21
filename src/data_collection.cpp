@@ -276,7 +276,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
             //std::cout << "Handwritten envs: " << HANDWRITTEN_ENVS << std::endl;
 
             run_results[j] = as->run(*genomes_to_be_tested[i], file_name, (j+1), true, true,
-                                      HANDWRITTEN_ENVS, (j+1), rand_seed);
+                                      HANDWRITTEN_ENVS, true, (j+1), rand_seed);
 
             //std::cout << "Eval set: " << scores[i] << std::endl;
 

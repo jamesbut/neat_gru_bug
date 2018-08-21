@@ -11,7 +11,7 @@ GA::GA(std::string neat_param_file) :
    FLUSH_EVERY(1),
    INCREMENTAL_EV(false),
    PARALLEL(true),
-   ACCEPTABLE_FITNESS(13.88),
+   //ACCEPTABLE_FITNESS(13.88),
    HANDWRITTEN_ENVS(false),
    RANDOMLY_GENERATED_ENVS(true),
    TEST_EVAL_GEN(25),
@@ -50,8 +50,8 @@ GA::GA(std::string neat_param_file) :
                                         TEST_SET_PATH, as);
 
    //Remove all score files
-   system("exec rm -r ../scores/eval_scores/*");
-   system("exec rm -r ../scores/training_scores/*");
+   system("exec rm ../scores/eval_scores/*");
+   system("exec rm ../scores/training_scores/*");
 
 }
 
@@ -170,6 +170,7 @@ void GA::epoch() {
       std::string file_name;
       int env_num;
       bool reset = false;
+      bool test_envs = false;
 
       //Create file name and env num
       if(HANDWRITTEN_ENVS) {
@@ -179,6 +180,7 @@ void GA::epoch() {
          file_name = "";
          env_num = i+1;
       } else {
+         test_envs = true;
          file_name = ENV_PATH + std::to_string(i+1) + ".png";
          env_num = i+1;
       }
@@ -195,7 +197,7 @@ void GA::epoch() {
          if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
          trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num,
-                                       reset, false, HANDWRITTEN_ENVS, (i+1), rand_seed);
+                                       reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), rand_seed);
 
          reset = false;
 
@@ -221,6 +223,7 @@ void GA::parallel_epoch() {
       std::string file_name;
       int env_num;
       bool reset = false;
+      bool test_envs = false;
 
       //Create file name and env num
       if(HANDWRITTEN_ENVS) {
@@ -231,6 +234,7 @@ void GA::parallel_epoch() {
          env_num = i+1;
          reset = true;
       } else {
+         test_envs = true;
          file_name = ENV_PATH + std::to_string(i+1) + ".png";
          env_num = i+1;
          reset = true;
@@ -248,7 +252,7 @@ void GA::parallel_epoch() {
 
             shared_mem->set_run_result(j, i, as->run(*(neatPop->organisms[j]), file_name,
                                                       env_num, reset, false, HANDWRITTEN_ENVS,
-                                                      (i+1), rand_seed));
+                                                      test_envs, (i+1), rand_seed));
 
             //Kill slave
             ::raise(SIGTERM);

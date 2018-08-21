@@ -35,7 +35,8 @@ RandomEnvironmentGenerator::RandomEnvironmentGenerator() :
   total_boxes_generated(0),
   amount_of_openings(11),
   environment_accepted(false),
-  rng(5)
+  rng(5),
+  GENERATED_ENVS_MAP_PATH("../maps_temp/map_")
   {
 
    //std::srand(5);
@@ -201,11 +202,12 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
 
     rectangle(corridor_contours_img, border, Scalar(255), 3);
 
+    //Write to file
     std::stringstream file_name;
-    file_name << "../argos_params/environments/training_set/ts_" << env_num << ".png";
+    file_name << GENERATED_ENVS_MAP_PATH << env_num << ".png";
 
     //Write images of generated envs
-    //cv::imwrite(file_name.str(),corridor_contours_img);
+    cv::imwrite(file_name.str(),corridor_contours_img);
 
 #ifdef ACCEPT_ENVIRONMENT
 

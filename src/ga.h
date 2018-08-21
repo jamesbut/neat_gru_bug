@@ -74,7 +74,7 @@ private:
    const bool HANDWRITTEN_ENVS;
    const bool RANDOMLY_GENERATED_ENVS;
 
-   const double ACCEPTABLE_FITNESS;
+   //const double ACCEPTABLE_FITNESS;
 
    const int TEST_EVAL_GEN;
    const std::string TEST_SET_PATH;

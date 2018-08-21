@@ -7,7 +7,7 @@
 
 struct SearchNode
 {
-	typedef int cost_type;
+	typedef double cost_type;
 
 	cost_type cost{-1};
 	cost_type traversalCost{1};

@@ -14,13 +14,13 @@ public:
    void PostStep();
    void PostExperiment();
 
-   std::vector<CVector3> get_trajectory() {return trajectory;};
+   inline const std::vector<CVector2>& get_trajectory() {return trajectory;}
 
 private:
 
    CFootBotEntity* m_clever_bot;
 
-   std::vector<CVector3> trajectory;
+   std::vector<CVector2> trajectory;
 
    int m_envNum;
 
