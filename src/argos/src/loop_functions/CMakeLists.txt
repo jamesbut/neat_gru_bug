@@ -1,6 +1,6 @@
 add_library(loop_functions_lib SHARED master_loop_function.cpp fitness/fitness_score.cpp
             kim_environment_generator.cpp fitness/trajectory_logger.cpp fitness/astar_on_env.cpp
-            fitness/search_grid_wrapper.cpp)
+            fitness/search_grid_wrapper.cpp fitness/search_node_comparator.cpp)
 
 set(EXT_LIB_INCLUDES
    ${CMAKE_SOURCE_DIR}/lib/)

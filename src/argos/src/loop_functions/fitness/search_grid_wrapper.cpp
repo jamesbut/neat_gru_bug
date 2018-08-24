@@ -22,12 +22,13 @@ SearchGridWrapper::SearchGridWrapper(const std::string& filePath,
       mGoalIndex = GridIndex(goal_pos.x, goal_pos.y);
       mData.at(goal_pos.x, goal_pos.y).mData.isGoal = true;
 
-      // for(size_t y = 0; y < mData.mHeight; y++) {
-      //    for(size_t x = 0; x < mData.mWidth; x++) {
-      //       if(mData.at(x,y).mData.isOpen)
-      //          std::cout << x << " " << y << std::endl;
-      //    }
-      // }
+      //Initialise open priority queue
+      //mOpenQueue.reset(new std::priority_queue<value_type, std::vector<value_type>, SearchNodeComparator>(SearchNodeComparator(*this)));
+      mOpenQueue.reset(new std::set<value_type, SearchNodeComparator>(SearchNodeComparator(*this)));
+
+      //Add start pos to open queue
+      //mOpenQueue->push(std::make_tuple(start_pos.x, start_pos.y));
+      mOpenQueue->insert(std::make_tuple(start_pos.x, start_pos.y));
 
 }
 
@@ -39,9 +40,33 @@ void SearchGridWrapper::updateCostSetOpen(SearchGridWrapper::value_type& node, S
 	if((!current.isOpen && !current.isClosed) || cost < current.cost) //if unknown OR costs are lowered...
 	{
 		//else, do not update/re-open! (if new cost are actually higher.)
+
+      if(current.isOpen) {
+         //std::unique_ptr<std::priority_queue<value_type, std::vector<value_type>, SearchNodeComparator>> copy_queue(new std::priority_queue<value_type, std::vector<value_type>, SearchNodeComparator>(SearchNodeComparator(*this)));
+
+         auto iter = mOpenQueue->find(node);
+         if(iter != mOpenQueue->end()) {
+            mOpenQueue->erase(iter);
+         }
+         //
+         // while(!mOpenQueue->empty()) {
+         //    if(mOpenQueue->find() != node)
+         //       copy_queue->push(mOpenQueue->top());
+         //    mOpenQueue->pop();
+         // }
+
+         // mOpenQueue.swap(copy_queue);
+
+      }
+
 		current.cost = cost;
 		current.isOpen = true;
 		current.isClosed = false;
+
+      //Here is where I want to add the new open node to the priority queue
+      //mOpenQueue->push(node);
+      mOpenQueue->insert(node);
+
 	}
 
 }
@@ -83,69 +108,77 @@ bool SearchGridWrapper::isGoalNode(value_type& node) {
 
 boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen() {
 
-   boost::optional<SearchGridWrapper::value_type> result;
-   SearchGridWrapper::cost_type bestCosts{};
-   //std::cout << "--------------" << std::endl;
-   	for(std::size_t y = 0;y<mData.mHeight;++y)
-   	{
-   		for(std::size_t x = 0;x<mData.mWidth;++x)
-   		{
-   			value_type current{x, y};
-   			auto& node = mData.at(current).mData;
+   //Here I just want to pop next off priority queue and use that
+   //rather than search through grid all the time
+   if(mOpenQueue->empty())
+      return boost::optional<SearchGridWrapper::value_type>();
 
-   			if(!node.isOpen) {
-               //std::cout << mData.at(current).x << " " << mData.at(current).y << std::endl;
-               continue;
-            }
+   auto result = *(mOpenQueue->begin());
+   mOpenQueue->erase(mOpenQueue->begin());
+   //mOpenQueue->pop();
 
-            //std::cout << mData.at(current).x << " " << mData.at(current).y << std::endl;
-   			if(!result)
-   			{
-   				result = current;
-   				bestCosts = node.cost;
-   				//std::cout << "first open node is " << x << "," << y << ", cost: " << bestCosts << ", h: " << getHeuristic(current) << std::endl;
-               //std::cout << mData.at(*result).x << " " << mData.at(*result).y << std::endl;
-   			}
-   			else
-   			{
-               //std::cout << "else" <<std::endl;
-   				auto totalEstCostFirst = node.cost + getHeuristic(current);
-   				auto totalEstCostSecond = bestCosts + getHeuristic(*result);
+   mData.at(result).mData.isOpen = false;
 
-   				//std::cout << "node is " << x << "," << y << ", cost: " << node.cost << ", h: " << getHeuristic(current) << ", both: " << totalEstCostFirst;
+   return result;
 
-   				if(totalEstCostFirst == totalEstCostSecond)
-   				{
-   					//std::cout << ", costs equal";
-
-   					if(node.cost > bestCosts) //counter-intuitive tie-break with greater cost - means greater distance travelled, more progress (hopefully)
-   					{
-   						//std::cout << ", tie break winner";
-   						result = current;
-   						bestCosts = node.cost;
-   					}
-   				}
-   				else if(totalEstCostFirst < totalEstCostSecond)
-   				{
-   					//std::cout << ", costs lower";
-   					result = current;
-   					bestCosts = node.cost;
-   				}
-
-   				//std::cout << std::endl;
-   			}
-   		}
-   	}
-   	//std::cout << std::endl<< std::endl<< std::endl;
-
-   	//*remove* best open - mark as not open anymore
-   	if(result) {
-         //std::cout << mData.at(*result).x << " " << mData.at(*result).y << std::endl;
-         mData.at(*result).mData.isOpen = false;
-      }
-
-
-   	return result;
+   // boost::optional<SearchGridWrapper::value_type> result;
+   // SearchGridWrapper::cost_type bestCosts{};
+   //
+   // 	for(std::size_t y = 0;y<mData.mHeight;++y)
+   // 	{
+   // 		for(std::size_t x = 0;x<mData.mWidth;++x)
+   // 		{
+   // 			value_type current{x, y};
+   // 			auto& node = mData.at(current).mData;
+   //
+   // 			if(!node.isOpen)
+   //             continue;
+   //
+   // 			if(!result)
+   // 			{
+   // 				result = current;
+   // 				bestCosts = node.cost;
+   // 				//std::cout << "first open node is " << x << "," << y << ", cost: " << bestCosts << ", h: " << getHeuristic(current) << std::endl;
+   // 			}
+   // 			else
+   // 			{
+   //
+   // 				auto totalEstCostFirst = node.cost + getHeuristic(current);
+   // 				auto totalEstCostSecond = bestCosts + getHeuristic(*result);
+   //
+   // 				//std::cout << "node is " << x << "," << y << ", cost: " << node.cost << ", h: " << getHeuristic(current) << ", both: " << totalEstCostFirst;
+   //
+   // 				if(totalEstCostFirst == totalEstCostSecond)
+   // 				{
+   // 					//std::cout << ", costs equal";
+   //
+   // 					if(node.cost > bestCosts) //counter-intuitive tie-break with greater cost - means greater distance travelled, more progress (hopefully)
+   // 					{
+   // 						//std::cout << ", tie break winner";
+   // 						result = current;
+   // 						bestCosts = node.cost;
+   // 					}
+   // 				}
+   // 				else if(totalEstCostFirst < totalEstCostSecond)
+   // 				{
+   // 					//std::cout << ", costs lower";
+   // 					result = current;
+   // 					bestCosts = node.cost;
+   // 				}
+   //
+   // 				//std::cout << std::endl;
+   // 			}
+   // 		}
+   // 	}
+   //
+   // 	//*remove* best open - mark as not open anymore
+   // 	if(result) {
+   //       //std::cout << mData.at(*result).x << " " << mData.at(*result).y << std::endl;
+   //       mData.at(*result).mData.isOpen = false;
+   //    }
+   //
+   //
+   // 	return result;
 
 }
 

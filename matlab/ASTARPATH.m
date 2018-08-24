@@ -63,9 +63,12 @@ FScore(StartY,StartX)=Hn(StartY,StartX);
 OpenMAT(StartY,StartX)=1;   
 
 
-
+num_iterations = 0;
 
 while 1==1 %Code will break when path found or when no path exist
+    
+    num_iterations = num_iterations + 1;
+    
     MINopenFSCORE=min(min(FScore));
     if MINopenFSCORE==inf;
     %Failuere!
@@ -124,6 +127,8 @@ while 1==1 %Code will break when path found or when no path exist
         end
     end
 end
+
+%num_iterations
 
 k=2;
 if RECONSTRUCTPATH

@@ -2,7 +2,8 @@ from numpy import genfromtxt
 import matplotlib.pyplot as plt
 
 #Read data
-train_file_data = genfromtxt('../scores/training_scores/training_scores_deadpool.txt', delimiter=',')
+#train_file_data = genfromtxt('../scores/training_scores/archive_scores/ap_13/ap_13_training_4.txt', delimiter=',')
+#train_file_data = genfromtxt('../scores/training_scores/archive_scores/ap_6/ap_6_training_4.txt', delimiter=',')
 
 #Get data
 train_generations = train_file_data[:,0]

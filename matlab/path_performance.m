@@ -2,8 +2,8 @@ clear all, clc
 
 path_to_trajectories = '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/trajectories_temp/';
 path_to_envs = '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/argos_params/environments/kim_envs/';
-%num_of_envs = 209;
-num_of_envs = 1;
+num_of_envs = 209;
+%num_of_envs = 5;
 
 %Read data
 
@@ -80,8 +80,8 @@ for i = 1:length(environments)
         
         %Add 1 for the final meter to the target
         run_path_length = sum(sqrt(run_path_diff(:,1).^2+run_path_diff(:,2).^2)) + 1;
-        disp(run_path_length)
-        disp(optimal_path_length)
+        %disp(run_path_length)
+        %disp(optimal_path_length)
         
         run_path_lengths(i) = run_path_length;
         path_percentages(i) = run_path_length/optimal_path_length;
@@ -96,12 +96,12 @@ for i = 1:length(environments)
     
 end
 
-image(environments(1).img)
+%image(environments(1).img)
 
 %Turn back on when doing individual runs analyses again
 
-%disp(mean(path_percentages))
-%disp(median(path_percentages))
+disp(mean(path_percentages))
+disp(median(path_percentages))
 
-%figure,
-%boxplot(path_percentages(:))
+figure,
+boxplot(path_percentages(:))

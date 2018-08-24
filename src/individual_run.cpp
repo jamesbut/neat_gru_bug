@@ -1,7 +1,7 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
-   //NUM_RUNS(1),
+   //NUM_RUNS(44),
    NUM_RUNS(209),
    RANDOM_ENVS(false),
    HANDWRITTEN_ENVS(false),

@@ -205,6 +205,34 @@ void DataCollection::test_on_training_set(std::vector<std::vector<RunResult> > g
    //Calculate mean number of finishes
    double mean_num_finishes = (double)total_num_finishes / (double)gen_results.size();
 
+   //Find min trajectories and mean trajectories
+   std::vector<double> mean_gen_trajectories;
+   double min_mean_trajectories = 0.0;
+   double total_trajectories = 0.0;
+
+   for(int i = 0; i < gen_results.size(); i++) {
+
+      double total_traj = 0.0;
+
+      for(int j = 0; j < gen_results[i].size(); j++) {
+         total_traj += gen_results[i][j].traj_per_astar;
+         std::cout << gen_results[i][j].traj_per_astar << std::endl;
+      }
+
+      double mean_traj = total_traj / gen_results[i].size();
+
+      mean_gen_trajectories.push_back(mean_traj);
+
+      if((mean_traj < min_mean_trajectories) || i == 0)
+         min_mean_trajectories = mean_traj;
+
+      total_trajectories += mean_traj;
+
+   }
+
+   //Calculate mean trajectories
+   double mean_trajectories = total_trajectories / (double)gen_results.size();
+
    //Print results
    std::ofstream outfile;
 
@@ -217,7 +245,9 @@ void DataCollection::test_on_training_set(std::vector<std::vector<RunResult> > g
    outfile << max_training_score << ",";
    outfile << mean_gen_fitness << ",";
    outfile << max_num_finishes << ",";
-   outfile << mean_num_finishes << "\n";
+   outfile << mean_num_finishes << ",";
+   outfile << min_mean_trajectories << ",";
+   outfile << mean_trajectories << "\n";
 
    outfile.close();
 
@@ -291,6 +321,17 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
          }
 
+         //Calculate mean trajectory of robot
+         double total_traj_per_astar = 0.0;
+
+         for(int j = 0; j < run_results.size(); j++) {
+
+            total_traj_per_astar += run_results[j].traj_per_astar;
+
+         }
+
+         double mean_traj_per_astar = total_traj_per_astar / run_results.size();
+
          //Print eval results
          std::ofstream outfile;
 
@@ -298,7 +339,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
          file_name << "../scores/eval_scores/eval_scores_" << i << ".txt";
 
          outfile.open(file_name.str(), std::ios_base::app);
-         outfile << current_gen << "," << num_finishes;
+         outfile << current_gen << "," << num_finishes << "," << mean_traj_per_astar;
 
          for(int i = 0; i < run_results.size(); i++) {
 

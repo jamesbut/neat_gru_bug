@@ -38,7 +38,7 @@ void FitnessScore::Reset(bool indv_run, CVector3 arena_size, int env_num, std::s
    //if(indv_run) CLOSE_TO_TOWER = 0.32;
    else CLOSE_TO_TOWER = 0.32;
 
-   if (indv_run) trajectory_loop.Reset(env_num);
+   trajectory_loop.Reset(env_num);
 
 }
 
@@ -66,25 +66,36 @@ void FitnessScore::PreStep() {
 
 void FitnessScore::PostStep() {
 
-   if(m_indvRun) trajectory_loop.PostStep();
+   trajectory_loop.PostStep();
 
 }
 
 void FitnessScore::PostExperiment() {
 
-   if(m_indvRun) trajectory_loop.PostExperiment();
+   trajectory_loop.PostExperiment();
 
    const std::vector<CVector2>& trajectory = trajectory_loop.get_trajectory();
 
-   //double traj_per_astar = calculate_trajectory_per_optimal_path(trajectory);
-   //std::cout << "Traj per astar: " << traj_per_astar << std::endl;
+   traj_per_astar = calculate_trajectory_per_optimal_path(trajectory);
 
    //Calculate fitness
-   fitness_score = max_range - robots_distance;
 
-   if (no_son_of_mine) fitness_score /= 10;
+   double distance_from_tower = max_range - robots_distance;
+
+   if (no_son_of_mine) distance_from_tower /= 10;
+
+   distance_from_tower_w_crash = distance_from_tower;
+
+   fitness_score = distance_from_tower_w_crash;
 
    if (fitness_score < 0) fitness_score = 0;
+
+   //Old calculate fitness
+   // fitness_score = max_range - robots_distance;
+   //
+   // if (no_son_of_mine) fitness_score /= 10;
+   //
+   // if (fitness_score < 0) fitness_score = 0;
 
    //std::cout << fitness_score << std::endl;
 
@@ -104,6 +115,7 @@ double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVe
 
       //Calculate A* path on environment
       m_envPath = GENERATED_ENVS_MAP_PATH + std::to_string(m_envNum) + ".png";
+      //m_envPath = "../argos_params/environments/kim_envs/rand_env_" + std::to_string(m_envNum) + ".png";
 
       std::vector<CVector2> astar_path = astar_on_env(m_envPath);
 
@@ -139,15 +151,15 @@ double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVe
 }
 
 double FitnessScore::calculate_trajectory_length(const std::vector<CVector2>& traj) {
-
-   double length = 0;
+   //std::cout << "Calc traj length" << std::endl;
+   double length = 0.0;
 
    //Debug
    // int num_straights = 0;
    // int num_diags = 0;
-
+   //std::cout << traj.size()-1 << std::endl;
    for(size_t i = 0; i < traj.size()-1; i++) {
-
+      //std::cout << "Hello" << std::endl;
       double x_diff = std::abs(traj[i].GetX() - traj[i+1].GetX());
       double y_diff = std::abs(traj[i].GetY() - traj[i+1].GetY());
 
@@ -158,9 +170,9 @@ double FitnessScore::calculate_trajectory_length(const std::vector<CVector2>& tr
 
    }
 
-   // std::cout << "Num straights: " << num_straights << std::endl;
-   // std::cout << "Num diags: " << num_diags << std::endl;
-
+   //std::cout << "Num straights: " << num_straights << std::endl;
+   //std::cout << "Num diags: " << num_diags << std::endl;
+   //std::cout << length <<std::endl;
    return length;
 
 }
@@ -179,7 +191,9 @@ RunResult FitnessScore::get_fitness_score() {
    RunResult rr;
    rr.fitness = fitness_score;
    rr.got_to_tower = hit_tower;
-
+   rr.distance_from_tower_w_crash = distance_from_tower_w_crash;
+   rr.traj_per_astar = traj_per_astar;
+   //std::cout << rr.traj_per_astar << std::endl;
    return rr;
 
 }

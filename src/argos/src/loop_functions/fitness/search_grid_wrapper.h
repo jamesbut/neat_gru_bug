@@ -4,6 +4,11 @@
 #include <aiTools/Algorithm/AStar.h>
 #include <aiTools/Util/Grid.h>
 #include <aiTools/Math/Vector2.h>
+#include <queue>
+#include <set>
+#include <memory>
+
+#include "search_node_comparator.h"
 
 struct SearchNode
 {
@@ -17,6 +22,7 @@ struct SearchNode
 	bool isGoal{false};
 	bool isPath{false};
 };
+
 
 struct SearchGridWrapper : public aiTools::Algorithm::SampleAStarSearchGraphWrapper<aiTools::Grid<SearchNode>::GridIndex, SearchNode::cost_type>
 {
@@ -52,6 +58,11 @@ struct SearchGridWrapper : public aiTools::Algorithm::SampleAStarSearchGraphWrap
 
 	aiTools::Grid<SearchNode> mData;
 	GridIndex mGoalIndex;
+
+	//Priority queue for open nodes
+	//std::unique_ptr <std::priority_queue<value_type, std::vector<value_type>, SearchNodeComparator>> mOpenQueue;
+	std::unique_ptr <std::set<value_type, SearchNodeComparator>> mOpenQueue;
+
 };
 
 #endif

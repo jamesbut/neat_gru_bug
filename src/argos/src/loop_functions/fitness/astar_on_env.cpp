@@ -12,14 +12,17 @@ std::vector<CVector2> astar_on_env(const std::string env_path) {
    Math::Vector2<int> goal_pos = aiTools::Math::Vector2<int>(110,110);
    SearchGridWrapper searchGrid(env_path, start_pos, goal_pos);
    Algorithm::AStarAlgorithm<Algorithm::SampleAStarSearchGraphWrapper<Grid<SearchNode>::GridIndex, SearchNode::cost_type>> algorithm(searchGrid);
-
+   //std::cout << "Starting search" << std::endl;
    unsigned int iterations = 0;
    while(!algorithm.isComplete()) {
 			++iterations;
-			if(iterations % 1000 == 0)
-				std::cout << iterations << std::endl;
+			//if(iterations % 1000 == 0)
+            //std::cout << iterations << std::endl;
+
 			algorithm.performIteration();
 	}
+
+   //std::cout << "Iterations: " << iterations << std::endl;
 
    //Retrieve astar path
    auto path = algorithm.getPath();
@@ -42,3 +45,9 @@ std::vector<CVector2> astar_on_env(const std::string env_path) {
    return path_vec;
 
 }
+
+// double astar_on_path_length(const std::string env_path) {
+//
+//
+//
+// }

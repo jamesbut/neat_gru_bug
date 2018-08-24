@@ -11,6 +11,8 @@ struct RunResult {
 
    double fitness;
    bool got_to_tower;
+   double distance_from_tower_w_crash;
+   double traj_per_astar;
 
 };
 
@@ -41,6 +43,8 @@ private:
 
    double robots_distance;
    double fitness_score;
+   double distance_from_tower_w_crash;
+   double traj_per_astar;
 
    bool no_son_of_mine;
    double CLOSE_TO_TOWER;

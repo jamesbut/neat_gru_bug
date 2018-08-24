@@ -19,7 +19,7 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 void MasterLoopFunction::Reset() {
 
    //Get arena size for fitness function
-   CVector3 arena_size =  CSimulator::GetInstance().GetSpace().GetArenaSize(); 
+   CVector3 arena_size =  CSimulator::GetInstance().GetSpace().GetArenaSize();
 
    if (GENERATE_ENVS && m_reset) {
 

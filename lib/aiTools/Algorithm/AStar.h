@@ -22,6 +22,8 @@
 
 #include <list>
 
+#include<iostream>
+
 namespace aiTools
 {
 	namespace Algorithm
@@ -36,6 +38,7 @@ namespace aiTools
 
 				NodeComparator(SearchGraphWrapper& searchGraphWrapper, value_type& goalNode);
 				void operator()(const value_type& node);
+
 				value_type mLowestCostNode;
 			private:
 				SearchGraphWrapper& mSearchGraphWrapper;
@@ -52,7 +55,7 @@ namespace aiTools
 			{
 				cost_type storedCost = mSearchGraphWrapper.getCostForNode(mLowestCostNode);
 				cost_type newCost = mSearchGraphWrapper.getCostForNode(node);
-
+				//std::cout << storedCost << " " << newCost << std::endl;
 				if(newCost < storedCost)
 					mLowestCostNode = node;
 				if(newCost == storedCost) //tie-breaking over heuristic, if possible:
@@ -63,6 +66,7 @@ namespace aiTools
 						mLowestCostNode = node;
 				}
 			}
+
 		}
 
 		template <typename SearchGraphWrapper>
@@ -151,8 +155,11 @@ namespace aiTools
 
 						mSearchGraphWrapper.updateCostSetOpen(successor, newCostForNode, parentNode);
 
-						if(mSearchGraphWrapper.isGoalNode(successor))
+						if(mSearchGraphWrapper.isGoalNode(successor)){
+							//std::cout << "Found goal, backtracking" << std::endl;
 							backtrackFrom(successor);
+						}
+
 					}
 				);
 		}
