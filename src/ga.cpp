@@ -257,8 +257,8 @@ void GA::parallel_epoch() {
                                                       env_num, reset, false, HANDWRITTEN_ENVS,
                                                       test_envs, (i+1), rand_seed));
 
-            //Kill slave
-            ::raise(SIGTERM);
+            //Kill slave with user defined signal
+            ::raise(SIGUSR1);
 
          }
 
@@ -272,12 +272,32 @@ void GA::parallel_epoch() {
       while(unTrialsLeft > 0) {
 
          /* Wait for next slave to finish */
-         tSlavePID = ::waitpid(-1, &nSlaveInfo, WUNTRACED);
-         // Check for failure
-         if(!WIFSIGNALED(nSlaveInfo)) {
-            std::cout << "Something weird happened with slave process" << std::endl;
-            exit(1);
+         tSlavePID = ::wait(&nSlaveInfo);
+
+         //std::cout << unTrialsLeft << std::endl;
+
+         //Check for failure
+         if (tSlavePID == -1) {
+            perror("waitpid");
+            exit(EXIT_FAILURE);
          }
+
+         if(WIFSIGNALED(nSlaveInfo))
+            //If I didn't terminate slave, print out what did and exit
+            if(WTERMSIG(nSlaveInfo) != SIGUSR1) {
+
+               std::cout << "Terminated with signal: " << WTERMSIG(nSlaveInfo) << std::endl;
+
+               //Kill all child processes
+               for(size_t i = 0; i < slave_PIDs.size(); i++) {
+                  kill(slave_PIDs[i], SIGKILL);
+               }
+
+               //Kill main process
+               exit(EXIT_FAILURE);
+
+         }
+
          /* All OK, one less slave to wait for */
          --unTrialsLeft;
 

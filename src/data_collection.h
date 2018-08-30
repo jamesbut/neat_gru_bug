@@ -40,17 +40,17 @@ private:
    const int FLUSH_EVERY;
    const std::string TEST_SET_PATH;
 
-   NEAT::Organism* overall_winner;
+   std::unique_ptr<NEAT::Organism> overall_winner;
 
    bool overall_winner_change_since_last_eval;
 
    //Also keep track of other winners for test set evaluations
-   NEAT::Organism* gen_n_1;
-   NEAT::Organism* gen_n_2;
-   NEAT::Organism* gen_n_3;
-   NEAT::Organism* gen_nminus1_1;
-   NEAT::Organism* gen_nminus1_2;
-   NEAT::Organism* gen_nminus2_1;
+   std::unique_ptr<NEAT::Organism> gen_n_1;
+   std::unique_ptr<NEAT::Organism> gen_n_2;
+   std::unique_ptr<NEAT::Organism> gen_n_3;
+   std::unique_ptr<NEAT::Organism> gen_nminus1_1;
+   std::unique_ptr<NEAT::Organism> gen_nminus1_2;
+   std::unique_ptr<NEAT::Organism> gen_nminus2_1;
 
 };
 

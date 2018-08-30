@@ -64,7 +64,8 @@ void DataCollection::collect_scores(std::vector<std::vector <RunResult> > trial_
 
       new_genome = neatPop->organisms[maxPopOrg]->gnome->duplicate(1);
 
-      overall_winner = new NEAT::Organism(maxPopScore, new_genome, 1);
+      //overall_winner = new NEAT::Organism(maxPopScore, new_genome, 1);
+      overall_winner.reset(new NEAT::Organism(maxPopScore, new_genome, 1));
       overall_winner->winning_gen = current_gen;
 
    }
@@ -75,9 +76,9 @@ void DataCollection::collect_scores(std::vector<std::vector <RunResult> > trial_
       //Scan through array 3 times choosing the largest and moving down
 
       //Set older genomes to previous generational winners
-      gen_nminus2_1 = gen_nminus1_1;
-      gen_nminus1_1 = gen_n_1;
-      gen_nminus1_2 = gen_n_2;
+      gen_nminus2_1 = std::move(gen_nminus1_1);
+      gen_nminus1_1 = std::move(gen_n_1);
+      gen_nminus1_2 = std::move(gen_n_2);
 
 
       std::vector<int> previously_found_winners;
@@ -121,15 +122,15 @@ void DataCollection::collect_scores(std::vector<std::vector <RunResult> > trial_
          switch(i) {
 
             case 0:
-               gen_n_1 = new NEAT::Organism(top_genome_fitness, new_genome, 1);
+               gen_n_1.reset(new NEAT::Organism(top_genome_fitness, new_genome, 1));
                break;
 
             case 1:
-               gen_n_2 = new NEAT::Organism(top_genome_fitness, new_genome, 1);
+               gen_n_2.reset(new NEAT::Organism(top_genome_fitness, new_genome, 1));
                break;
 
             case 2:
-               gen_n_3 = new NEAT::Organism(top_genome_fitness, new_genome, 1);
+               gen_n_3.reset(new NEAT::Organism(top_genome_fitness, new_genome, 1));
                break;
 
          }
@@ -216,7 +217,7 @@ void DataCollection::test_on_training_set(std::vector<std::vector<RunResult> > g
 
       for(int j = 0; j < gen_results[i].size(); j++) {
          total_traj += gen_results[i][j].traj_per_astar;
-         std::cout << gen_results[i][j].traj_per_astar << std::endl;
+         //std::cout << gen_results[i][j].traj_per_astar << std::endl;
       }
 
       double mean_traj = total_traj / gen_results[i].size();
@@ -270,12 +271,12 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
       if(RANDOMLY_GENERATED_ENVS) {
 
-         genomes_to_be_tested.push_back(gen_n_1);
-         genomes_to_be_tested.push_back(gen_n_2);
-         genomes_to_be_tested.push_back(gen_n_3);
-         genomes_to_be_tested.push_back(gen_nminus1_1);
-         genomes_to_be_tested.push_back(gen_nminus1_2);
-         genomes_to_be_tested.push_back(gen_nminus2_1);
+         genomes_to_be_tested.push_back(gen_n_1.get());
+         genomes_to_be_tested.push_back(gen_n_2.get());
+         genomes_to_be_tested.push_back(gen_n_3.get());
+         genomes_to_be_tested.push_back(gen_nminus1_1.get());
+         genomes_to_be_tested.push_back(gen_nminus1_2.get());
+         genomes_to_be_tested.push_back(gen_nminus2_1.get());
 
       }
 
@@ -283,7 +284,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
       if (overall_winner_change_since_last_eval) {
 
          /*Add it to be tested*/
-         genomes_to_be_tested.push_back(overall_winner);
+         genomes_to_be_tested.push_back(overall_winner.get());
          overall_winner_change_since_last_eval = false;
 
       }
@@ -407,12 +408,12 @@ void DataCollection::flush_winners(int current_gen) {
 
       std::vector<NEAT::Organism*> genomes_to_be_printed;
 
-      genomes_to_be_printed.push_back(gen_n_1);
-      genomes_to_be_printed.push_back(gen_n_2);
-      genomes_to_be_printed.push_back(gen_n_3);
-      genomes_to_be_printed.push_back(gen_nminus1_1);
-      genomes_to_be_printed.push_back(gen_nminus1_2);
-      genomes_to_be_printed.push_back(gen_nminus2_1);
+      genomes_to_be_printed.push_back(gen_n_1.get());
+      genomes_to_be_printed.push_back(gen_n_2.get());
+      genomes_to_be_printed.push_back(gen_n_3.get());
+      genomes_to_be_printed.push_back(gen_nminus1_1.get());
+      genomes_to_be_printed.push_back(gen_nminus1_2.get());
+      genomes_to_be_printed.push_back(gen_nminus2_1.get());
 
       for(int i = 0; i < genomes_to_be_printed.size(); i++) {
 

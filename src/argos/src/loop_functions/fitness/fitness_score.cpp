@@ -88,6 +88,9 @@ void FitnessScore::PostExperiment() {
 
    fitness_score = distance_from_tower_w_crash;
 
+   //f2
+   //fitness_score = distance_from_tower_w_crash - traj_per_astar;
+
    if (fitness_score < 0) fitness_score = 0;
 
    //Old calculate fitness

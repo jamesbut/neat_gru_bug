@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #Read data
-test_file_data = genfromtxt('../scores/eval_scores/archive_scores/ap_13/ap_13_eval_0_4.txt', delimiter=',')
+#test_file_data = genfromtxt('../scores/eval_scores/archive_scores/ap_13/ap_13_eval_0_4.txt', delimiter=',')
+test_file_data = genfromtxt('../scores/eval_scores/archive_scores/ap_17/ap_17_eval_0_1.txt', delimiter=',')
 
 #Sort data
 test_generations = test_file_data[:,0]
