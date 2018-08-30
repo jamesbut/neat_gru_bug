@@ -5,6 +5,8 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 
+#include <thread>
+
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(1),
    NUM_FLUSHES(3),   //Currently not used
@@ -246,65 +248,149 @@ void GA::parallel_epoch() {
       //Create random seed for parallel processes
       int rand_seed = rand();
 
-      for(size_t j = 0; j < neatPop->organisms.size(); j++) {
+      unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
+      //std::cout << "Detected cores: " << concurentThreadsSupported << std::endl;
 
-         //Spawn slaves
-         slave_PIDs.push_back(::fork());
+      unsigned int num_organisms_tested = 0;
 
-         if(slave_PIDs.back() == 0) {
+      while(num_organisms_tested < neatPop->organisms.size()) {
 
-            shared_mem->set_run_result(j, i, as->run(*(neatPop->organisms[j]), file_name,
-                                                      env_num, reset, false, HANDWRITTEN_ENVS,
-                                                      test_envs, (i+1), rand_seed));
+         //std::cout << "Organisms tested: " << num_organisms_tested << std::endl;
 
-            //Kill slave with user defined signal
-            ::raise(SIGUSR1);
+         unsigned int num_organisms_left = neatPop->organisms.size() - num_organisms_tested;
+         unsigned int num_threads_to_spawn = std::min(num_organisms_left, concurentThreadsSupported);
+
+         //std::cout << "Num threads to spawn: " << num_threads_to_spawn << std::endl;
+
+         for(size_t k = 0; k < num_threads_to_spawn; k++) {
+
+            num_organisms_tested++;
+
+            //Spawn slaves
+            slave_PIDs.push_back(::fork());
+
+            if(slave_PIDs.back() == 0) {
+
+               shared_mem->set_run_result(num_organisms_tested-1, i, as->run(*(neatPop->organisms[num_organisms_tested-1]),
+                                          file_name, env_num, reset, false, HANDWRITTEN_ENVS, test_envs, (i+1),
+                                          rand_seed));
+
+               //Kill slave with user defined signal
+               ::raise(SIGUSR1);
+
+            }
 
          }
 
-      }
+         /* Wait for all the slaves to finish the run */
+         int unTrialsLeft = num_threads_to_spawn;
+         int nSlaveInfo;
+         pid_t tSlavePID;
 
-      /* Wait for all the slaves to finish the run */
-      int unTrialsLeft = neatPop->organisms.size();
-      int nSlaveInfo;
-      pid_t tSlavePID;
+         while(unTrialsLeft > 0) {
 
-      while(unTrialsLeft > 0) {
+            /* Wait for next slave to finish */
+            tSlavePID = ::wait(&nSlaveInfo);
 
-         /* Wait for next slave to finish */
-         tSlavePID = ::wait(&nSlaveInfo);
+            //std::cout << unTrialsLeft << std::endl;
 
-         //std::cout << unTrialsLeft << std::endl;
-
-         //Check for failure
-         if (tSlavePID == -1) {
-            perror("waitpid");
-            exit(EXIT_FAILURE);
-         }
-
-         if(WIFSIGNALED(nSlaveInfo))
-            //If I didn't terminate slave, print out what did and exit
-            if(WTERMSIG(nSlaveInfo) != SIGUSR1) {
-
-               std::cout << "Terminated with signal: " << WTERMSIG(nSlaveInfo) << std::endl;
-
-               //Kill all child processes
-               for(size_t i = 0; i < slave_PIDs.size(); i++) {
-                  kill(slave_PIDs[i], SIGKILL);
-               }
-
-               //Kill main process
+            //Check for failure
+            if (tSlavePID == -1) {
+               perror("waitpid");
                exit(EXIT_FAILURE);
+            }
+
+            if(WIFSIGNALED(nSlaveInfo))
+               //If I didn't terminate slave, print out what did and exit
+               if(WTERMSIG(nSlaveInfo) != SIGUSR1) {
+
+                  std::cout << "Terminated with signal: " << WTERMSIG(nSlaveInfo) << std::endl;
+
+                  //Kill all child processes
+                  for(size_t i = 0; i < slave_PIDs.size(); i++) {
+                     kill(slave_PIDs[i], SIGKILL);
+                  }
+
+                  //Kill main process
+                  exit(EXIT_FAILURE);
+
+            }
+
+            /* All OK, one less slave to wait for */
+            --unTrialsLeft;
 
          }
 
-         /* All OK, one less slave to wait for */
-         --unTrialsLeft;
+         //Clear slave pids
+         slave_PIDs.clear();
 
       }
 
-      //Clear slave pids
-      slave_PIDs.clear();
+
+
+
+
+
+      // for(size_t j = 0; j < neatPop->organisms.size(); j++) {
+      //
+      //    //Spawn slaves
+      //    slave_PIDs.push_back(::fork());
+      //
+      //    if(slave_PIDs.back() == 0) {
+      //
+      //       shared_mem->set_run_result(j, i, as->run(*(neatPop->organisms[j]), file_name,
+      //                                                 env_num, reset, false, HANDWRITTEN_ENVS,
+      //                                                 test_envs, (i+1), rand_seed));
+      //
+      //       //Kill slave with user defined signal
+      //       ::raise(SIGUSR1);
+      //
+      //    }
+      //
+      // }
+      //
+      // /* Wait for all the slaves to finish the run */
+      // int unTrialsLeft = neatPop->organisms.size();
+      // int nSlaveInfo;
+      // pid_t tSlavePID;
+      //
+      // while(unTrialsLeft > 0) {
+      //
+      //    /* Wait for next slave to finish */
+      //    tSlavePID = ::wait(&nSlaveInfo);
+      //
+      //    //std::cout << unTrialsLeft << std::endl;
+      //
+      //    //Check for failure
+      //    if (tSlavePID == -1) {
+      //       perror("waitpid");
+      //       exit(EXIT_FAILURE);
+      //    }
+      //
+      //    if(WIFSIGNALED(nSlaveInfo))
+      //       //If I didn't terminate slave, print out what did and exit
+      //       if(WTERMSIG(nSlaveInfo) != SIGUSR1) {
+      //
+      //          std::cout << "Terminated with signal: " << WTERMSIG(nSlaveInfo) << std::endl;
+      //
+      //          //Kill all child processes
+      //          for(size_t i = 0; i < slave_PIDs.size(); i++) {
+      //             kill(slave_PIDs[i], SIGKILL);
+      //          }
+      //
+      //          //Kill main process
+      //          exit(EXIT_FAILURE);
+      //
+      //    }
+      //
+      //    /* All OK, one less slave to wait for */
+      //    --unTrialsLeft;
+      //
+      // }
+      //
+      // //Clear slave pids
+      // slave_PIDs.clear();
+      //
 
    }
 
