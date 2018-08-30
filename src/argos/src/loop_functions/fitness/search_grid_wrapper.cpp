@@ -268,7 +268,7 @@ SearchGridWrapper::cost_type SearchGridWrapper::getHeuristic(const value_type& n
 
 }
 
-const int MAX_NUM_READ_TIMES = 10;
+const int MAX_NUM_READ_TIMES = 10000;
 
 aiTools::Grid<SearchNode> SearchGridWrapper::gridFromPng(const std::string& filename) {
 
