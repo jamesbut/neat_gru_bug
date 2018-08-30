@@ -271,7 +271,10 @@ aiTools::Grid<SearchNode> SearchGridWrapper::gridFromPng(const std::string& file
    //Read in environment
    Mat read_img = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
 
-   if(!read_img.data) std::cout << "Could not read image for astar" << std::endl;
+   if(!read_img.data) {
+      std::cout << "Could not read image for astar" << std::endl;
+      std::cout << "Filename: " << filename << std::endl;
+   }
 
    aiTools::Grid<SearchNode> map(read_img.rows, read_img.cols);
 
