@@ -268,18 +268,42 @@ SearchGridWrapper::cost_type SearchGridWrapper::getHeuristic(const value_type& n
 
 }
 
+const int MAX_NUM_READ_TIMES = 10;
+
 aiTools::Grid<SearchNode> SearchGridWrapper::gridFromPng(const std::string& filename) {
 
    if(!boost::filesystem::exists(filename))
       std::cout << "File: " << filename << " does not exist" << std::endl;
 
    //Read in environment
-   Mat read_img = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+   // Mat read_img = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+   //
+   // if(!read_img.data) {
+   //    std::cout << "Could not read image for astar" << std::endl;
+   //    std::cout << "Filename: " << filename << std::endl;
+   // }
 
-   if(!read_img.data) {
-      std::cout << "Could not read image for astar" << std::endl;
-      std::cout << "Filename: " << filename << std::endl;
-   }
+   Mat read_img;
+   int num_reads = 0;
+
+   //Keep trying to read file if can't at first
+   //This occasionally happens, I think it is something to do with the
+   //synchronous processes
+   do {
+
+      read_img = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
+      num_reads++;
+
+      if(num_reads > MAX_NUM_READ_TIMES) {
+
+         std::cout << "Could not read image for astar" << std::endl;
+         std::cout << "Exceeded number of file reads, file reads: " << num_reads << std::endl;
+         break;
+
+      }
+
+   } while (!read_img.data);
+
 
    aiTools::Grid<SearchNode> map(read_img.rows, read_img.cols);
 
