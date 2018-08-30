@@ -6,6 +6,8 @@
 #include <aiTools/Math/LinearTransformation.h>
 #include <algorithm>
 
+#include <boost/filesystem.hpp>
+
 using namespace cv;
 
 SearchGridWrapper::SearchGridWrapper(const std::string& filePath,
@@ -267,6 +269,9 @@ SearchGridWrapper::cost_type SearchGridWrapper::getHeuristic(const value_type& n
 }
 
 aiTools::Grid<SearchNode> SearchGridWrapper::gridFromPng(const std::string& filename) {
+
+   if(!boost::filesystem::exists(filename))
+      std::cout << "File: " << filename << " does not exist" << std::endl;
 
    //Read in environment
    Mat read_img = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
