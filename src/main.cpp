@@ -6,6 +6,8 @@
 
 #include <chrono>
 
+#include "argos/src/loop_functions/environment/environment_generator.h"
+
 using Clock = std::chrono::steady_clock;
 using std::chrono::time_point;
 using std::chrono::duration_cast;
@@ -19,6 +21,11 @@ int main(int argc, char *argv[]) {
    // time_point<Clock> end = Clock::now();
    // milliseconds diff = duration_cast<milliseconds>(end - start);
    // std::cout << diff.count() << "ms" << std::endl;
+
+   // EnvironmentGenerator eg = EnvironmentGenerator("");
+   // eg.generate_env();
+
+
 
    // Seed random number generator with time
    srand((unsigned)time(NULL));

@@ -8,6 +8,11 @@
 #include <set>
 #include <memory>
 
+//OpenCV libraries
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
 #include "search_node_comparator.h"
 
 struct SearchNode
@@ -49,12 +54,20 @@ struct SearchGridWrapper : public aiTools::Algorithm::SampleAStarSearchGraphWrap
 	cost_type getHeuristic(const value_type& node);
 
 	static aiTools::Grid<SearchNode> gridFromPng(const std::string& filename);
+	static aiTools::Grid<SearchNode> gridFromMat(const cv::Mat& mat_img);
 	static void printGridToPng(const std::string& filename, aiTools::Grid<SearchNode>& grid);
 
 	//now, own stuff:
 	//SearchGridWrapper(const std::string& initialLayout);
-	SearchGridWrapper(const std::string& filePath, const aiTools::Math::Vector2<int> start_pos,
+	SearchGridWrapper(const std::string& filePath,
+							const aiTools::Math::Vector2<int> start_pos,
 							const aiTools::Math::Vector2<int> goal_pos);
+	SearchGridWrapper(const cv::Mat& mat_img,
+                     const aiTools::Math::Vector2<int> start_pos,
+                     const aiTools::Math::Vector2<int> goal_pos);
+
+	void initialise(const aiTools::Math::Vector2<int> start_pos,
+						 const aiTools::Math::Vector2<int> goal_pos);
 
 	aiTools::Grid<SearchNode> mData;
 	GridIndex mGoalIndex;

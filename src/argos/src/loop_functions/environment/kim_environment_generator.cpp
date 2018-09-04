@@ -58,6 +58,9 @@ void RandomEnvironmentGenerator::getRobotPositions()
      vector<int> initial_bot_position{0,0};
      initial_bot_position.at(0)=pos_bot.GetX()/2+environment_width/2;
      initial_bot_position.at(1)=pos_bot.GetY()/2+environment_height/2;
+
+     //std::cout << "Initial position: " << initial_bot_position.at(0) << " " << initial_bot_position.at(1) << std::endl;
+
      initial_bot_positions.push_back(initial_bot_position);
   }
 }
@@ -113,8 +116,11 @@ void RandomEnvironmentGenerator::ClearEnvironment()
 void RandomEnvironmentGenerator::Reset(std::string file_name, int env_num, int rand_seed) {
 
    //Reset rngs
-   std::srand(rand_seed);
-   rng(rand_seed);
+   // std::srand(rand_seed);
+   // rng(rand_seed);
+
+   std::srand(5);
+   rng(5);
 
     it_box = 0;
     if(file_name.length()==0)
@@ -128,6 +134,8 @@ void RandomEnvironmentGenerator::Reset(std::string file_name, int env_num, int r
     }
 
     //std::cout << boxEntities.size() << std::endl;
+
+    std::cout << "Kim built" << std::endl;
 
 }
 void RandomEnvironmentGenerator::Destroy()
@@ -208,6 +216,9 @@ void RandomEnvironmentGenerator::generateEnvironment(int env_num)
 
     //Write images of generated envs
     cv::imwrite(file_name.str(),corridor_contours_img);
+
+   //  std::cout << "Second" << std::endl;
+   //  std::cout << corridor_contours_img.rows << " " << corridor_contours_img.cols << std::endl;
 
 #ifdef ACCEPT_ENVIRONMENT
 
@@ -326,6 +337,7 @@ void RandomEnvironmentGenerator::decideNextAction(std::vector<int> current_bot_p
 {
   float random_percentage = rng.uniform(0.0f,1.0f);
   //std::cout << "Agent at: " << current_bot_position[0] << ", " << current_bot_position[1] << std::endl;
+  //std::cout << "RNG state: " << rng.state << std::endl;
   //std::cout << "Random percentage: " << random_percentage << std::endl;
   float percentage_rest = 1.0f - change_agent_gostraight;
 

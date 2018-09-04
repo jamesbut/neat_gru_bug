@@ -7,12 +7,14 @@
 
 #include <thread>
 
+#include "argos/src/loop_functions/environment/environment_generator.h"
+
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(1),
    NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(1),
    INCREMENTAL_EV(false),
-   PARALLEL(true),
+   PARALLEL(false),
    //ACCEPTABLE_FITNESS(13.88),
    HANDWRITTEN_ENVS(false),
    RANDOMLY_GENERATED_ENVS(true),
@@ -29,7 +31,7 @@ GA::GA(std::string neat_param_file) :
    if(HANDWRITTEN_ENVS)
       as = new ARGoS_simulation("../argos_params/no_walls_10.argos");
    else
-      as = new ARGoS_simulation("../argos_params/no_walls.argos");
+      as = new ARGoS_simulation("../argos_params/no_walls_vis.argos");
 
    initNEAT(neat_param_file);
 
@@ -187,9 +189,11 @@ void GA::epoch() {
          env_num = i+1;
       }
 
-      //Create random seed for parallel processes - it is not really needed
-      //in the serial version but the method now needs one
-      int rand_seed = rand();
+      //Generate environment
+      EnvironmentGenerator eg = EnvironmentGenerator(file_name);
+      eg.generate_env();
+
+      // int rand_seed = rand();
 
       for(size_t j = 0; j < neatPop->organisms.size(); j++) {
 
@@ -198,8 +202,11 @@ void GA::epoch() {
 
          if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
 
-         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num,
-                                       reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), rand_seed);
+         // trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num,
+         //                               reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), rand_seed);
+
+         trial_scores[j][i] = as->run(*(neatPop->organisms[j]), env_num,
+                                       reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), eg);
 
          reset = false;
 
@@ -242,11 +249,9 @@ void GA::parallel_epoch() {
          reset = true;
       }
 
-      //I need to calculate optimal path of environment here really,
-      //so that it isn't parallelised, nor is it done for every organism
-
-      //Create random seed for parallel processes
-      int rand_seed = rand();
+      //Generate environment
+      EnvironmentGenerator eg = EnvironmentGenerator(file_name);
+      eg.generate_env();
 
       unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
       //std::cout << "Detected cores: " << concurentThreadsSupported << std::endl;
@@ -272,8 +277,7 @@ void GA::parallel_epoch() {
             if(slave_PIDs.back() == 0) {
 
                shared_mem->set_run_result(num_organisms_tested-1, i, as->run(*(neatPop->organisms[num_organisms_tested-1]),
-                                          file_name, env_num, reset, false, HANDWRITTEN_ENVS, test_envs, (i+1),
-                                          rand_seed));
+                                          env_num, reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), eg));
 
                //Kill slave with user defined signal
                ::raise(SIGUSR1);
@@ -325,73 +329,6 @@ void GA::parallel_epoch() {
          slave_PIDs.clear();
 
       }
-
-
-
-
-
-
-      // for(size_t j = 0; j < neatPop->organisms.size(); j++) {
-      //
-      //    //Spawn slaves
-      //    slave_PIDs.push_back(::fork());
-      //
-      //    if(slave_PIDs.back() == 0) {
-      //
-      //       shared_mem->set_run_result(j, i, as->run(*(neatPop->organisms[j]), file_name,
-      //                                                 env_num, reset, false, HANDWRITTEN_ENVS,
-      //                                                 test_envs, (i+1), rand_seed));
-      //
-      //       //Kill slave with user defined signal
-      //       ::raise(SIGUSR1);
-      //
-      //    }
-      //
-      // }
-      //
-      // /* Wait for all the slaves to finish the run */
-      // int unTrialsLeft = neatPop->organisms.size();
-      // int nSlaveInfo;
-      // pid_t tSlavePID;
-      //
-      // while(unTrialsLeft > 0) {
-      //
-      //    /* Wait for next slave to finish */
-      //    tSlavePID = ::wait(&nSlaveInfo);
-      //
-      //    //std::cout << unTrialsLeft << std::endl;
-      //
-      //    //Check for failure
-      //    if (tSlavePID == -1) {
-      //       perror("waitpid");
-      //       exit(EXIT_FAILURE);
-      //    }
-      //
-      //    if(WIFSIGNALED(nSlaveInfo))
-      //       //If I didn't terminate slave, print out what did and exit
-      //       if(WTERMSIG(nSlaveInfo) != SIGUSR1) {
-      //
-      //          std::cout << "Terminated with signal: " << WTERMSIG(nSlaveInfo) << std::endl;
-      //
-      //          //Kill all child processes
-      //          for(size_t i = 0; i < slave_PIDs.size(); i++) {
-      //             kill(slave_PIDs[i], SIGKILL);
-      //          }
-      //
-      //          //Kill main process
-      //          exit(EXIT_FAILURE);
-      //
-      //    }
-      //
-      //    /* All OK, one less slave to wait for */
-      //    --unTrialsLeft;
-      //
-      // }
-      //
-      // //Clear slave pids
-      // slave_PIDs.clear();
-      //
-
    }
 
    //Populate trial scores from shared mem
@@ -405,6 +342,129 @@ void GA::parallel_epoch() {
    data_collection->flush_winners(m_unCurrentGeneration);
 
 }
+
+// void GA::parallel_epoch() {
+//
+//    //Run individual fitness tests
+//    for(size_t i = 0; i < NEAT::num_trials; i++) {
+//
+//       std::string file_name;
+//       int env_num;
+//       bool reset = false;
+//       bool test_envs = false;
+//
+//       //Create file name and env num
+//       if(HANDWRITTEN_ENVS) {
+//          file_name = ENV_PATH + "15.png";
+//          env_num = 15;
+//       } else if (RANDOMLY_GENERATED_ENVS) {
+//          file_name = "";
+//          env_num = i+1;
+//          reset = true;
+//       } else {
+//          test_envs = true;
+//          file_name = ENV_PATH + std::to_string(i+1) + ".png";
+//          env_num = i+1;
+//          reset = true;
+//       }
+//
+//       //Generate environment
+//       EnvironmentGenerator eg = EnvironmentGenerator(file_name);
+//       eg.generate_env();
+//
+//       //Create random seed for parallel processes
+//       int rand_seed = 5;
+//
+//       unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
+//       //std::cout << "Detected cores: " << concurentThreadsSupported << std::endl;
+//
+//       unsigned int num_organisms_tested = 0;
+//
+//       while(num_organisms_tested < neatPop->organisms.size()) {
+//
+//          //std::cout << "Organisms tested: " << num_organisms_tested << std::endl;
+//
+//          unsigned int num_organisms_left = neatPop->organisms.size() - num_organisms_tested;
+//          unsigned int num_threads_to_spawn = std::min(num_organisms_left, concurentThreadsSupported);
+//
+//          //std::cout << "Num threads to spawn: " << num_threads_to_spawn << std::endl;
+//
+//          for(size_t k = 0; k < num_threads_to_spawn; k++) {
+//
+//             num_organisms_tested++;
+//
+//             //Spawn slaves
+//             slave_PIDs.push_back(::fork());
+//
+//             if(slave_PIDs.back() == 0) {
+//
+//                shared_mem->set_run_result(num_organisms_tested-1, i, as->run(*(neatPop->organisms[num_organisms_tested-1]),
+//                                           file_name, env_num, reset, false, HANDWRITTEN_ENVS, test_envs, (i+1),
+//                                           rand_seed));
+//
+//                //Kill slave with user defined signal
+//                ::raise(SIGUSR1);
+//
+//             }
+//
+//          }
+//
+//          /* Wait for all the slaves to finish the run */
+//          int unTrialsLeft = num_threads_to_spawn;
+//          int nSlaveInfo;
+//          pid_t tSlavePID;
+//
+//          while(unTrialsLeft > 0) {
+//
+//             /* Wait for next slave to finish */
+//             tSlavePID = ::wait(&nSlaveInfo);
+//
+//             //std::cout << unTrialsLeft << std::endl;
+//
+//             //Check for failure
+//             if (tSlavePID == -1) {
+//                perror("waitpid");
+//                exit(EXIT_FAILURE);
+//             }
+//
+//             if(WIFSIGNALED(nSlaveInfo))
+//                //If I didn't terminate slave, print out what did and exit
+//                if(WTERMSIG(nSlaveInfo) != SIGUSR1) {
+//
+//                   std::cout << "Terminated with signal: " << WTERMSIG(nSlaveInfo) << std::endl;
+//
+//                   //Kill all child processes
+//                   for(size_t i = 0; i < slave_PIDs.size(); i++) {
+//                      kill(slave_PIDs[i], SIGKILL);
+//                   }
+//
+//                   //Kill main process
+//                   exit(EXIT_FAILURE);
+//
+//             }
+//
+//             /* All OK, one less slave to wait for */
+//             --unTrialsLeft;
+//
+//          }
+//
+//          //Clear slave pids
+//          slave_PIDs.clear();
+//
+//       }
+//    }
+//
+//    //Populate trial scores from shared mem
+//    std::vector<std::vector <RunResult> > trial_results;
+//
+//    for(size_t i = 0; i < neatPop->organisms.size(); i++)
+//       trial_results.push_back(shared_mem->get_run_result(i));
+//
+//    data_collection->collect_scores(trial_results, neatPop, m_unCurrentGeneration);
+//
+//    data_collection->flush_winners(m_unCurrentGeneration);
+//
+// }
 
 void GA::nextGen() {
 

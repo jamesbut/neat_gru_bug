@@ -15,22 +15,36 @@ SearchGridWrapper::SearchGridWrapper(const std::string& filePath,
                                      const aiTools::Math::Vector2<int> goal_pos) :
                                      mData(gridFromPng(filePath)) {
 
-      //Set start position
-      mData.at(start_pos.x, start_pos.y).mData.cost = 0;
-      mData.at(start_pos.x, start_pos.y).mData.isOpen = true;
-      mData.at(start_pos.x, start_pos.y).mData.isClosed = false;
+   initialise(start_pos, goal_pos);
 
-      //Set goal
-      mGoalIndex = GridIndex(goal_pos.x, goal_pos.y);
-      mData.at(goal_pos.x, goal_pos.y).mData.isGoal = true;
+}
 
-      //Initialise open priority queue
-      //mOpenQueue.reset(new std::priority_queue<value_type, std::vector<value_type>, SearchNodeComparator>(SearchNodeComparator(*this)));
-      mOpenQueue.reset(new std::set<value_type, SearchNodeComparator>(SearchNodeComparator(*this)));
+SearchGridWrapper::SearchGridWrapper(const cv::Mat& mat_img,
+                                     const aiTools::Math::Vector2<int> start_pos,
+                                     const aiTools::Math::Vector2<int> goal_pos) :
+                                     mData(gridFromMat(mat_img)) {
 
-      //Add start pos to open queue
-      //mOpenQueue->push(std::make_tuple(start_pos.x, start_pos.y));
-      mOpenQueue->insert(std::make_tuple(start_pos.x, start_pos.y));
+   initialise(start_pos, goal_pos);
+
+}
+
+void SearchGridWrapper::initialise(const aiTools::Math::Vector2<int> start_pos,
+                                   const aiTools::Math::Vector2<int> goal_pos) {
+
+   //Set start position
+   mData.at(start_pos.x, start_pos.y).mData.cost = 0;
+   mData.at(start_pos.x, start_pos.y).mData.isOpen = true;
+   mData.at(start_pos.x, start_pos.y).mData.isClosed = false;
+
+   //Set goal
+   mGoalIndex = GridIndex(goal_pos.x, goal_pos.y);
+   mData.at(goal_pos.x, goal_pos.y).mData.isGoal = true;
+
+   //Initialise open priority set
+   mOpenQueue.reset(new std::set<value_type, SearchNodeComparator>(SearchNodeComparator(*this)));
+
+   //Add start pos to open set
+   mOpenQueue->insert(std::make_tuple(start_pos.x, start_pos.y));
 
 }
 
@@ -324,6 +338,34 @@ aiTools::Grid<SearchNode> SearchGridWrapper::gridFromPng(const std::string& file
 
    // namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
    // imshow( "Display window", read_img );                   // Show our image inside it.
+   //
+   // waitKey(0);
+
+   return map;
+
+}
+
+aiTools::Grid<SearchNode> SearchGridWrapper::gridFromMat(const cv::Mat& mat_img) {
+
+   aiTools::Grid<SearchNode> map(mat_img.rows, mat_img.cols);
+
+   for(size_t y = 0; y < map.mHeight; y++) {
+
+      for(size_t x = 0; x < map.mWidth; x++) {
+
+         int img_value = static_cast<int>(mat_img.at<uchar>(x,y));
+
+         if(img_value == 255)
+            map.at(x, y).mData.isBlocked = true;
+         else
+            map.at(x, y).mData.traversalCost = 1;
+
+      }
+
+   }
+
+   // namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
+   // imshow( "Display window", mat_img );                   // Show our image inside it.
    //
    // waitKey(0);
 

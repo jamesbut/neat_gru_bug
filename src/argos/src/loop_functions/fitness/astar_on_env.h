@@ -5,8 +5,14 @@
 #include <vector>
 #include <argos3/core/utility/math/vector2.h>
 
-//using namespace argos;
+//OpenCV libraries
+#include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
-std::vector<argos::CVector2> astar_on_env(const std::string env_path);
+
+std::vector<argos::CVector2> astar_on_env(const std::string& env_path);
+
+std::vector<argos::CVector2> astar_on_env(const cv::Mat& mat_img);
 
 #endif

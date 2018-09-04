@@ -19,14 +19,37 @@ void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
 }
 
-void FitnessScore::Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs) {
+// void FitnessScore::Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs) {
+//
+//    m_indvRun = indv_run;
+//    m_envPath = env_path;
+//    m_testEnvs = test_envs;
+//    m_envNum = env_num;
+//
+//    arena_size = CVector3(arena_size.GetX(), arena_size.GetY(), 0.0);
+//    max_range = arena_size.Length();
+//
+//    robots_distance = 0;
+//    no_son_of_mine = false;
+//    fitness_score = 0;
+//    hit_tower = false;
+//
+//    if(indv_run) CLOSE_TO_TOWER = 1.0;
+//    //if(indv_run) CLOSE_TO_TOWER = 0.32;
+//    else CLOSE_TO_TOWER = 0.32;
+//
+//    trajectory_loop.Reset(env_num);
+//
+// }
+
+void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator) {
 
    m_indvRun = indv_run;
-   m_envPath = env_path;
    m_testEnvs = test_envs;
    m_envNum = env_num;
+   m_env_generator.reset(&env_generator);
 
-   arena_size = CVector3(arena_size.GetX(), arena_size.GetY(), 0.0);
+   CVector3 arena_size = CVector3(m_env_generator->get_env_width(), m_env_generator->get_env_height(), 0.0);
    max_range = arena_size.Length();
 
    robots_distance = 0;
@@ -88,6 +111,8 @@ void FitnessScore::PostExperiment() {
 
    fitness_score = distance_from_tower_w_crash;
 
+   std::cout << "Fitness score: " << fitness_score << std::endl;
+
    //f2
    //fitness_score = distance_from_tower_w_crash - traj_per_astar;
 
@@ -104,7 +129,6 @@ void FitnessScore::PostExperiment() {
 
 }
 
-//Calculate the trajectory length divided by the astar length
 double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVector2>& trajectory) {
 
    double astar_length;
@@ -116,20 +140,7 @@ double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVe
 
    } else {
 
-      //Calculate A* path on environment
-      m_envPath = GENERATED_ENVS_MAP_PATH + std::to_string(m_envNum) + ".png";
-      //m_envPath = "../argos_params/environments/kim_envs/rand_env_" + std::to_string(m_envNum) + ".png";
-
-      std::vector<CVector2> astar_path = astar_on_env(m_envPath);
-
-      std::vector<CVector2> astar_path_divided_by_ten(astar_path.size());
-
-      //Divide astar path by 10 because the image that is planned over is 140x140
-      //whereas the environment is 14x14
-      std::transform(astar_path.begin(), astar_path.end(), astar_path_divided_by_ten.begin(),
-                     [](const CVector2& pos){return pos / 10;});
-
-      astar_length = calculate_trajectory_length(astar_path_divided_by_ten);
+      astar_length = m_env_generator->get_environment_optimal_length();
 
    }
 
@@ -152,6 +163,57 @@ double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVe
    return (double)trajectory_length / (double)astar_length;
 
 }
+
+//Calculate the trajectory length divided by the astar length
+// double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVector2>& trajectory) {
+//
+//    double astar_length;
+//
+//    //If it is in test set, just read from file
+//    if(m_testEnvs) {
+//
+//       astar_length = get_value_at_line(TEST_ENV_LENGTHS_PATH, m_envNum);
+//
+//    } else {
+//
+//       //Calculate A* path on environment
+//       m_envPath = GENERATED_ENVS_MAP_PATH + std::to_string(m_envNum) + ".png";
+//       //m_envPath = "../argos_params/environments/kim_envs/rand_env_" + std::to_string(m_envNum) + ".png";
+//
+//       std::vector<CVector2> astar_path = astar_on_env(m_envPath);
+//
+//       std::vector<CVector2> astar_path_divided_by_ten(astar_path.size());
+//
+//       //Divide astar path by 10 because the image that is planned over is 140x140
+//       //whereas the environment is 14x14
+//       std::transform(astar_path.begin(), astar_path.end(), astar_path_divided_by_ten.begin(),
+//                      [](const CVector2& pos){return pos / 10;});
+//
+//       astar_length = calculate_trajectory_length(astar_path_divided_by_ten);
+//
+//       //std::cout << "Optimal path length: " << astar_length << std::endl;
+//
+//    }
+//
+//    //Calculate trajectory length
+//    double trajectory_length = calculate_trajectory_length(trajectory);
+//    trajectory_length += 1.0;      //Add 1 for the extra 1 meter stopped before the tower
+//
+//    //For now, deposit this into kims_envs_lengths.txt
+//    // std::ofstream trajectory_file;
+//    // std::stringstream file_name;
+//    // file_name << "../trajectories_temp/kims_envs_lengths/kims_envs_lengths.txt";
+//    // trajectory_file.open(file_name.str(), std::ios_base::app);
+//    //
+//    // trajectory_file << astar_length <<std::endl;
+//    //
+//    // trajectory_file.close();
+//
+//    //std::cout << trajectory_length << " " << astar_length << std::endl;
+//
+//    return (double)trajectory_length / (double)astar_length;
+//
+// }
 
 double FitnessScore::calculate_trajectory_length(const std::vector<CVector2>& traj) {
    //std::cout << "Calc traj length" << std::endl;

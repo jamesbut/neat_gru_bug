@@ -32,7 +32,7 @@
 
 using namespace argos;
 
-struct grid_element_status_t {
+struct grid_element_status_t_kim {
   bool is_agent_present;
   std::vector<std::vector<int>> circ_action;
   bool is_corridor_present;
@@ -74,7 +74,7 @@ public:
 
 
 private:
-  std::vector<std::vector<grid_element_status_t>> environment_grid;
+  std::vector<std::vector<grid_element_status_t_kim>> environment_grid;
   int environment_width;
   int environment_height;
   std::vector<std::vector<int>> initial_bot_positions;

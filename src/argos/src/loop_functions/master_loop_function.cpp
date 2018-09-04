@@ -1,9 +1,22 @@
 #include "master_loop_function.h"
 
 
-MasterLoopFunction::MasterLoopFunction() : GENERATE_ENVS(true) {}
+MasterLoopFunction::MasterLoopFunction() : GENERATE_ENVS(true), m_env_builder() {}
 
 MasterLoopFunction::~MasterLoopFunction() {}
+
+// void MasterLoopFunction::Init(TConfigurationNode& t_node) {
+//
+//    //Find pointers to robots and their controllers
+//    find_robot_pointers();
+//
+//    fitness_score_loop.Init(clever_bot, dead_bot);
+//
+//    if (GENERATE_ENVS) environment_generator_loop.Init();
+//
+//
+//
+// }
 
 void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
@@ -12,26 +25,43 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
    fitness_score_loop.Init(clever_bot, dead_bot);
 
-   if (GENERATE_ENVS) environment_generator_loop.Init();
+   //if (GENERATE_ENVS) environment_generator_loop.Init();
+
+   m_env_builder = EnvironmentBuilder();
 
 }
+
+// void MasterLoopFunction::Reset() {
+//
+//    //Get arena size for fitness function
+//    CVector3 arena_size =  CSimulator::GetInstance().GetSpace().GetArenaSize();
+//
+//    if (GENERATE_ENVS && m_reset) {
+//
+//       environment_generator_loop.ClearEnvironment();
+//       environment_generator_loop.Reset(m_envPath, m_envNum, m_randSeed);
+//
+//    }
+//
+//    if (m_handwritten)
+//       SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
+//
+//    fitness_score_loop.Reset(m_indvRun, arena_size, m_envNum, m_envPath, m_testEnvs);
+//
+// }
 
 void MasterLoopFunction::Reset() {
 
    //Get arena size for fitness function
    CVector3 arena_size =  CSimulator::GetInstance().GetSpace().GetArenaSize();
 
-   if (GENERATE_ENVS && m_reset) {
-
-      environment_generator_loop.ClearEnvironment();
-      environment_generator_loop.Reset(m_envPath, m_envNum, m_randSeed);
-
-   }
+   //Build env
+   if(m_reset) m_env_builder.build_env(*m_env_generator);
 
    if (m_handwritten)
       SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
 
-   fitness_score_loop.Reset(m_indvRun, arena_size, m_envNum, m_envPath, m_testEnvs);
+   fitness_score_loop.Reset(m_indvRun, m_envNum, m_testEnvs, *m_env_generator);
 
 }
 

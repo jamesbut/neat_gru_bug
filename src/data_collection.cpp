@@ -302,12 +302,18 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
             //Create random seed for parallel processes - it is not really needed
             //in the serial version but the method now needs one
-            int rand_seed = rand();
+            // int rand_seed = rand();
+
+            EnvironmentGenerator eg = EnvironmentGenerator(file_name);
+            eg.generate_env();
 
             //std::cout << "Handwritten envs: " << HANDWRITTEN_ENVS << std::endl;
 
-            run_results[j] = as->run(*genomes_to_be_tested[i], file_name, (j+1), true, true,
-                                      HANDWRITTEN_ENVS, true, (j+1), rand_seed);
+            // run_results[j] = as->run(*genomes_to_be_tested[i], file_name, (j+1), true, true,
+            //                           HANDWRITTEN_ENVS, true, (j+1), rand_seed);
+
+            run_results[j] = as->run(*genomes_to_be_tested[i], (j+1), true, true,
+                                      HANDWRITTEN_ENVS, true, (j+1), eg);
 
             //std::cout << "Eval set: " << scores[i] << std::endl;
 

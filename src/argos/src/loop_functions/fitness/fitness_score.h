@@ -4,6 +4,7 @@
 #include <argos3/core/simulator/loop_functions.h>
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include "trajectory_logger.h"
+#include "../environment/environment_generator.h"
 
 using namespace argos;
 
@@ -23,7 +24,8 @@ public:
    FitnessScore();
 
    void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
-   void Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs);
+   // void Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs);
+   void Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator);
    void PreStep();
    void PostStep();
    void PostExperiment();
@@ -40,6 +42,7 @@ private:
    CFootBotEntity* m_dead_bot;
 
    TrajectoryLogger trajectory_loop;
+   std::unique_ptr<EnvironmentGenerator> m_env_generator;
 
    double robots_distance;
    double fitness_score;
