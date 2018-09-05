@@ -40,6 +40,8 @@ public:
    inline int get_env_width() {return 2 * environment_width;};
    inline int get_env_height() {return 2 * environment_height;};
 
+   void set_argos_config_file(const std::string filename);
+
    const bool EFFICIENT_ENVIRONMENT;
 
 private:

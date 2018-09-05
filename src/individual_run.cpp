@@ -1,6 +1,8 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
+   ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
+   ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
    eg(),
    //NUM_RUNS(44),
    NUM_RUNS(209),
@@ -11,10 +13,13 @@ IndividualRun::IndividualRun(const std::string& gf) :
    //ENV_PATH("../argos_params/environments/handwritten_envs/e")
 {
 
-   if(HANDWRITTEN_ENVS)
-      as = new ARGoS_simulation("../argos_params/no_walls_10_vis.argos");
-   else
-      as = new ARGoS_simulation("../argos_params/no_walls.argos");
+   if(HANDWRITTEN_ENVS) {
+      as = new ARGoS_simulation(ARGOS_FILE_NAME_10);
+      eg.set_argos_config_file(ARGOS_FILE_NAME_10);
+   } else {
+      as = new ARGoS_simulation(ARGOS_FILE_NAME);
+      eg.set_argos_config_file(ARGOS_FILE_NAME);
+   }
 
    readGenomeFile(gf);
 

@@ -2,7 +2,10 @@
 
 #include "../fitness/astar_on_env.h"
 
+#include <argos3/core/utility/configuration/argos_configuration.h>
+
 using namespace cv;
+//using namespace argos;
 
 //#define ACCEPT_ENVIRONMENT
 
@@ -26,8 +29,6 @@ EnvironmentGenerator::EnvironmentGenerator() :
       // environment_width = 14;
       // environment_height = 14;
 
-      
-
       environment_width = 14/2;
       environment_height = 14/2;
 
@@ -39,6 +40,19 @@ EnvironmentGenerator::EnvironmentGenerator() :
 EnvironmentGenerator::~EnvironmentGenerator() {
 
    //std::cout << "Env generator destroyed" << std::endl;
+
+}
+
+//TODO: Come back to this eventually, not essential for now
+//This function also overides the environment height and width
+//by reading the xml file
+void EnvironmentGenerator::set_argos_config_file(const std::string filename) {
+
+   //argos::tcipp::Document doc = tcipp::Document();
+   //doc.LoadFile(filename);
+
+   //environment_width =
+   //environment_height =
 
 }
 
@@ -198,17 +212,15 @@ void EnvironmentGenerator::generate_rand_env() {
 
 void EnvironmentGenerator::read_file(const std::string file_name) {
 
-   //bin_corridor_img_large = Mat::zeros(environment_width * 20, environment_height * 20, CV_8UC1);
-   //resize(bin_corridor_img, bin_corridor_img_large, bin_corridor_img_large.size(), 0, 0, INTER_NEAREST);
-   //corridor_contours_img = Mat::zeros(bin_corridor_img_large.size(), CV_8UC1);
-   //std::cout<<"size "<<corridor_contours_img.size()<<std::endl;
-
-   //cv::Mat read_img = cv::imread(file_name, CV_LOAD_IMAGE_GRAYSCALE);
-   //resize(read_img, corridor_contours_img, corridor_contours_img.size(), 0, 0, INTER_NEAREST);
-
+   //std::cout << "filename: " << file_name << std::endl;
+   
    cv::Mat read_img = cv::imread(file_name, CV_LOAD_IMAGE_GRAYSCALE);
 
    corridor_contours_img = Mat::zeros(read_img.size(), CV_8UC1);
+   resize(read_img, corridor_contours_img, corridor_contours_img.size(), 0, 0, INTER_NEAREST);
+
+   //namedWindow( "Environment2", WINDOW_AUTOSIZE );// Create a window for display.
+   //imshow( "Environment2", corridor_contours_img );                   // Show our image inside it.
 
 }
 

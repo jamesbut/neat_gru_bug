@@ -25,6 +25,9 @@ private:
    const bool RANDOM_ENVS;
    const bool HANDWRITTEN_ENVS;
 
+   const std::string ARGOS_FILE_NAME;
+   const std::string ARGOS_FILE_NAME_10;
+
    EnvironmentGenerator eg;
 
 };

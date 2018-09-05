@@ -11,8 +11,8 @@
 
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(1),
-   //ARGOS_FILE_NAME(),
-   //ARGOS_FILE_NAME_10(),
+   ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
+   ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
    eg(),
    NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(1),
@@ -31,10 +31,13 @@ GA::GA(std::string neat_param_file) :
    //ENV_PATH("../argos_params/environments/handwritten_envs/e")
    {
 
-   if(HANDWRITTEN_ENVS)
-      as = new ARGoS_simulation("../argos_params/no_walls_10.argos");
-   else
-      as = new ARGoS_simulation("../argos_params/no_walls.argos");
+   if(HANDWRITTEN_ENVS) {
+      as = new ARGoS_simulation(ARGOS_FILE_NAME_10);
+      eg.set_argos_config_file(ARGOS_FILE_NAME_10);
+   } else {
+      as = new ARGoS_simulation(ARGOS_FILE_NAME);
+      eg.set_argos_config_file(ARGOS_FILE_NAME);
+   }
 
    initNEAT(neat_param_file);
 

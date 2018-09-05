@@ -80,8 +80,8 @@ private:
    const std::string TEST_SET_PATH;
    const int NUM_TEST_ENVS;
 
-   //const std::string ARGOS_FILE_NAME;
-   //const std::string ARGOS_FILE_NAME_10;
+   const std::string ARGOS_FILE_NAME;
+   const std::string ARGOS_FILE_NAME_10;
 
    // int eval_set_finishes_overall_winner;
    // std::vector<RunResult> eval_set_results_overall_winner;
