@@ -52,6 +52,8 @@ private:
    std::unique_ptr<NEAT::Organism> gen_nminus1_2;
    std::unique_ptr<NEAT::Organism> gen_nminus2_1;
 
+   EnvironmentGenerator eg;
+
 };
 
 #endif

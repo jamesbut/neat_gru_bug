@@ -42,7 +42,8 @@ private:
    CFootBotEntity* m_dead_bot;
 
    TrajectoryLogger trajectory_loop;
-   std::unique_ptr<EnvironmentGenerator> m_env_generator;
+   //std::unique_ptr<EnvironmentGenerator> m_env_generator;
+   EnvironmentGenerator* m_env_generator;
 
    double robots_distance;
    double fitness_score;

@@ -14,7 +14,8 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
    NUM_TEST_ENVS(NUM_TEST_ENVS),
    FLUSH_EVERY(FLUSH_EVERY),
    TEST_SET_PATH(TEST_SET_PATH),
-   as(argos_simulation) {}
+   as(argos_simulation),
+   eg() {}
 
 void DataCollection::collect_scores(std::vector<std::vector <RunResult> > trial_results,
                                     NEAT::Population* neatPop,
@@ -304,8 +305,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
             //in the serial version but the method now needs one
             // int rand_seed = rand();
 
-            EnvironmentGenerator eg = EnvironmentGenerator(file_name);
-            eg.generate_env();
+            eg.generate_env(file_name);
 
             //std::cout << "Handwritten envs: " << HANDWRITTEN_ENVS << std::endl;
 

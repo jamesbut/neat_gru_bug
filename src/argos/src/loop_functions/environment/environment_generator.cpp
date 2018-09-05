@@ -6,22 +6,27 @@ using namespace cv;
 
 //#define ACCEPT_ENVIRONMENT
 
-EnvironmentGenerator::EnvironmentGenerator(const std::string filename) :
-   FILE_NAME(filename),
+EnvironmentGenerator::EnvironmentGenerator() :
    WANTED_CORRIDOR_PERCENTAGE(0.4f),
    CHANGE_AGENT_GOSTRAIGHT(0.7f),
    ROOM_PERCENTAGE(0.4f),
    AMOUNT_OF_OPENINGS(11),
    EFFICIENT_ENVIRONMENT(true),
-   rng(5)
+   //rng(5)
+   rng(rand())
    {
 
-      std::srand(5);
+      //std::srand(5);
+      std::srand(rand());
 
       //TODO: Would be nice to get this from somewhere else
       //I can probably get it from the xml file using the argos code
+      //It's quite complicated, I will have to donwload the tinyXML library
+      //and use that, but it can be done.
       // environment_width = 14;
       // environment_height = 14;
+
+      
 
       environment_width = 14/2;
       environment_height = 14/2;
@@ -31,13 +36,21 @@ EnvironmentGenerator::EnvironmentGenerator(const std::string filename) :
 
    }
 
-void EnvironmentGenerator::generate_env() {
+EnvironmentGenerator::~EnvironmentGenerator() {
+
+   //std::cout << "Env generator destroyed" << std::endl;
+
+}
+
+void EnvironmentGenerator::generate_env(const std::string filename) {
+
+   //std::cout << "Generate new env" << std::endl;
 
    //This means the environment has an image already, for example in the test data
-   if(FILE_NAME != "") {
+   if(filename != "") {
 
       //Read in image
-      read_file();
+      read_file(filename);
 
    //Otherwise generate a random env
    } else {
@@ -183,7 +196,7 @@ void EnvironmentGenerator::generate_rand_env() {
 
 }
 
-void EnvironmentGenerator::read_file() {
+void EnvironmentGenerator::read_file(const std::string file_name) {
 
    //bin_corridor_img_large = Mat::zeros(environment_width * 20, environment_height * 20, CV_8UC1);
    //resize(bin_corridor_img, bin_corridor_img_large, bin_corridor_img_large.size(), 0, 0, INTER_NEAREST);
@@ -193,7 +206,7 @@ void EnvironmentGenerator::read_file() {
    //cv::Mat read_img = cv::imread(file_name, CV_LOAD_IMAGE_GRAYSCALE);
    //resize(read_img, corridor_contours_img, corridor_contours_img.size(), 0, 0, INTER_NEAREST);
 
-   cv::Mat read_img = cv::imread(FILE_NAME, CV_LOAD_IMAGE_GRAYSCALE);
+   cv::Mat read_img = cv::imread(file_name, CV_LOAD_IMAGE_GRAYSCALE);
 
    corridor_contours_img = Mat::zeros(read_img.size(), CV_8UC1);
 

@@ -47,7 +47,8 @@ void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, Environment
    m_indvRun = indv_run;
    m_testEnvs = test_envs;
    m_envNum = env_num;
-   m_env_generator.reset(&env_generator);
+   //m_env_generator.reset(&env_generator);
+   m_env_generator = &env_generator;
 
    CVector3 arena_size = CVector3(m_env_generator->get_env_width(), m_env_generator->get_env_height(), 0.0);
    max_range = arena_size.Length();
@@ -111,7 +112,9 @@ void FitnessScore::PostExperiment() {
 
    fitness_score = distance_from_tower_w_crash;
 
-   std::cout << "Fitness score: " << fitness_score << std::endl;
+   // std::cout << "Max range: " << max_range << std::endl;
+   // std::cout << "Robots distance " << robots_distance << std::endl;
+   // std::cout << "Fitness score: " << fitness_score << std::endl;
 
    //f2
    //fitness_score = distance_from_tower_w_crash - traj_per_astar;

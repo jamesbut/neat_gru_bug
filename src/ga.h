@@ -80,12 +80,17 @@ private:
    const std::string TEST_SET_PATH;
    const int NUM_TEST_ENVS;
 
+   //const std::string ARGOS_FILE_NAME;
+   //const std::string ARGOS_FILE_NAME_10;
+
    // int eval_set_finishes_overall_winner;
    // std::vector<RunResult> eval_set_results_overall_winner;
    //bool overall_winner_change_since_last_eval;
 
    //Data collection
    DataCollection* data_collection;
+
+   EnvironmentGenerator eg;
 
 
    //Class for shared memory management

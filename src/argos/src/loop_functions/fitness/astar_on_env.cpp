@@ -48,7 +48,7 @@ std::vector<CVector2> astar_on_env(const std::string& env_path) {
 
 //This is to work with the environment generator
 std::vector<CVector2> astar_on_env(const cv::Mat& mat_img) {
-
+   //std::cout << "Calculating astar" << std::endl;
    Math::Vector2<int> start_pos = aiTools::Math::Vector2<int>(20,20);
    Math::Vector2<int> goal_pos = aiTools::Math::Vector2<int>(110,110);
    SearchGridWrapper searchGrid(mat_img, start_pos, goal_pos);

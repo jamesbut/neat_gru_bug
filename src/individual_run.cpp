@@ -1,6 +1,7 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
+   eg(),
    //NUM_RUNS(44),
    NUM_RUNS(209),
    RANDOM_ENVS(false),
@@ -58,8 +59,7 @@ void IndividualRun::run() {
       //in the serial version but the method now needs one
       // int rand_seed = rand();
 
-      EnvironmentGenerator eg = EnvironmentGenerator(file_name);
-      eg.generate_env();
+      eg.generate_env(file_name);
 
 
       RunResult rr = as->run(*org, env_num, reset, true,

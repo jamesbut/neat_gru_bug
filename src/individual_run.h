@@ -25,6 +25,8 @@ private:
    const bool RANDOM_ENVS;
    const bool HANDWRITTEN_ENVS;
 
+   EnvironmentGenerator eg;
+
 };
 
 #endif

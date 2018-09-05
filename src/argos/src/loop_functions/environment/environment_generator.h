@@ -28,20 +28,23 @@ class EnvironmentGenerator {
 
 public:
 
-   EnvironmentGenerator(const std::string filename);
+   EnvironmentGenerator();
+   ~EnvironmentGenerator();
 
-   void generate_env();
+   void generate_env(const std::string filename);
 
    inline cv::Mat get_environment() {return corridor_contours_img;};
    inline double get_environment_optimal_length() {return optimal_path_length;};
-   inline int get_env_width() {return environment_width;};
-   inline int get_env_height() {return environment_height;};
+   inline int get_env_width_divide_two() {return environment_width;};
+   inline int get_env_height_divide_two() {return environment_height;};
+   inline int get_env_width() {return 2 * environment_width;};
+   inline int get_env_height() {return 2 * environment_height;};
 
    const bool EFFICIENT_ENVIRONMENT;
 
 private:
 
-   void read_file();
+   void read_file(const std::string file_name);
    void generate_rand_env();
    void calculate_optimal_path_length();
 
@@ -61,7 +64,7 @@ private:
    void dfs(int x, int y, int current_label);
    int mod(int a, int b);
 
-   const std::string FILE_NAME;
+   //const std::string FILE_NAME;
    const float WANTED_CORRIDOR_PERCENTAGE;
    const float CHANGE_AGENT_GOSTRAIGHT;
    const float ROOM_PERCENTAGE;

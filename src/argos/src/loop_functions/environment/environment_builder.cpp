@@ -74,7 +74,7 @@ void EnvironmentBuilder::putLinesInEnvironment(EnvironmentGenerator& env_generat
   {
     // Transform the hough line coordinates to argos coordinates
     cv::Vec4i l = lines[i];
-    std::vector<double> argos_coordinates{(double)((l[1]+l[3])/2 - env_generator.get_env_width() * 20 / 2) / 10.0f, (double)((l[0]+l[2])/2 - env_generator.get_env_height() *20/ 2) / 10.0f};
+    std::vector<double> argos_coordinates{(double)((l[1]+l[3])/2 - env_generator.get_env_width_divide_two() * 20 / 2) / 10.0f, (double)((l[0]+l[2])/2 - env_generator.get_env_height_divide_two() *20/ 2) / 10.0f};
     argos::CVector3 boxEntityPos{argos_coordinates.at(0), argos_coordinates.at(1), 0};
     double box_lenght = (sqrt(pow((double)(l[2]-l[0]),2.0f)+pow((double)(l[3]-l[1]),2.0f))+2)/10.0f;
     //double box_lenght = (sqrt(pow((double)(l[2]-l[0]),2.0f)+pow((double)(l[3]-l[1]),2.0f))+4)/10.0f;
@@ -132,12 +132,12 @@ void EnvironmentBuilder::putBlocksInEnvironment(EnvironmentGenerator& env_genera
    }*/
 
    argos::CLoopFunctions loopfunction;
-   for (int itx = 0; itx < env_generator.get_env_width() * 20; itx++) {
-     for (int ity = 0; ity < env_generator.get_env_height() * 20; ity++) {
+   for (int itx = 0; itx < env_generator.get_env_width_divide_two() * 20; itx++) {
+     for (int ity = 0; ity < env_generator.get_env_height_divide_two() * 20; ity++) {
        if (env_generator.get_environment().at<uchar>(ity, itx) == 255) {
          box_name.str("");
          box_name << "box" << (it_box);
-         std::vector<double> argos_coordinates{(double)(itx - env_generator.get_env_width() * 10) / 10.0f, (double)(ity - env_generator.get_env_height() * 10) / 10.0f};
+         std::vector<double> argos_coordinates{(double)(itx - env_generator.get_env_width_divide_two() * 10) / 10.0f, (double)(ity - env_generator.get_env_height_divide_two() * 10) / 10.0f};
          argos::CVector3 boxEntityPos{argos_coordinates.at(1), argos_coordinates.at(0), 0};
          boxEntity = new argos::CBoxEntity(box_name.str(), boxEntityPos, boxEntityRot, false, boxEntitySize);
 

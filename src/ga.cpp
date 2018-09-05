@@ -11,10 +11,13 @@
 
 GA::GA(std::string neat_param_file) :
    m_unCurrentGeneration(1),
+   //ARGOS_FILE_NAME(),
+   //ARGOS_FILE_NAME_10(),
+   eg(),
    NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(1),
    INCREMENTAL_EV(false),
-   PARALLEL(false),
+   PARALLEL(true),
    //ACCEPTABLE_FITNESS(13.88),
    HANDWRITTEN_ENVS(false),
    RANDOMLY_GENERATED_ENVS(true),
@@ -31,7 +34,7 @@ GA::GA(std::string neat_param_file) :
    if(HANDWRITTEN_ENVS)
       as = new ARGoS_simulation("../argos_params/no_walls_10.argos");
    else
-      as = new ARGoS_simulation("../argos_params/no_walls_vis.argos");
+      as = new ARGoS_simulation("../argos_params/no_walls.argos");
 
    initNEAT(neat_param_file);
 
@@ -190,8 +193,7 @@ void GA::epoch() {
       }
 
       //Generate environment
-      EnvironmentGenerator eg = EnvironmentGenerator(file_name);
-      eg.generate_env();
+      eg.generate_env(file_name);
 
       // int rand_seed = rand();
 
@@ -228,7 +230,7 @@ void GA::parallel_epoch() {
 
    //Run individual fitness tests
    for(size_t i = 0; i < NEAT::num_trials; i++) {
-
+      //std::cout << "Trial: " << i << std::endl;
       std::string file_name;
       int env_num;
       bool reset = false;
@@ -250,8 +252,7 @@ void GA::parallel_epoch() {
       }
 
       //Generate environment
-      EnvironmentGenerator eg = EnvironmentGenerator(file_name);
-      eg.generate_env();
+      eg.generate_env(file_name);
 
       unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
       //std::cout << "Detected cores: " << concurentThreadsSupported << std::endl;
