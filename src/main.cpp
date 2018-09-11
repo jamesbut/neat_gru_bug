@@ -22,8 +22,11 @@ int main(int argc, char *argv[]) {
    // milliseconds diff = duration_cast<milliseconds>(end - start);
    // std::cout << diff.count() << "ms" << std::endl;
 
-   // EnvironmentGenerator eg = EnvironmentGenerator("");
-   // eg.generate_env();
+   // EnvironmentGenerator eg = EnvironmentGenerator();
+   //
+   // while(1) {
+   //    eg.generate_env("");
+   // }
 
 
 

@@ -34,7 +34,7 @@ end
 
 for i = 1:length(environments)
     
-    i
+    %i
    
     img_dilated = environments(i).img;
     
@@ -81,7 +81,7 @@ for i = 1:length(environments)
         %Add 1 for the final meter to the target
         run_path_length = sum(sqrt(run_path_diff(:,1).^2+run_path_diff(:,2).^2)) + 1;
         %disp(run_path_length)
-        %disp(optimal_path_length)
+        disp(optimal_path_length)
         
         run_path_lengths(i) = run_path_length;
         path_percentages(i) = run_path_length/optimal_path_length;

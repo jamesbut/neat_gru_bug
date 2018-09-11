@@ -66,6 +66,4 @@ private:
 
 };
 
-double get_value_at_line(std::string file_name, unsigned int num);
-
 #endif

@@ -41,7 +41,13 @@ void SearchGridWrapper::initialise(const aiTools::Math::Vector2<int> start_pos,
    mData.at(goal_pos.x, goal_pos.y).mData.isGoal = true;
 
    //Initialise open priority set
-   mOpenQueue.reset(new std::set<value_type, SearchNodeComparator>(SearchNodeComparator(*this)));
+
+   OpenListType::ctor_args_list args_list = boost::make_tuple(
+       OpenListType::nth_index<0>::type::ctor_args(),
+       boost::make_tuple(boost::multi_index::identity<IndexType>(),SearchNodeComparator(*this))
+    );
+
+   mOpenQueue.reset(new OpenListType(args_list));
 
    //Add start pos to open set
    mOpenQueue->insert(std::make_tuple(start_pos.x, start_pos.y));
@@ -122,81 +128,95 @@ bool SearchGridWrapper::isGoalNode(value_type& node) {
 
 }
 
-boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen() {
+boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen()
+{
+	if(mOpenQueue->empty())
+		return boost::optional<SearchGridWrapper::value_type>();
 
-   //Here I just want to pop next off priority queue and use that
-   //rather than search through grid all the time
-   if(mOpenQueue->empty())
-      return boost::optional<SearchGridWrapper::value_type>();
+	auto iter = mOpenQueue->get<1>().begin();
+	const auto firstElem = *iter;
+	mOpenQueue->get<1>().erase(iter);
 
-   auto result = *(mOpenQueue->begin());
-   mOpenQueue->erase(mOpenQueue->begin());
-   //mOpenQueue->pop();
+   mData.at(firstElem).mData.isOpen = false;
 
-   mData.at(result).mData.isOpen = false;
-
-   return result;
-
-   // boost::optional<SearchGridWrapper::value_type> result;
-   // SearchGridWrapper::cost_type bestCosts{};
-   //
-   // 	for(std::size_t y = 0;y<mData.mHeight;++y)
-   // 	{
-   // 		for(std::size_t x = 0;x<mData.mWidth;++x)
-   // 		{
-   // 			value_type current{x, y};
-   // 			auto& node = mData.at(current).mData;
-   //
-   // 			if(!node.isOpen)
-   //             continue;
-   //
-   // 			if(!result)
-   // 			{
-   // 				result = current;
-   // 				bestCosts = node.cost;
-   // 				//std::cout << "first open node is " << x << "," << y << ", cost: " << bestCosts << ", h: " << getHeuristic(current) << std::endl;
-   // 			}
-   // 			else
-   // 			{
-   //
-   // 				auto totalEstCostFirst = node.cost + getHeuristic(current);
-   // 				auto totalEstCostSecond = bestCosts + getHeuristic(*result);
-   //
-   // 				//std::cout << "node is " << x << "," << y << ", cost: " << node.cost << ", h: " << getHeuristic(current) << ", both: " << totalEstCostFirst;
-   //
-   // 				if(totalEstCostFirst == totalEstCostSecond)
-   // 				{
-   // 					//std::cout << ", costs equal";
-   //
-   // 					if(node.cost > bestCosts) //counter-intuitive tie-break with greater cost - means greater distance travelled, more progress (hopefully)
-   // 					{
-   // 						//std::cout << ", tie break winner";
-   // 						result = current;
-   // 						bestCosts = node.cost;
-   // 					}
-   // 				}
-   // 				else if(totalEstCostFirst < totalEstCostSecond)
-   // 				{
-   // 					//std::cout << ", costs lower";
-   // 					result = current;
-   // 					bestCosts = node.cost;
-   // 				}
-   //
-   // 				//std::cout << std::endl;
-   // 			}
-   // 		}
-   // 	}
-   //
-   // 	//*remove* best open - mark as not open anymore
-   // 	if(result) {
-   //       //std::cout << mData.at(*result).x << " " << mData.at(*result).y << std::endl;
-   //       mData.at(*result).mData.isOpen = false;
-   //    }
-   //
-   //
-   // 	return result;
-
+	return firstElem;
 }
+
+// boost::optional<SearchGridWrapper::value_type> SearchGridWrapper::removeBestOpen() {
+//
+//    //Here I just want to pop next off priority queue and use that
+//    //rather than search through grid all the time
+//    if(mOpenQueue->empty())
+//       return boost::optional<SearchGridWrapper::value_type>();
+//
+//    auto result = *(mOpenQueue->begin());
+//    mOpenQueue->erase(mOpenQueue->begin());
+//    //mOpenQueue->pop();
+//
+//    mData.at(result).mData.isOpen = false;
+//
+//    return result;
+//
+//    // boost::optional<SearchGridWrapper::value_type> result;
+//    // SearchGridWrapper::cost_type bestCosts{};
+//    //
+//    // 	for(std::size_t y = 0;y<mData.mHeight;++y)
+//    // 	{
+//    // 		for(std::size_t x = 0;x<mData.mWidth;++x)
+//    // 		{
+//    // 			value_type current{x, y};
+//    // 			auto& node = mData.at(current).mData;
+//    //
+//    // 			if(!node.isOpen)
+//    //             continue;
+//    //
+//    // 			if(!result)
+//    // 			{
+//    // 				result = current;
+//    // 				bestCosts = node.cost;
+//    // 				//std::cout << "first open node is " << x << "," << y << ", cost: " << bestCosts << ", h: " << getHeuristic(current) << std::endl;
+//    // 			}
+//    // 			else
+//    // 			{
+//    //
+//    // 				auto totalEstCostFirst = node.cost + getHeuristic(current);
+//    // 				auto totalEstCostSecond = bestCosts + getHeuristic(*result);
+//    //
+//    // 				//std::cout << "node is " << x << "," << y << ", cost: " << node.cost << ", h: " << getHeuristic(current) << ", both: " << totalEstCostFirst;
+//    //
+//    // 				if(totalEstCostFirst == totalEstCostSecond)
+//    // 				{
+//    // 					//std::cout << ", costs equal";
+//    //
+//    // 					if(node.cost > bestCosts) //counter-intuitive tie-break with greater cost - means greater distance travelled, more progress (hopefully)
+//    // 					{
+//    // 						//std::cout << ", tie break winner";
+//    // 						result = current;
+//    // 						bestCosts = node.cost;
+//    // 					}
+//    // 				}
+//    // 				else if(totalEstCostFirst < totalEstCostSecond)
+//    // 				{
+//    // 					//std::cout << ", costs lower";
+//    // 					result = current;
+//    // 					bestCosts = node.cost;
+//    // 				}
+//    //
+//    // 				//std::cout << std::endl;
+//    // 			}
+//    // 		}
+//    // 	}
+//    //
+//    // 	//*remove* best open - mark as not open anymore
+//    // 	if(result) {
+//    //       //std::cout << mData.at(*result).x << " " << mData.at(*result).y << std::endl;
+//    //       mData.at(*result).mData.isOpen = false;
+//    //    }
+//    //
+//    //
+//    // 	return result;
+//
+// }
 
 SearchGridWrapper::cost_type SearchGridWrapper::getCostBetween(value_type& parent, value_type& child) {
 
@@ -411,10 +431,15 @@ void SearchGridWrapper::printGridToPng(const std::string& filename, aiTools::Gri
 
    }
 
-   namedWindow("Astar search", WINDOW_AUTOSIZE);// Create a window for display.
-   imshow("Astar search", img);                   // Show our image inside it.
+   //Add start point too
+   img.at<Vec3b>(20,20) = Vec3b(0, 0, 255);
 
-   waitKey(0);
+   //namedWindow("Astar search", WINDOW_AUTOSIZE);// Create a window for display.
+   //imshow("Astar search", img);                   // Show our image inside it.
+
+   //waitKey(0);
+
+   imwrite("../maps_temp/debug_map.png", img);
 
 }
 

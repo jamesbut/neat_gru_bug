@@ -15,6 +15,7 @@ EnvironmentGenerator::EnvironmentGenerator() :
    ROOM_PERCENTAGE(0.4f),
    AMOUNT_OF_OPENINGS(11),
    EFFICIENT_ENVIRONMENT(true),
+   TEST_ENV_LENGTHS_PATH("../trajectories_temp/kims_envs_lengths/kims_envs_lengths.txt"),
    //rng(5)
    rng(rand())
    {
@@ -56,15 +57,17 @@ void EnvironmentGenerator::set_argos_config_file(const std::string filename) {
 
 }
 
-void EnvironmentGenerator::generate_env(const std::string filename) {
-
-   //std::cout << "Generate new env" << std::endl;
+void EnvironmentGenerator::generate_env(const std::string filename, const int env_num) {
 
    //This means the environment has an image already, for example in the test data
    if(filename != "") {
 
       //Read in image
       read_file(filename);
+
+      optimal_path_length = get_value_at_line(TEST_ENV_LENGTHS_PATH, env_num);
+
+      //std::cout << "Optimal path length: " << optimal_path_length << std::endl;
 
    //Otherwise generate a random env
    } else {
@@ -94,9 +97,10 @@ void EnvironmentGenerator::calculate_optimal_path_length() {
                   [](const argos::CVector2& pos){return pos / 10;});
 
    double length = 0.0;
+   //std::cout << "Op path size: " << optimal_path.size() << std::endl;
 
    for(size_t i = 0; i < optimal_path.size()-1; i++) {
-
+      //std::cout << "i: " << i << std::endl;
       double x_diff = std::abs(astar_path_divided_by_ten[i].GetX() - astar_path_divided_by_ten[i+1].GetX());
       double y_diff = std::abs(astar_path_divided_by_ten[i].GetY() - astar_path_divided_by_ten[i+1].GetY());
 
@@ -213,7 +217,7 @@ void EnvironmentGenerator::generate_rand_env() {
 void EnvironmentGenerator::read_file(const std::string file_name) {
 
    //std::cout << "filename: " << file_name << std::endl;
-   
+
    cv::Mat read_img = cv::imread(file_name, CV_LOAD_IMAGE_GRAYSCALE);
 
    corridor_contours_img = Mat::zeros(read_img.size(), CV_8UC1);
@@ -602,4 +606,20 @@ void EnvironmentGenerator::dfs(int x, int y, int current_label) {
   // recursively mark the neighbors
   for (int direction = 0; direction < 4; ++direction)
     dfs(x + dx[direction], y + dy[direction], current_label);
+}
+
+double get_value_at_line(std::string file_name, unsigned int num) {
+
+   std::fstream file(file_name);
+
+   file.seekg(std::ios::beg);
+   for(int i=0; i < num - 1; ++i){
+     file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+   }
+
+   double value;
+   file >> value;
+
+   return value;
+
 }

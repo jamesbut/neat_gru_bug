@@ -31,7 +31,7 @@ public:
    EnvironmentGenerator();
    ~EnvironmentGenerator();
 
-   void generate_env(const std::string filename);
+   void generate_env(const std::string filename, const int env_num);
 
    inline cv::Mat get_environment() {return corridor_contours_img;};
    inline double get_environment_optimal_length() {return optimal_path_length;};
@@ -72,6 +72,8 @@ private:
    const float ROOM_PERCENTAGE;
    const int AMOUNT_OF_OPENINGS;
 
+   const std::string TEST_ENV_LENGTHS_PATH;
+
    //Imaage related variables
    cv::Mat bin_corridor_img;
    cv::Mat bin_corridor_img_large;
@@ -95,5 +97,7 @@ private:
 
 
 };
+
+double get_value_at_line(std::string file_name, unsigned int num);
 
 #endif

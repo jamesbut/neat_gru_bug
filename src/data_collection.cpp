@@ -305,7 +305,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
             //in the serial version but the method now needs one
             // int rand_seed = rand();
 
-            eg.generate_env(file_name);
+            eg.generate_env(file_name, j+1);
 
             //std::cout << "Handwritten envs: " << HANDWRITTEN_ENVS << std::endl;
 

@@ -134,32 +134,11 @@ void FitnessScore::PostExperiment() {
 
 double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVector2>& trajectory) {
 
-   double astar_length;
-
-   //If it is in test set, just read from file
-   if(m_testEnvs) {
-
-      astar_length = get_value_at_line(TEST_ENV_LENGTHS_PATH, m_envNum);
-
-   } else {
-
-      astar_length = m_env_generator->get_environment_optimal_length();
-
-   }
+   double astar_length = m_env_generator->get_environment_optimal_length();
 
    //Calculate trajectory length
    double trajectory_length = calculate_trajectory_length(trajectory);
    trajectory_length += 1.0;      //Add 1 for the extra 1 meter stopped before the tower
-
-   //For now, deposit this into kims_envs_lengths.txt
-   // std::ofstream trajectory_file;
-   // std::stringstream file_name;
-   // file_name << "../trajectories_temp/kims_envs_lengths/kims_envs_lengths.txt";
-   // trajectory_file.open(file_name.str(), std::ios_base::app);
-   //
-   // trajectory_file << astar_length <<std::endl;
-   //
-   // trajectory_file.close();
 
    //std::cout << trajectory_length << " " << astar_length << std::endl;
 
@@ -263,21 +242,5 @@ RunResult FitnessScore::get_fitness_score() {
    rr.traj_per_astar = traj_per_astar;
    //std::cout << rr.traj_per_astar << std::endl;
    return rr;
-
-}
-
-double get_value_at_line(std::string file_name, unsigned int num) {
-
-   std::fstream file(file_name);
-
-   file.seekg(std::ios::beg);
-   for(int i=0; i < num - 1; ++i){
-     file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-   }
-
-   double value;
-   file >> value;
-
-   return value;
 
 }

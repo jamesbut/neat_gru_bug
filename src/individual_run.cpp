@@ -64,7 +64,7 @@ void IndividualRun::run() {
       //in the serial version but the method now needs one
       // int rand_seed = rand();
 
-      eg.generate_env(file_name);
+      eg.generate_env(file_name, env_num);
 
 
       RunResult rr = as->run(*org, env_num, reset, true,

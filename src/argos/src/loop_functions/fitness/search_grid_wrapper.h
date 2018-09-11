@@ -13,6 +13,11 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/identity.hpp>
+
 #include "search_node_comparator.h"
 
 struct SearchNode
@@ -27,6 +32,18 @@ struct SearchNode
 	bool isGoal{false};
 	bool isPath{false};
 };
+
+typedef std::tuple<size_t, size_t> IndexType;
+
+typedef boost::multi_index_container
+	<
+		IndexType,
+		boost::multi_index::indexed_by
+		<
+			boost::multi_index::hashed_unique<boost::multi_index::identity<IndexType>>,
+			boost::multi_index::ordered_non_unique<boost::multi_index::identity<IndexType>, SearchNodeComparator>
+		>
+	> OpenListType;
 
 
 struct SearchGridWrapper : public aiTools::Algorithm::SampleAStarSearchGraphWrapper<aiTools::Grid<SearchNode>::GridIndex, SearchNode::cost_type>
@@ -74,7 +91,7 @@ struct SearchGridWrapper : public aiTools::Algorithm::SampleAStarSearchGraphWrap
 
 	//Priority queue for open nodes
 	//std::unique_ptr <std::priority_queue<value_type, std::vector<value_type>, SearchNodeComparator>> mOpenQueue;
-	std::unique_ptr <std::set<value_type, SearchNodeComparator>> mOpenQueue;
+	std::unique_ptr <OpenListType> mOpenQueue;
 
 };
 

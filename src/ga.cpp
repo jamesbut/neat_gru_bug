@@ -196,7 +196,7 @@ void GA::epoch() {
       }
 
       //Generate environment
-      eg.generate_env(file_name);
+      eg.generate_env(file_name, env_num);
 
       // int rand_seed = rand();
 
@@ -255,7 +255,7 @@ void GA::parallel_epoch() {
       }
 
       //Generate environment
-      eg.generate_env(file_name);
+      eg.generate_env(file_name, env_num);
 
       unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
       //std::cout << "Detected cores: " << concurentThreadsSupported << std::endl;
