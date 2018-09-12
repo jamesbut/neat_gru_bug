@@ -16,18 +16,7 @@ using namespace std::literals::chrono_literals;
 
 int main(int argc, char *argv[]) {
 
-   // time_point<Clock> start = Clock::now();
-   // astar_on_env("../argos_params/environments/kim_envs/rand_env_1.png");
-   // time_point<Clock> end = Clock::now();
-   // milliseconds diff = duration_cast<milliseconds>(end - start);
-   // std::cout << diff.count() << "ms" << std::endl;
-
-   // EnvironmentGenerator eg = EnvironmentGenerator();
-   //
-   // while(1) {
-   //    eg.generate_env("");
-   // }
-
+   //time_point<Clock> start = Clock::now();
 
 
    // Seed random number generator with time
@@ -57,5 +46,9 @@ int main(int argc, char *argv[]) {
       ir.run();
 
    }
+
+   // time_point<Clock> end = Clock::now();
+   // milliseconds diff = duration_cast<milliseconds>(end - start);
+   // std::cout << diff.count() << "ms" << std::endl;
 
 }

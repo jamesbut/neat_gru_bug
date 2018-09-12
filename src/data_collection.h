@@ -18,7 +18,7 @@ public:
                   const std::string TEST_SET_PATH,
                   ARGoS_simulation* argos_simulation);
 
-   void collect_scores(std::vector<std::vector <RunResult> > trial_results,
+   void collect_scores(const std::vector<std::vector <RunResult> >& trial_results,
                        NEAT::Population* neatPop,
                        int current_gen);
 
@@ -27,7 +27,7 @@ public:
 
 private:
 
-   void test_on_training_set(std::vector<std::vector<RunResult> > gen_results,
+   void test_on_training_set(const std::vector<std::vector<RunResult> >& gen_results,
                              int current_gen);
    void test_on_eval_set(int current_gen);
 

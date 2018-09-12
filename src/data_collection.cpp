@@ -17,7 +17,7 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
    as(argos_simulation),
    eg() {}
 
-void DataCollection::collect_scores(std::vector<std::vector <RunResult> > trial_results,
+void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >& trial_results,
                                     NEAT::Population* neatPop,
                                     int current_gen) {
 
@@ -150,7 +150,7 @@ void DataCollection::collect_scores(std::vector<std::vector <RunResult> > trial_
 }
 
 //Record the number of finishes on the TRAINING SET for the overall winner
-void DataCollection::test_on_training_set(std::vector<std::vector<RunResult> > gen_results,
+void DataCollection::test_on_training_set(const std::vector<std::vector<RunResult> >& gen_results,
                                           int current_gen) {
 
    //Extract scores and num finishes

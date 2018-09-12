@@ -3,7 +3,7 @@
 
 MasterLoopFunction::MasterLoopFunction() : GENERATE_ENVS(true), m_env_builder() {}
 
-MasterLoopFunction::~MasterLoopFunction() {}
+MasterLoopFunction::~MasterLoopFunction() = default;
 
 // void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 //
