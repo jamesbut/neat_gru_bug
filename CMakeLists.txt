@@ -14,7 +14,7 @@ link_directories(${ARGOS_LIBRARY_DIRS})
 find_package (Boost 1.55.0 REQUIRED COMPONENTS filesystem)
 
 add_executable(${PROJECT_NAME} src/main.cpp src/ga.cpp src/individual_run.cpp
-                               src/data_collection.cpp)
+                               src/data_collection.cpp src/shared_memory.cpp)
 
 target_link_libraries(neat_gru_bug
    neatGRULib

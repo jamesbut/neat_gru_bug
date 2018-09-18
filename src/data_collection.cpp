@@ -1,6 +1,13 @@
 #include "data_collection.h"
 #include <boost/filesystem.hpp>
 
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
+
+#include <thread>
+
 DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
                                const bool HANDWRITTEN_ENVS,
                                const int TEST_EVAL_GEN,
@@ -15,7 +22,13 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
    FLUSH_EVERY(FLUSH_EVERY),
    TEST_SET_PATH(TEST_SET_PATH),
    as(argos_simulation),
-   eg() {}
+   eg() {
+
+      //Create shared memory block for master and slaves
+      const int MAX_NUM_GENOMES_TO_TEST = 7;
+      shared_mem = new SharedMem(MAX_NUM_GENOMES_TO_TEST, NUM_TEST_ENVS);
+
+   }
 
 void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >& trial_results,
                                     NEAT::Population* neatPop,
@@ -290,54 +303,32 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
       }
 
-      //Test each genome on all the test envs
-      for(int i = 0; i < genomes_to_be_tested.size(); i++) {
+      parallel_eval(genomes_to_be_tested);
 
-         std::cout << "Evaluating " << i << " on test set.." << std::endl;
+      //Collect results from shared memory
+      std::vector<std::vector <RunResult> > trial_results;
 
-         std::vector<RunResult> run_results(NUM_TEST_ENVS);
+      for(size_t i = 0; i < genomes_to_be_tested.size(); i++)
+         trial_results.push_back(shared_mem->get_run_result(i));
 
-         for(int j = 0; j < NUM_TEST_ENVS; j++) {
-            //std::cout << "Test env: " << j << std::endl;
-            std::string file_name = TEST_SET_PATH + std::to_string(j+1) + ".png";
 
-            //Create random seed for parallel processes - it is not really needed
-            //in the serial version but the method now needs one
-            // int rand_seed = rand();
+      //Collect data for each run
+      for(int i = 0; i < trial_results.size(); i++) {
 
-            eg.generate_env(file_name, j+1);
-
-            //std::cout << "Handwritten envs: " << HANDWRITTEN_ENVS << std::endl;
-
-            // run_results[j] = as->run(*genomes_to_be_tested[i], file_name, (j+1), true, true,
-            //                           HANDWRITTEN_ENVS, true, (j+1), rand_seed);
-
-            run_results[j] = as->run(*genomes_to_be_tested[i], (j+1), true, true,
-                                      HANDWRITTEN_ENVS, true, (j+1), eg);
-
-            //std::cout << "Eval set: " << scores[i] << std::endl;
-
-         }
-
-         //See how many times robot made it to tower
          int num_finishes = 0;
-
-         for(int j = 0; j < run_results.size(); j++) {
-
-            if(run_results[j].got_to_tower) num_finishes++;
-
-         }
-
-         //Calculate mean trajectory of robot
          double total_traj_per_astar = 0.0;
 
-         for(int j = 0; j < run_results.size(); j++) {
+         for(size_t j = 0; j < trial_results[i].size(); j++) {
 
-            total_traj_per_astar += run_results[j].traj_per_astar;
+            //See how many times robot made it to tower
+            if(trial_results[i][j].got_to_tower) num_finishes++;
+
+            //Record traj_per_astar
+            total_traj_per_astar += trial_results[i][j].traj_per_astar;
 
          }
 
-         double mean_traj_per_astar = total_traj_per_astar / run_results.size();
+         double mean_traj_per_astar = total_traj_per_astar / trial_results[i].size();
 
          //Print eval results
          std::ofstream outfile;
@@ -348,9 +339,9 @@ void DataCollection::test_on_eval_set(int current_gen) {
          outfile.open(file_name.str(), std::ios_base::app);
          outfile << current_gen << "," << num_finishes << "," << mean_traj_per_astar;
 
-         for(int i = 0; i < run_results.size(); i++) {
+         for(int j = 0; j < trial_results[i].size(); j++) {
 
-            outfile << "," << run_results[i].fitness;
+            outfile << "," << trial_results[i][j].fitness;
 
          }
 
@@ -360,6 +351,100 @@ void DataCollection::test_on_eval_set(int current_gen) {
       }
 
    }
+
+}
+
+void DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested) {
+
+   std::cout << "Evaluating on test set.." << std::endl;
+
+   for(int i = 0; i < NUM_TEST_ENVS; i++) {
+
+      if((i+1) % 25 == 0)
+         std::cout << "Evaluating genomes on test env: " << i+1 << std::endl;
+
+      std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
+
+      eg.generate_env(file_name, i+1);
+
+      unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
+      unsigned int num_organisms_tested = 0;
+
+      while(num_organisms_tested < genomes_to_be_tested.size()) {
+
+         //std::cout << "Organisms tested: " << num_organisms_tested << std::endl;
+
+         unsigned int num_organisms_left = genomes_to_be_tested.size() - num_organisms_tested;
+         unsigned int num_threads_to_spawn = std::min(num_organisms_left, concurentThreadsSupported);
+
+         //std::cout << "Num threads to spawn: " << num_threads_to_spawn << std::endl;
+
+         for(size_t k = 0; k < num_threads_to_spawn; k++) {
+
+            num_organisms_tested++;
+
+            //Spawn slaves
+            slave_PIDs.push_back(::fork());
+
+            if(slave_PIDs.back() == 0) {
+
+               shared_mem->set_run_result(num_organisms_tested-1, i, as->run(*genomes_to_be_tested[num_organisms_tested-1],
+                                          i+1, true, true, HANDWRITTEN_ENVS, true, (i+1), eg));
+
+               //Kill slave with user defined signal
+               ::raise(SIGUSR1);
+
+            }
+
+         }
+
+         /* Wait for all the slaves to finish the run */
+         int unTrialsLeft = num_threads_to_spawn;
+         int nSlaveInfo;
+         pid_t tSlavePID;
+
+         while(unTrialsLeft > 0) {
+
+            /* Wait for next slave to finish */
+            tSlavePID = ::wait(&nSlaveInfo);
+
+            //std::cout << unTrialsLeft << std::endl;
+
+            //Check for failure
+            if (tSlavePID == -1) {
+               perror("waitpid");
+               exit(EXIT_FAILURE);
+            }
+
+            if(WIFSIGNALED(nSlaveInfo))
+               //If I didn't terminate slave, print out what did and exit
+               if(WTERMSIG(nSlaveInfo) != SIGUSR1) {
+
+                  std::cout << "Terminated with signal: " << WTERMSIG(nSlaveInfo) << std::endl;
+
+                  //Kill all child processes
+                  for(size_t i = 0; i < slave_PIDs.size(); i++) {
+                     kill(slave_PIDs[i], SIGKILL);
+                  }
+
+                  //Kill main process
+                  exit(EXIT_FAILURE);
+
+            }
+
+            /* All OK, one less slave to wait for */
+            --unTrialsLeft;
+
+         }
+
+         //Clear slave pids
+         slave_PIDs.clear();
+
+      }
+
+   }
+
+   std::cout << "..finished evaluating on test set" << std::endl;
 
 }
 

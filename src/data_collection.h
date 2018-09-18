@@ -5,6 +5,8 @@
 #include "argos/src/loop_functions/fitness/fitness_score.h"
 #include <NEAT_GRU/include/population.h>
 #include "argos/src/argos_simulation.h"
+#include "shared_memory.h"
+
 
 class DataCollection {
 
@@ -31,6 +33,8 @@ private:
                              int current_gen);
    void test_on_eval_set(int current_gen);
 
+   void parallel_eval(const std::vector<NEAT::Organism*>);
+
    ARGoS_simulation* as;
 
    const bool RANDOMLY_GENERATED_ENVS;
@@ -53,6 +57,11 @@ private:
    std::unique_ptr<NEAT::Organism> gen_nminus2_1;
 
    EnvironmentGenerator eg;
+
+   //Shared memory object
+   SharedMem* shared_mem;
+
+   std::vector<pid_t> slave_PIDs;
 
 };
 
