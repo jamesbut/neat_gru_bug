@@ -74,13 +74,14 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       //Duplicate winner because it will be deleted by next generation
       //We need this to flush genome.
       NEAT::Genome* new_genome;
-      NEAT::Organism* new_organism;
 
       new_genome = neatPop->organisms[maxPopOrg]->gnome->duplicate(1);
 
       //overall_winner = new NEAT::Organism(maxPopScore, new_genome, 1);
       overall_winner.reset(new NEAT::Organism(maxPopScore, new_genome, 1));
       overall_winner->winning_gen = current_gen;
+
+      delete new_genome;
 
    }
 
@@ -148,6 +149,8 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
                break;
 
          }
+
+         delete new_genome;
 
       }
 
