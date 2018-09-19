@@ -21,8 +21,8 @@ GA::GA(std::string neat_param_file) :
    //ACCEPTABLE_FITNESS(13.88),
    HANDWRITTEN_ENVS(false),
    RANDOMLY_GENERATED_ENVS(true),
-   //TEST_EVAL_GEN(25),
-   TEST_EVAL_GEN(5),
+   TEST_EVAL_GEN(25),
+   //TEST_EVAL_GEN(5),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
