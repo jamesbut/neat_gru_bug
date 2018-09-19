@@ -4,7 +4,7 @@ import numpy as np
 
 #Read data
 #test_file_data = genfromtxt('../scores/eval_scores_0.txt', delimiter=',')
-test_file_data = genfromtxt('../scores/eval_scores/archive_scores/ap_6_fast_wheels/ap_6_fw_eval_0_1.txt', delimiter=',')
+test_file_data = genfromtxt('../scores/eval_scores/archive_scores/ap_18_fw/ap_18_fw_eval_0_1.txt', delimiter=',')
 
 #Sort data
 test_generations = test_file_data[:,0]
