@@ -9,7 +9,7 @@ class SharedMem {
 
 public:
 
-   SharedMem(int population_size, int num_trials);
+   SharedMem(int population_size, int num_trials, const std::string PREFIX);
    ~SharedMem();
 
    std::vector<RunResult> get_run_result(int individual);

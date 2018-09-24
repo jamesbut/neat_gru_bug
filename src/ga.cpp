@@ -53,7 +53,7 @@ GA::GA(std::string neat_param_file) :
    }
 
    //Create shared memory block for master and slaves
-   if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials);
+   if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials, "GA");
 
    //Data collection
    data_collection = new DataCollection(RANDOMLY_GENERATED_ENVS, HANDWRITTEN_ENVS,

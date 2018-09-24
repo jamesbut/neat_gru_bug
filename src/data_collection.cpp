@@ -26,7 +26,7 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
 
       //Create shared memory block for master and slaves
       const int MAX_NUM_GENOMES_TO_TEST = 7;
-      shared_mem = new SharedMem(MAX_NUM_GENOMES_TO_TEST, NUM_TEST_ENVS);
+      shared_mem = new SharedMem(MAX_NUM_GENOMES_TO_TEST, NUM_TEST_ENVS, "DC");
 
    }
 
