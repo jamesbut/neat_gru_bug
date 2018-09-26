@@ -33,10 +33,10 @@ NEATGRUFootbotController::NEATGRUFootbotController() :
       PROX_SENSOR_UPPER_BOUND(0.1),
       BEARING_SENSOR_LOWER_BOUND(-M_PI),
       BEARING_SENSOR_UPPER_BOUND(M_PI),
-      MAX_WHEEL_SPEED(10),
-      MIN_WHEEL_SPEED(-10)
-      //MAX_WHEEL_SPEED(34.35),
-      //MIN_WHEEL_SPEED(-34.35)
+      //MAX_WHEEL_SPEED(10),
+      //MIN_WHEEL_SPEED(-10)
+      MAX_WHEEL_SPEED(34.35),
+      MIN_WHEEL_SPEED(-34.35)
 {}
 
 void NEATGRUFootbotController::Init(TConfigurationNode& t_node) {
