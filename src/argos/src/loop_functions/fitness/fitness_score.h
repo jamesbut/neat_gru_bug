@@ -64,6 +64,10 @@ private:
    const std::string TEST_ENV_LENGTHS_PATH;
    const std::string GENERATED_ENVS_MAP_PATH;
 
+   //Fitness score constants
+   const float C1;
+   const float C2;
+
 };
 
 #endif

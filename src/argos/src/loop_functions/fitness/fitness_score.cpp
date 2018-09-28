@@ -8,7 +8,9 @@ FitnessScore::FitnessScore() :
    //MAX_RANGE(14.2),
    no_son_of_mine(false),
    TEST_ENV_LENGTHS_PATH("../trajectories_temp/kims_envs_lengths/kims_envs_lengths.txt"),
-   GENERATED_ENVS_MAP_PATH("../maps_temp/map_") {}
+   GENERATED_ENVS_MAP_PATH("../maps_temp/map_"),
+   C1(1.0),
+   C2(1.0) {}
 
 void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
@@ -18,29 +20,6 @@ void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
    trajectory_loop.Init(clever_bot);
 
 }
-
-// void FitnessScore::Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs) {
-//
-//    m_indvRun = indv_run;
-//    m_envPath = env_path;
-//    m_testEnvs = test_envs;
-//    m_envNum = env_num;
-//
-//    arena_size = CVector3(arena_size.GetX(), arena_size.GetY(), 0.0);
-//    max_range = arena_size.Length();
-//
-//    robots_distance = 0;
-//    no_son_of_mine = false;
-//    fitness_score = 0;
-//    hit_tower = false;
-//
-//    if(indv_run) CLOSE_TO_TOWER = 1.0;
-//    //if(indv_run) CLOSE_TO_TOWER = 0.32;
-//    else CLOSE_TO_TOWER = 0.32;
-//
-//    trajectory_loop.Reset(env_num);
-//
-// }
 
 void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator) {
 
@@ -117,7 +96,7 @@ void FitnessScore::PostExperiment() {
    // std::cout << "Fitness score: " << fitness_score << std::endl;
 
    //f2
-   //fitness_score = distance_from_tower_w_crash - traj_per_astar;
+   //fitness_score = (C1 * distance_from_tower_w_crash) - (C2 * traj_per_astar);
 
    if (fitness_score < 0) fitness_score = 0;
 

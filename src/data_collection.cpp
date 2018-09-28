@@ -334,11 +334,22 @@ void DataCollection::test_on_eval_set(int current_gen) {
          outfile.open(file_name.str(), std::ios_base::app);
          outfile << current_gen << "," << num_finishes << "," << mean_traj_per_astar;
 
-         for(int j = 0; j < trial_results[i].size(); j++) {
+         //Gather fitnesses
+         std::vector<double> indv_fitnesses(trial_results[i].size());
 
-            outfile << "," << trial_results[i][j].fitness;
+         for(int j = 0; j < indv_fitnesses.size(); j++)
+            indv_fitnesses[j] = trial_results[i][j].fitness;
 
-         }
+         //Find average trial score
+         double mean_indv_fitness = std::accumulate(indv_fitnesses.begin(), indv_fitnesses.end(), 0.0) / indv_fitnesses.size();
+
+         outfile << "," << mean_indv_fitness;
+
+         // for(int j = 0; j < trial_results[i].size(); j++) {
+         //
+         //    outfile << "," << trial_results[i][j].fitness;
+         //
+         // }
 
          outfile << "\n";
          outfile.close();
