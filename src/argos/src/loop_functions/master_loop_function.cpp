@@ -5,19 +5,6 @@ MasterLoopFunction::MasterLoopFunction() : GENERATE_ENVS(true), m_env_builder() 
 
 MasterLoopFunction::~MasterLoopFunction() = default;
 
-// void MasterLoopFunction::Init(TConfigurationNode& t_node) {
-//
-//    //Find pointers to robots and their controllers
-//    find_robot_pointers();
-//
-//    fitness_score_loop.Init(clever_bot, dead_bot);
-//
-//    if (GENERATE_ENVS) environment_generator_loop.Init();
-//
-//
-//
-// }
-
 void MasterLoopFunction::Init(TConfigurationNode& t_node) {
 
    //Find pointers to robots and their controllers
@@ -30,25 +17,6 @@ void MasterLoopFunction::Init(TConfigurationNode& t_node) {
    m_env_builder = EnvironmentBuilder();
 
 }
-
-// void MasterLoopFunction::Reset() {
-//
-//    //Get arena size for fitness function
-//    CVector3 arena_size =  CSimulator::GetInstance().GetSpace().GetArenaSize();
-//
-//    if (GENERATE_ENVS && m_reset) {
-//
-//       environment_generator_loop.ClearEnvironment();
-//       environment_generator_loop.Reset(m_envPath, m_envNum, m_randSeed);
-//
-//    }
-//
-//    if (m_handwritten)
-//       SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
-//
-//    fitness_score_loop.Reset(m_indvRun, arena_size, m_envNum, m_envPath, m_testEnvs);
-//
-// }
 
 void MasterLoopFunction::Reset() {
 

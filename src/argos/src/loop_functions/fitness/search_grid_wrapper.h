@@ -31,6 +31,7 @@ struct SearchNode
 	bool isBlocked{false};
 	bool isGoal{false};
 	bool isPath{false};
+	bool isStart{false};
 };
 
 typedef std::tuple<size_t, size_t> IndexType;

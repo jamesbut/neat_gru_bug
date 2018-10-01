@@ -68,6 +68,8 @@ private:
    const float C1;
    const float C2;
 
+   const double REMAINING_DIST_MAX;
+
 };
 
 #endif

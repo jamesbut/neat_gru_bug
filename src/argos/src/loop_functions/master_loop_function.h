@@ -33,7 +33,6 @@ public:
    void set_test_envs(bool test_envs) {m_testEnvs = test_envs;};
    void set_trial_num(int trial_num) {m_trialNum = trial_num;};
    void set_random_seed(int rand_seed) {m_randSeed = rand_seed;};
-   // void set_env_generator(EnvironmentGenerator& env_generator) {m_env_generator.reset(&env_generator);};
    void set_env_generator(EnvironmentGenerator& env_generator) {m_env_generator = &env_generator;};
 
    RunResult get_fitness_score();

@@ -43,9 +43,7 @@ void EnvironmentBuilder::putLinesInEnvironment(EnvironmentGenerator& env_generat
   } else {
      HoughLinesP(env_generator.get_environment(), lines, 1, CV_PI/180*90, 10, 0, 0);
  }
-  // namedWindow( "corridor_contours_img", WINDOW_AUTOSIZE );
-  // imshow( "corridor_contours_img", corridor_contours_img );
-  // namedWindow( "img_lines ", WINDOW_AUTOSIZE );
+
 
   //Show the hough detection
   cv::Mat img_lines = env_generator.get_environment().clone();
@@ -54,14 +52,19 @@ void EnvironmentBuilder::putLinesInEnvironment(EnvironmentGenerator& env_generat
 
     cv::Vec4i l = lines[i];
     line( img_lines, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(100,100,100), 3, CV_AA);       //original
+    //line( img_lines, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(100,100,100), 1, CV_AA);
     line(env_generator.get_environment(), cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,0), 1, CV_AA);
     //line(dst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,0), 2, CV_AA);
 
 
   }
 
-  //imshow( "img_lines ", corridor_contours_img);
-  //waitKey(0);
+  // namedWindow( "corridor_contours_img", cv::WINDOW_AUTOSIZE );
+  // imshow( "corridor_contours_img", env_generator.get_environment());
+  // cv::waitKey(0);
+
+  // imshow( "img_lines ", img_lines);
+  // cv::waitKey(0);
 
   // Initialize box entity characteristics
   argos::CBoxEntity* boxEntity;
@@ -103,6 +106,7 @@ void EnvironmentBuilder::putLinesInEnvironment(EnvironmentGenerator& env_generat
   }
 
   total_boxes_generated=it_box-1;
+  //std::cout << "Boxes generated: " << total_boxes_generated << std::endl;
 
 }
 

@@ -9,6 +9,7 @@ FitnessScore::FitnessScore() :
    no_son_of_mine(false),
    TEST_ENV_LENGTHS_PATH("../trajectories_temp/kims_envs_lengths/kims_envs_lengths.txt"),
    GENERATED_ENVS_MAP_PATH("../maps_temp/map_"),
+   REMAINING_DIST_MAX(25.0),
    C1(1.0),
    C2(1.0) {}
 
@@ -26,7 +27,6 @@ void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, Environment
    m_indvRun = indv_run;
    m_testEnvs = test_envs;
    m_envNum = env_num;
-   //m_env_generator.reset(&env_generator);
    m_env_generator = &env_generator;
 
    CVector3 arena_size = CVector3(m_env_generator->get_env_width(), m_env_generator->get_env_height(), 0.0);
@@ -38,7 +38,6 @@ void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, Environment
    hit_tower = false;
 
    if(indv_run) CLOSE_TO_TOWER = 1.0;
-   //if(indv_run) CLOSE_TO_TOWER = 0.32;
    else CLOSE_TO_TOWER = 0.32;
 
    trajectory_loop.Reset(env_num);
@@ -79,35 +78,47 @@ void FitnessScore::PostExperiment() {
 
    const std::vector<CVector2>& trajectory = trajectory_loop.get_trajectory();
 
-   traj_per_astar = calculate_trajectory_per_optimal_path(trajectory);
+   //traj_per_astar = calculate_trajectory_per_optimal_path(trajectory);
 
    //Calculate fitness
+   /*    F1   */
+   //double distance_from_tower = max_range - robots_distance;
 
-   double distance_from_tower = max_range - robots_distance;
+   //if (no_son_of_mine) distance_from_tower /= 10;
 
-   if (no_son_of_mine) distance_from_tower /= 10;
+   //distance_from_tower_w_crash = distance_from_tower;
 
-   distance_from_tower_w_crash = distance_from_tower;
+   //fitness_score = distance_from_tower_w_crash;
 
-   fitness_score = distance_from_tower_w_crash;
+   /*    F2   */
+   //double distance_from_tower = max_range - robots_distance;
 
-   // std::cout << "Max range: " << max_range << std::endl;
-   // std::cout << "Robots distance " << robots_distance << std::endl;
-   // std::cout << "Fitness score: " << fitness_score << std::endl;
+   //if (no_son_of_mine) distance_from_tower /= 10;
 
-   //f2
+   //distance_from_tower_w_crash = distance_from_tower;
+
    //fitness_score = (C1 * distance_from_tower_w_crash) - (C2 * traj_per_astar);
 
+   /*    F3   */
+   //Calculate remaining distance according to astar
+   //NOTE: This does an astar search, so comment out unless needed!
+   CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+
+   //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
+   argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
+   double remaining_distance_from_tower =  m_env_generator->calculate_remaining_distance_from(bot_pos);
+
+   fitness_score = REMAINING_DIST_MAX - remaining_distance_from_tower;
+
+   if(no_son_of_mine) fitness_score /= 10;
+
+   //std::cout << "Max range: " << max_range << std::endl;
+   // std::cout << "Robots distance " << robots_distance << std::endl;
+   // std::cout << "Fitness score: " << fitness_score << std::endl;
+   //std::cout << "Remaining distance from tower: " << remaining_distance_from_tower << std::endl;
+
+   //Capture any fitness that is below 0
    if (fitness_score < 0) fitness_score = 0;
-
-   //Old calculate fitness
-   // fitness_score = max_range - robots_distance;
-   //
-   // if (no_son_of_mine) fitness_score /= 10;
-   //
-   // if (fitness_score < 0) fitness_score = 0;
-
-   //std::cout << fitness_score << std::endl;
 
 }
 
@@ -119,86 +130,24 @@ double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVe
    double trajectory_length = calculate_trajectory_length(trajectory);
    trajectory_length += 1.0;      //Add 1 for the extra 1 meter stopped before the tower
 
-   //std::cout << trajectory_length << " " << astar_length << std::endl;
-
    return (double)trajectory_length / (double)astar_length;
 
 }
 
-//Calculate the trajectory length divided by the astar length
-// double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVector2>& trajectory) {
-//
-//    double astar_length;
-//
-//    //If it is in test set, just read from file
-//    if(m_testEnvs) {
-//
-//       astar_length = get_value_at_line(TEST_ENV_LENGTHS_PATH, m_envNum);
-//
-//    } else {
-//
-//       //Calculate A* path on environment
-//       m_envPath = GENERATED_ENVS_MAP_PATH + std::to_string(m_envNum) + ".png";
-//       //m_envPath = "../argos_params/environments/kim_envs/rand_env_" + std::to_string(m_envNum) + ".png";
-//
-//       std::vector<CVector2> astar_path = astar_on_env(m_envPath);
-//
-//       std::vector<CVector2> astar_path_divided_by_ten(astar_path.size());
-//
-//       //Divide astar path by 10 because the image that is planned over is 140x140
-//       //whereas the environment is 14x14
-//       std::transform(astar_path.begin(), astar_path.end(), astar_path_divided_by_ten.begin(),
-//                      [](const CVector2& pos){return pos / 10;});
-//
-//       astar_length = calculate_trajectory_length(astar_path_divided_by_ten);
-//
-//       //std::cout << "Optimal path length: " << astar_length << std::endl;
-//
-//    }
-//
-//    //Calculate trajectory length
-//    double trajectory_length = calculate_trajectory_length(trajectory);
-//    trajectory_length += 1.0;      //Add 1 for the extra 1 meter stopped before the tower
-//
-//    //For now, deposit this into kims_envs_lengths.txt
-//    // std::ofstream trajectory_file;
-//    // std::stringstream file_name;
-//    // file_name << "../trajectories_temp/kims_envs_lengths/kims_envs_lengths.txt";
-//    // trajectory_file.open(file_name.str(), std::ios_base::app);
-//    //
-//    // trajectory_file << astar_length <<std::endl;
-//    //
-//    // trajectory_file.close();
-//
-//    //std::cout << trajectory_length << " " << astar_length << std::endl;
-//
-//    return (double)trajectory_length / (double)astar_length;
-//
-// }
 
 double FitnessScore::calculate_trajectory_length(const std::vector<CVector2>& traj) {
-   //std::cout << "Calc traj length" << std::endl;
+
    double length = 0.0;
 
-   //Debug
-   // int num_straights = 0;
-   // int num_diags = 0;
-   //std::cout << traj.size()-1 << std::endl;
    for(size_t i = 0; i < traj.size()-1; i++) {
-      //std::cout << "Hello" << std::endl;
+
       double x_diff = std::abs(traj[i].GetX() - traj[i+1].GetX());
       double y_diff = std::abs(traj[i].GetY() - traj[i+1].GetY());
-
-      // if((x_diff != 0) && (y_diff != 0)) num_diags += 1;
-      // else if((x_diff != 0) || (y_diff != 0)) num_straights += 1;
 
       length += sqrt(pow(x_diff, 2) + pow(y_diff, 2));
 
    }
 
-   //std::cout << "Num straights: " << num_straights << std::endl;
-   //std::cout << "Num diags: " << num_diags << std::endl;
-   //std::cout << length <<std::endl;
    return length;
 
 }

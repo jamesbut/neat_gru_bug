@@ -59,6 +59,8 @@ void EnvironmentGenerator::set_argos_config_file(const std::string filename) {
 
 void EnvironmentGenerator::generate_env(const std::string filename, const int env_num) {
 
+   //corridor_contours_img_stored
+
    //This means the environment has an image already, for example in the test data
    if(filename != "") {
 
@@ -67,8 +69,6 @@ void EnvironmentGenerator::generate_env(const std::string filename, const int en
 
       optimal_path_length = get_value_at_line(TEST_ENV_LENGTHS_PATH, env_num);
 
-      //std::cout << "Optimal path length: " << optimal_path_length << std::endl;
-
    //Otherwise generate a random env
    } else {
 
@@ -76,30 +76,29 @@ void EnvironmentGenerator::generate_env(const std::string filename, const int en
       generate_rand_env();
 
       //Call astar here
-      optimal_path = astar_on_env(corridor_contours_img);
+      optimal_path = astar_on_env(corridor_contours_img, argos::CVector2(20, 20), argos::CVector2(110, 110));
 
       //Calculate path length too
-      calculate_optimal_path_length();
-
-      //std::cout << "Optimal path length: " << optimal_path_length << std::endl;
+      optimal_path_length = calculate_path_length(optimal_path);
 
    }
 
 }
 
-void EnvironmentGenerator::calculate_optimal_path_length() {
 
-   std::vector<argos::CVector2> astar_path_divided_by_ten(optimal_path.size());
+double EnvironmentGenerator::calculate_path_length(const std::vector<argos::CVector2> path) {
+
+   std::vector<argos::CVector2> astar_path_divided_by_ten(path.size());
 
    //Divide astar path by 10 because the image that is planned over is 140x140
    //whereas the environment is 14x14
-   std::transform(optimal_path.begin(), optimal_path.end(), astar_path_divided_by_ten.begin(),
+   std::transform(path.begin(), path.end(), astar_path_divided_by_ten.begin(),
                   [](const argos::CVector2& pos){return pos / 10;});
 
    double length = 0.0;
-   //std::cout << "Op path size: " << optimal_path.size() << std::endl;
+   //std::cout << "Op path size: " << path.size() << std::endl;
 
-   for(size_t i = 0; i < optimal_path.size()-1; i++) {
+   for(size_t i = 0; i < path.size()-1; i++) {
       //std::cout << "i: " << i << std::endl;
       double x_diff = std::abs(astar_path_divided_by_ten[i].GetX() - astar_path_divided_by_ten[i+1].GetX());
       double y_diff = std::abs(astar_path_divided_by_ten[i].GetY() - astar_path_divided_by_ten[i+1].GetY());
@@ -108,7 +107,15 @@ void EnvironmentGenerator::calculate_optimal_path_length() {
 
    }
 
-   optimal_path_length = length;
+   return length;
+
+}
+
+double EnvironmentGenerator::calculate_remaining_distance_from(const argos::CVector2 pos) {
+
+   std::vector<argos::CVector2> remaining_path = astar_on_env(corridor_contours_img_stored, pos, argos::CVector2(110, 110));
+
+   return calculate_path_length(remaining_path);
 
 }
 
@@ -212,6 +219,8 @@ void EnvironmentGenerator::generate_rand_env() {
 
   }
 
+  corridor_contours_img_stored = corridor_contours_img.clone();
+
 }
 
 void EnvironmentGenerator::read_file(const std::string file_name) {
@@ -223,8 +232,7 @@ void EnvironmentGenerator::read_file(const std::string file_name) {
    corridor_contours_img = Mat::zeros(read_img.size(), CV_8UC1);
    resize(read_img, corridor_contours_img, corridor_contours_img.size(), 0, 0, INTER_NEAREST);
 
-   //namedWindow( "Environment2", WINDOW_AUTOSIZE );// Create a window for display.
-   //imshow( "Environment2", corridor_contours_img );                   // Show our image inside it.
+   corridor_contours_img_stored = corridor_contours_img.clone();
 
 }
 

@@ -13,6 +13,7 @@
 
 std::vector<argos::CVector2> astar_on_env(const std::string& env_path);
 
-std::vector<argos::CVector2> astar_on_env(const cv::Mat& mat_img);
+std::vector<argos::CVector2> astar_on_env(const cv::Mat& mat_img, const argos::CVector2 start_position,
+                                                                  const argos::CVector2 goal_position);
 
 #endif

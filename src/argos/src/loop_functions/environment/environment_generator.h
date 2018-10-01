@@ -42,13 +42,16 @@ public:
 
    void set_argos_config_file(const std::string filename);
 
+   double calculate_remaining_distance_from(const argos::CVector2 pos);
+
    const bool EFFICIENT_ENVIRONMENT;
 
 private:
 
    void read_file(const std::string file_name);
    void generate_rand_env();
-   void calculate_optimal_path_length();
+   //void calculate_optimal_path_length();
+   double calculate_path_length(const std::vector<argos::CVector2> path);
 
    //Kims functions
    bool checkConnectivity();
@@ -79,6 +82,9 @@ private:
    cv::Mat bin_corridor_img_large;
    cv::Mat corridor_contours_img;
    cv::Mat corridor_contours_img_save;
+
+   cv::Mat corridor_contours_img_stored;
+
    int environment_width;
    int environment_height;
 
