@@ -78,7 +78,7 @@ void FitnessScore::PostExperiment() {
 
    const std::vector<CVector2>& trajectory = trajectory_loop.get_trajectory();
 
-   //traj_per_astar = calculate_trajectory_per_optimal_path(trajectory);
+   traj_per_astar = calculate_trajectory_per_optimal_path(trajectory);
 
    //Calculate fitness
    /*    F1   */
