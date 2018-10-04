@@ -91,26 +91,42 @@ void FitnessScore::PostExperiment() {
    //fitness_score = distance_from_tower_w_crash;
 
    /*    F2   */
-   //double distance_from_tower = max_range - robots_distance;
-
-   //if (no_son_of_mine) distance_from_tower /= 10;
-
-   //distance_from_tower_w_crash = distance_from_tower;
-
-   //fitness_score = (C1 * distance_from_tower_w_crash) - (C2 * traj_per_astar);
+   // double distance_from_tower = max_range - robots_distance;
+   //
+   // if (no_son_of_mine) distance_from_tower /= 10;
+   //
+   // distance_from_tower_w_crash = distance_from_tower;
+   //
+   // fitness_score = (C1 * distance_from_tower_w_crash) - (C2 * traj_per_astar);
 
    /*    F3   */
    //Calculate remaining distance according to astar
    //NOTE: This does an astar search, so comment out unless needed!
+   // CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+   //
+   // //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
+   // argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
+   // double remaining_distance_from_tower =  m_env_generator->calculate_remaining_distance_from(bot_pos);
+   //
+   // fitness_score = REMAINING_DIST_MAX - remaining_distance_from_tower;
+   //
+   // if(no_son_of_mine) fitness_score /= 10;
+
+   /*    F4   */
    CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
 
    //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
    argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
    double remaining_distance_from_tower =  m_env_generator->calculate_remaining_distance_from(bot_pos);
 
-   fitness_score = REMAINING_DIST_MAX - remaining_distance_from_tower;
+   fitness_score = (C1 * (REMAINING_DIST_MAX - remaining_distance_from_tower)) - (C2 * traj_per_astar);
 
    if(no_son_of_mine) fitness_score /= 10;
+
+   /*   F5   */
+   // fitness_score = hit_tower ? 1 : 0;
+   //
+   // if(no_son_of_mine) fitness_score /= 10;
 
    //std::cout << "Max range: " << max_range << std::endl;
    // std::cout << "Robots distance " << robots_distance << std::endl;

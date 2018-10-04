@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 #Read data
 #train_file_data = genfromtxt('../scores/training_scores_1.txt', delimiter=',')
-train_file_data = genfromtxt('../scores/training_scores/archive_scores/ap_21_f3_fw/ap_21_f3_fw_training_2.txt', delimiter=',')
+train_file_data = genfromtxt('../scores/training_scores/archive_scores/ap_21_f2_fw/ap_21_f2_fw_c1:1.0_c2:0.75_training_6.txt', delimiter=',')
 #train_file_data = genfromtxt('../scores/training_scores/archive_scores/ap_6_f2/ap_6_f2_training_5.txt', delimiter=',')
 
 #Get data
