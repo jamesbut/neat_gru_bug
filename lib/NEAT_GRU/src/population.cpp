@@ -607,7 +607,7 @@ bool Population::epoch(int generation) {
 	   It is also fine when the GRU cell is a hidden node just not when it is an output node */
 	/* James - it seems here that all but the 2 best species are killed off */
 	// James - turned off delta coding for now.
-	if (highest_last_changed>=NEAT::dropoff_age+5) {
+	if (highest_last_changed>=NEAT::dropoff_age+5 && false) {
 
 		std::cout<<"PERFORMING DELTA CODING"<<std::endl;
 
