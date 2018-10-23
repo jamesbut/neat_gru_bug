@@ -126,11 +126,16 @@ void FitnessScore::PostExperiment() {
    /*   F5   */
    // fitness_score = hit_tower ? 1 : 0;
    //
-   // if(no_son_of_mine) fitness_score /= 10;
+   // std::cout << "Fitness score: " << fitness_score;
+   //
+   // if(no_son_of_mine)
+   //    fitness_score /= 10;
+   //
+   // std::cout << " " << fitness_score << std::endl;
 
    //std::cout << "Max range: " << max_range << std::endl;
    // std::cout << "Robots distance " << robots_distance << std::endl;
-   // std::cout << "Fitness score: " << fitness_score << std::endl;
+   //std::cout << "Fitness score: " << fitness_score << std::endl;
    //std::cout << "Remaining distance from tower: " << remaining_distance_from_tower << std::endl;
 
    //Capture any fitness that is below 0

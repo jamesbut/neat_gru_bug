@@ -303,8 +303,16 @@ void DataCollection::test_on_eval_set(int current_gen) {
       //Collect results from shared memory
       std::vector<std::vector <RunResult> > trial_results;
 
-      for(size_t i = 0; i < genomes_to_be_tested.size(); i++)
+      for(size_t i = 0; i < genomes_to_be_tested.size(); i++) {
          trial_results.push_back(shared_mem->get_run_result(i));
+
+         // for(size_t j = 0; j < trial_results[i].size(); j++) {
+         //
+         //    std::cout << "Org: " << i << " trial: " << j << " fitness: " << trial_results[i][j].fitness << std::endl;
+         //
+         // }
+      }
+
 
 
       //Collect data for each run

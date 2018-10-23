@@ -541,7 +541,7 @@ bool Population::epoch(int generation) {
 	//Need to make up for lost foating point precision in offspring assignment
 	//If we lost precision, give an extra baby to the best Species
 	if (total_expected<total_organisms) {
-
+		
 		//Find the Species expecting the most
 		max_expected=0;
 		final_expected=0;

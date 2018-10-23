@@ -4,21 +4,24 @@ import numpy as np
 
 #Read data
 #test_file_data = genfromtxt('../scores/eval_scores_0.txt', delimiter=',')
-test_file_data = genfromtxt('../scores/eval_scores/archive_scores/ap_22_f4_fw/ap_22_f4_fw_c1:1.0_c2:1.1_eval_0_7.txt', delimiter=',')
+test_file_data = genfromtxt('../scores/eval_scores/archive_scores/ap_22_f5_fw/ap_22_f5_fw_dc:off_eval_0_1.txt', delimiter=',')
 
 #Sort data
 test_generations = test_file_data[:,0]
 
 test_num_finishes = test_file_data[:,1]
 
+traj_per_astar = test_file_data[:,2]
+
 #Get all individual test fitnesses
-test_scores = test_file_data[:,2:]
+#test_scores = test_file_data[:,2:]
+test_mean_scores = test_file_data[:,3]
 
 #Max test scores
-test_max_scores = np.amax(test_scores, axis=1)
+#test_max_scores = np.amax(test_scores, axis=1)
 
 #Mean test scores
-test_mean_scores = np.mean(test_scores, axis=1)
+#test_mean_scores = np.mean(test_scores, axis=1)
 
 #print(test_scores)
 #print(test_mean_scores)
@@ -26,7 +29,7 @@ test_mean_scores = np.mean(test_scores, axis=1)
 #print(test_max_scores)
 
 #Plot fitnesses
-plt.plot(test_generations, test_max_scores)
+#plt.plot(test_generations, test_max_scores)
 plt.plot(test_generations, test_mean_scores)
 plt.ylabel('Agent fitnesses')
 plt.show()
