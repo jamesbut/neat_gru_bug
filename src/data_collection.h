@@ -6,6 +6,7 @@
 #include <NEAT_GRU/include/population.h>
 #include "argos/src/argos_simulation.h"
 #include "shared_memory.h"
+#include "nash_averaging.h"
 
 
 class DataCollection {
@@ -62,6 +63,8 @@ private:
    SharedMem* shared_mem;
 
    std::vector<pid_t> slave_PIDs;
+
+   NashAverager nash_averager;
 
 };
 

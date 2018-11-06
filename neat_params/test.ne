@@ -35,4 +35,4 @@ print_every 199
 babies_stolen 0
 num_runs 1
 num_gens 10
-num_trials 2
+num_trials 5

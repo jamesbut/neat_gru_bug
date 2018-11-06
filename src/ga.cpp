@@ -341,6 +341,21 @@ void GA::parallel_epoch() {
    for(size_t i = 0; i < neatPop->organisms.size(); i++)
       trial_results.push_back(shared_mem->get_run_result(i));
 
+   /*---------------------------------------------------*/
+
+   // for(size_t i = 0; i < trial_results.size(); i++) {
+   //    for(size_t j = 0; j < trial_results[i].size(); j++) {
+   //       std::cout << trial_results[i][j].fitness << " ";
+   //    }
+   //    std::cout << std::endl;
+   // }
+   //
+   // std::cout << std::endl;
+
+
+
+   /*--------------------------------------------------*/
+
    data_collection->collect_scores(trial_results, neatPop, m_unCurrentGeneration);
 
    data_collection->flush_winners(m_unCurrentGeneration);

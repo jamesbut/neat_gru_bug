@@ -34,6 +34,21 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
                                     NEAT::Population* neatPop,
                                     int current_gen) {
 
+   //Get fitnesses out of trial results for nash averaging
+   std::vector<std::vector<double> > trial_fitnesses(trial_results.size());
+
+   for(size_t i = 0; i < trial_results.size(); i++) {
+
+      trial_fitnesses[i].resize(trial_results[i].size());
+
+      for(size_t j = 0; j < trial_results[i].size(); j++)
+         trial_fitnesses[i][j] = trial_results[i][j].fitness;
+
+   }
+
+   //Calculate agent skills via nash averaging
+   std::vector<double> agent_skills = nash_averager.calculate_agent_skills(trial_fitnesses);
+
    int maxPopOrg;
    double maxPopScore;
 

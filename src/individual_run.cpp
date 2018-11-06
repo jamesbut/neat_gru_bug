@@ -1,7 +1,7 @@
 #include "individual_run.h"
 
 IndividualRun::IndividualRun(const std::string& gf) :
-   ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
+   ARGOS_FILE_NAME("../argos_params/no_walls_vis.argos"),
    ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
    eg(),
    NUM_RUNS(209),

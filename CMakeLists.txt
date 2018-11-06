@@ -10,21 +10,29 @@ add_subdirectory(src/argos)
 # Set ARGoS link dir
 link_directories(${ARGOS_LIBRARY_DIRS})
 
+#find_package(GUROBI REQUIRED)
+
 #Find boost
 find_package (Boost 1.55.0 REQUIRED COMPONENTS filesystem)
 
 add_executable(${PROJECT_NAME} src/main.cpp src/ga.cpp src/individual_run.cpp
-                               src/data_collection.cpp src/shared_memory.cpp)
+                               src/data_collection.cpp src/shared_memory.cpp
+                               src/nash_averaging.cpp)
 
 target_link_libraries(neat_gru_bug
    neatGRULib
    argos_simulation
    rt
    ${Boost_LIBRARIES}
+   /opt/gurobi810/linux64/src/build/libgurobi_c++.a
+   /opt/gurobi810/linux64/lib/libgurobi81.so
+   /usr/lib/python2.7/config-x86_64-linux-gnu/libpython2.7.so
    )
 
 set(EXT_LIB_INCLUDES
    ${CMAKE_SOURCE_DIR}/lib/)
 
 target_include_directories(neat_gru_bug PUBLIC
-${EXT_LIB_INCLUDES})
+   ${EXT_LIB_INCLUDES}
+   /opt/gurobi810/linux64/include/
+   )
