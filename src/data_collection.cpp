@@ -47,7 +47,9 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
    }
 
    //Calculate agent skills via nash averaging
-   std::vector<double> agent_skills = nash_averager.calculate_agent_skills(trial_fitnesses);
+   std::vector<double> agent_skills = nash_averager.calculate_agent_skills(trial_fitnesses,
+                                                                           trial_results.size(),
+                                                                           trial_results[0].size());
 
    int maxPopOrg;
    double maxPopScore;

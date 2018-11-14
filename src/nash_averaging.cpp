@@ -11,28 +11,48 @@
 #include <python2.7/Python.h>
 
 NashAverager::NashAverager() :
-   GAME_FILE_PATH("/home/james/Documents/PhD/researchPrograms/bimatrix_solver/tmp/tmp_game.txt"),
-   NASH_FILE_PATH("/home/james/Documents/PhD/researchPrograms/bimatrix_solver/tmp/nash_out_") {}
+   GAME_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/tmp_game.txt"),
+   //BIMATRIX_LIB_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver"),
+   NASH_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/nash_out_") {}
 
-std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::vector<double> >& vec_scores) {
+std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::vector<double> >& vec_scores,
+                                                         const unsigned int num_agents,
+                                                         const unsigned int num_envs) {
 
    //Calculate S
    Eigen::MatrixXd S = calculate_S(vec_scores);
 
-   //std::cout << S << std::endl;
+   std::cout << S << std::endl;
+
+   std::cout << "-----------------" << std::endl;
+
+   std::cout << -S.transpose() << std::endl;
 
    //Calculate A
    Eigen::MatrixXd A = calculate_A(S);
 
-   std::cout << A << std::endl;
+   //std::cout << A << std::endl;
 
    //Find max entropy Nash Equilibrium for A
-   std::vector<Eigen::VectorXd> nash_eq = calculate_maxent_nash_bimatrix_solver(A);
+   std::vector<Eigen::VectorXd> nash_eq = calculate_maxent_nash_bimatrix_solver(S);
 
+   /* Find skills of agents */
+
+   //Get p*_e
+   Eigen::VectorXd p_e_nash = nash_eq[0].tail(num_envs);
+   //std::cout << nash_eq[0] << std::endl;
+   //std::cout << nash_eq[1] << std::endl;
+   //std::cout << "p_e_nash: " << std::endl;
+   //std::cout << p_e_nash << std::endl;
+   //std::cout << S << std::endl;
+   Eigen::VectorXd agent_skills = S * p_e_nash;
+
+   //std::cout << "Agent skills: " << std::endl;
+   //std::cout << agent_skills << std::endl;
 
    //Return
-   std::vector<double> agent_skills(vec_scores.size());
-   return agent_skills;
+   std::vector<double> agent_skills_vec(vec_scores.size());
+   return agent_skills_vec;
 
 }
 
@@ -89,15 +109,39 @@ Eigen::MatrixXd NashAverager::calculate_A(const Eigen::MatrixXd& S) {
 
 }
 
-//This method prints the games to file and calls the solvers
-std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver(const Eigen::MatrixXd& A) {
+std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver(const Eigen::MatrixXd& S) {
+
+   call_bimatrix_solver(S);
+   std::vector<Eigen::MatrixXd> nash_S = read_nash_from_file();
+
+   // call_bimatrix_solver(-S.transpose());
+   // std::vector<Eigen::MatrixXd> nash_S_transpose = read_nash_from_file();
+   // std::cout << "Nashes:" << std::endl;
+   // std::cout << nash_S[0] << std::endl;
+   // std::cout << "---------" << std::endl;
+   // std::cout << nash_S[1] << std::endl;
+   // std::cout << "---------" << std::endl;
+   // std::cout << nash_S_transpose[0] << std::endl;
+   // std::cout << "---------" << std::endl;
+   // std::cout << nash_S_transpose[1] << std::endl;
+
+   //Calculate the nash equilibrium with highest entropy
+   std::vector<Eigen::VectorXd> max_ent_nash = calculate_maxent_nash(nash_S);
+
+   //std::cout << max_ent_nash[0] << std::endl;
+
+   return max_ent_nash;
+
+}
+
+void NashAverager::call_bimatrix_solver(const Eigen::MatrixXd& game) {
 
    //Write game to file
-   //write_game_to_file(A);
+   write_game_to_file(game);
 
    //Initialise python
    Py_Initialize();
-   PyRun_SimpleString("import sys; sys.path.insert(0, '/home/james/Documents/PhD/researchPrograms/bimatrix_solver')");
+   PyRun_SimpleString("import sys; sys.path.insert(0, '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver')");
 
    //Get python file
    PyObject* myModuleString = PyString_FromString((char*)"solve_game");
@@ -105,6 +149,7 @@ std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver
 
    if(myModule == NULL) {
       std::cout << "Could not import bimatrix_solver module!" << std::endl;
+      PyErr_Print();
       exit(EXIT_FAILURE);
    }
 
@@ -125,21 +170,59 @@ std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver
    //Solve game
    PyObject* myResult = PyObject_CallObject(myFunction, args);
 
-   //Read nash results from file
-   //Vector of size 2 - one for each player
-   std::vector<Eigen::MatrixXd> all_nash_eq = read_nash_from_file();
-
-   //std::cout << all_nash_eq[0] << std::endl;
-   //std::cout << all_nash_eq[1] << std::endl;
-
-   //Calculate the nash equilibrium with highest entropy
-   std::vector<Eigen::VectorXd> max_ent_nash = calculate_maxent_nash(all_nash_eq);
-
-   //std::cout << max_ent_nash[0] << std::endl;
-
-   return max_ent_nash;
-
 }
+
+//This method prints the games to file and calls the solvers
+// std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver(const Eigen::MatrixXd& A) {
+//
+//    //Write game to file
+//    write_game_to_file(A);
+//
+//    //Initialise python
+//    Py_Initialize();
+//    PyRun_SimpleString("import sys; sys.path.insert(0, '/home/james/Documents/PhD/researchPrograms/bimatrix_solver')");
+//
+//    //Get python file
+//    PyObject* myModuleString = PyString_FromString((char*)"solve_game");
+//    PyObject* myModule = PyImport_Import(myModuleString);
+//
+//    if(myModule == NULL) {
+//       std::cout << "Could not import bimatrix_solver module!" << std::endl;
+//       exit(EXIT_FAILURE);
+//    }
+//
+//    //Get reference to function
+//    PyObject* myFunction = PyObject_GetAttrString(myModule, (char*)"solve_game");
+//
+//    if(myFunction == NULL) {
+//       std::cout << "Could not find bimatrix_solver function" << std::endl;
+//       exit(EXIT_FAILURE);
+//    }
+//
+//    //Build args
+//    PyObject* args = PyTuple_New(1);
+//    PyObject* string_arg = PyString_FromString(GAME_FILE_PATH.c_str());
+//
+//    PyTuple_SetItem(args, 0, string_arg);
+//
+//    //Solve game
+//    PyObject* myResult = PyObject_CallObject(myFunction, args);
+//
+//    //Read nash results from file
+//    //Vector of size 2 - one for each player
+//    std::vector<Eigen::MatrixXd> all_nash_eq = read_nash_from_file();
+//
+//    //std::cout << all_nash_eq[0] << std::endl;
+//    //std::cout << all_nash_eq[1] << std::endl;
+//
+//    //Calculate the nash equilibrium with highest entropy
+//    std::vector<Eigen::VectorXd> max_ent_nash = calculate_maxent_nash(all_nash_eq);
+//
+//    //std::cout << max_ent_nash[0] << std::endl;
+//
+//    return max_ent_nash;
+//
+// }
 
 std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash(const std::vector<Eigen::MatrixXd>& nash_eqs) {
 
@@ -197,10 +280,12 @@ void NashAverager::write_game_to_file(const Eigen::MatrixXd& A) {
    game_file << A.rows() << " " << A.cols() << "\n\n";
 
    //Write p1 game
+   //Convert from double to rational of form x/y
    for(unsigned int i = 0; i < A.rows(); i++) {
 
       for(unsigned int j = 0; j < A.cols(); j++)
          game_file << A(i,j) << " ";
+         //game_file << A(i,j) * 1e5 << "/" << 1e5 << " ";
 
       game_file << "\n";
 
@@ -213,6 +298,7 @@ void NashAverager::write_game_to_file(const Eigen::MatrixXd& A) {
 
       for(unsigned int j = 0; j < A.cols(); j++)
          game_file << -A(i,j) << " ";
+         //game_file << -A(i,j) * 1e5 << "/" << 1e5 << " ";
 
       game_file << "\n";
 
