@@ -12,8 +12,9 @@
 
 NashAverager::NashAverager() :
    //GAME_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/tmp_game.txt"),
-   BIMATRIX_LIB_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver"),
-   NASH_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/nash_out_") {}
+   //BIMATRIX_LIB_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod"),
+   BIMATRIX_LIB_PATH("../lib/bimatrix_solver_mod"),
+   NASH_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod/tmp/nash_out_") {}
 
 std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::vector<double> >& vec_scores,
                                                          const unsigned int num_agents,
@@ -141,7 +142,7 @@ void NashAverager::call_bimatrix_solver(const Eigen::MatrixXd& game) {
 
    //Initialise python
    Py_Initialize();
-   PyRun_SimpleString("import sys; sys.path.insert(0, '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver')");
+   PyRun_SimpleString("import sys; sys.path.insert(0, '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod')");
 
    //Get python file
    PyObject* myModuleString = PyString_FromString((char*)"solve_game");
@@ -284,8 +285,8 @@ void NashAverager::write_game_to_file(const Eigen::MatrixXd& A) {
    for(unsigned int i = 0; i < A.rows(); i++) {
 
       for(unsigned int j = 0; j < A.cols(); j++)
-         //game_file << A(i,j) << " ";
-         game_file << A(i,j) * 1e5 << "/" << 1e5 << " ";
+         game_file << A(i,j) << " ";
+         //game_file << A(i,j) * 1e5 << "/" << 1e5 << " ";
 
       game_file << "\n";
 
@@ -297,8 +298,8 @@ void NashAverager::write_game_to_file(const Eigen::MatrixXd& A) {
    for(unsigned int i = 0; i < A.rows(); i++) {
 
       for(unsigned int j = 0; j < A.cols(); j++)
-         //game_file << -A(i,j) << " ";
-         game_file << -A(i,j) * 1e5 << "/" << 1e5 << " ";
+         game_file << -A(i,j) << " ";
+         //game_file << -A(i,j) * 1e5 << "/" << 1e5 << " ";
 
       game_file << "\n";
 

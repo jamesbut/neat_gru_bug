@@ -8,11 +8,11 @@
 /* A          (row by row)                               */
 /* B          (row by row)                               */
 /*                                                       */
-/* Derived from nash.c in lrslib-060 by                  */ 
+/* Derived from nash.c in lrslib-060 by                  */
 /* Terje Lensberg, October 26, 2015:                     */
 /* Simplified API via lrs_solve_nash(game *g)            */
 /*********************************************************/
-/* 
+/*
 Compile:
 gcc -O3 -o lrsnash lrsnash.c lrsnashlib.c lrslib.c lrsgmp.c -lgmp -DGMP
 */
@@ -114,7 +114,7 @@ int tl_readrat(long *num, long *den, char *str) {
 		*den = atol(div+1);
 	}
 	return TRUE;
-} 
+}
 
 
 //----------------------------------------------------------------------------------------//
@@ -124,11 +124,11 @@ int readGame(game * g, char *filename)
   long pos, s, t, nr, nc;
   char in[MAXINPUT];
 	strcpy(((gInfo *)g->aux)->name, filename);
-  if ((IN = fopen(filename, "r")) == NULL) 
+  if ((IN = fopen(filename, "r")) == NULL)
 		FILEERROR(filename);
-  if (fscanf(IN, "%ld %ld", &nr, &nc) < 2) 
+  if (fscanf(IN, "%ld %ld", &nr, &nc) < 2)
 		READERROR(filename);
-  if (nr > MAXSTRAT || nc > MAXSTRAT) 
+  if (nr > MAXSTRAT || nc > MAXSTRAT)
 		SIZEERROR(filename);
   g->nstrats[ROW] = nr;
   g->nstrats[COL] = nc;
@@ -137,7 +137,7 @@ int readGame(game * g, char *filename)
   for (pos = 0; pos < 2; pos++) {
     for (s = 0; s < nr; s++) {
       for (t = 0; t < nc; t++) {
-        if (fscanf(IN, "%s", in) < 1) 
+        if (fscanf(IN, "%s", in) < 1)
 					READERROR(filename);
 				updateFwidth(g, t, pos, in);
 				if (!tl_readrat (&g->payoff[s][t][pos].num, &g->payoff[s][t][pos].den, in))
@@ -243,7 +243,7 @@ int getArgs(int argc, char **argv)
     }
   }
 	if(error) {
-		fprintf(stderr, "Execution halted\n"); 
+		fprintf(stderr, "Execution halted\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -256,11 +256,11 @@ int isLegacy(char *filename) {
 	FILE *fp;
 	int i, n, foundLetter = FALSE;
 	char buf[100];
-	
+
 	if((fp = fopen(filename, "r")) == NULL) FILEERROR(filename);
 
-	n = fread(buf, sizeof(char), 100, fp); 
-	for(i=0;i<n;i++) 
+	n = fread(buf, sizeof(char), 100, fp);
+	for(i=0;i<n;i++)
 		if(isalpha(buf[i])) {
 			foundLetter = TRUE;
 			break;
@@ -300,12 +300,10 @@ int main(int argc, char **argv)
 		}
   	closeIO();
 	}
-	else 
-	{                                     // Handle legacy input files      
+	else
+	{                                     // Handle legacy input files
   	fprintf (stderr, "%s", LegacyMsg);  // Print a message to user
 		lrs_solve_nash_legacy(argc, argv);
 	}
 	return 0;
 }
-
-

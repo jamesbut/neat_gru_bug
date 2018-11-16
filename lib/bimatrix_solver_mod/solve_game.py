@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import os 
+import os
 from fractions import Fraction
-import string 
-import argparse 
+import string
+import argparse
 import subprocess
 import StringIO
 import yaml
@@ -37,7 +37,7 @@ def process_lrs_output(string_input = None, fpath = 'tmp/out'):
     if string_input is not None:
         # string_input takes precedence
         buf = StringIO.StringIO(string_input)
-    else: 
+    else:
         # read from fpath
         buf = open(fpath, 'r')
 
@@ -57,14 +57,14 @@ def process_lrs_output(string_input = None, fpath = 'tmp/out'):
 
     store['number_of_extreme_eq'] = numberOfEq
 
-    # store mixed strategies as arrays of string probabilities 
+    # store mixed strategies as arrays of string probabilities
     e1, e2 = {}, {}
 
-    # store payoffs 
+    # store payoffs
     p1, p2 = {}, {}
 
     ######################################################
-    # DICTIONARIES for mixed strategies 
+    # DICTIONARIES for mixed strategies
     ######################################################
     # Mixed strategies strings as keys (e.g. '1/2,1/4,1/4')
     # Indices as values
@@ -75,7 +75,7 @@ def process_lrs_output(string_input = None, fpath = 'tmp/out'):
     # next index for input to clique algorithm
     c1, c2 = 1, 1
 
-    eq = -1 # index of current equilibrium (shared by e1,e2,p1,p2,index1,index2) 
+    eq = -1 # index of current equilibrium (shared by e1,e2,p1,p2,index1,index2)
 
     count = 0 # how many equilibria of II to match with one
 
@@ -97,11 +97,11 @@ def process_lrs_output(string_input = None, fpath = 'tmp/out'):
         if not x[j]:
             count = 0 # reset count, ready for next set of II's strategies
             continue
-        elif x[j][0] == "2": 
+        elif x[j][0] == "2":
             processII = True
             count += 1 # one more of II's strategies to pair with I's
             eq += 1
-        elif x[j][0] == "1": 
+        elif x[j][0] == "1":
             processII = False
         else:
             print("skipping line: %s", x[j])
@@ -120,12 +120,12 @@ def process_lrs_output(string_input = None, fpath = 'tmp/out'):
             if e2string not in dict2.keys():
                 dict2[e2string] = c2
                 c2 += 1
-            index2[eq] = dict2[e2string] 
+            index2[eq] = dict2[e2string]
         else:
             #################################################
             # Player I
             #################################################
-            # Now match all these count-many strategies of II 
+            # Now match all these count-many strategies of II
             # with # subsequent strategy of I
 
             e1[eq] = x[j][1:l-1]
@@ -136,12 +136,12 @@ def process_lrs_output(string_input = None, fpath = 'tmp/out'):
             if e1string not in dict1.values():
                 dict1[e1string] = c1
                 c1 += 1
-            index1[eq] = dict1[e1string] 
+            index1[eq] = dict1[e1string]
 
             for i in range(1,count):
-                e1[eq-i] = e1[eq] 
+                e1[eq-i] = e1[eq]
                 p2[eq-i] = p2[eq]
-                index1[eq-i] = index1[eq] 
+                index1[eq-i] = index1[eq]
 
     strategies1 = []
     strategies2 = []
@@ -213,7 +213,7 @@ def clique_enumeration(numberOfEq, index1, index2, lib_path):
     assert numberOfEq == len(index1) == len(index2)
     # open clique enumeration input file
     fcin = open(lib_path + '/tmp/clique_input.txt', 'w')
-    # print indices to clique enumeration input file 
+    # print indices to clique enumeration input file
     for i in range(numberOfEq):
         fcin.write("{0} {1}\n".format(index1[i],index2[i]))
     # close file
@@ -282,28 +282,28 @@ def parse_input_game(fpath):
 
 def solve_game(lib_path):
     nrow, ncol, m1, m2 = parse_input_game(lib_path + "/tmp/tmp_game.txt")
-    
+
     # write the game as a *rational* matrix for use with lrs
-    #import sympy as sy
-    #m1_rat = sy.Matrix(m1).applyfunc(sy.Rational)
-    #m2_rat = sy.Matrix(m2).applyfunc(sy.Rational)
+    import sympy as sy
+    m1_rat = sy.Matrix(m1).applyfunc(sy.Rational)
+    m2_rat = sy.Matrix(m2).applyfunc(sy.Rational)
 
-    #newfile = os.path.join(lib_path + '/tmp','rational_input.txt')
+    newfile = os.path.join(lib_path + '/tmp','rational_input.txt')
 
-    #with open(newfile, 'w') as outfile:
-    #    outfile.write("%s %s\n\n" % (nrow,ncol))
-    #    tmp = m1_rat.tolist()
-    #    for row in tmp:
-    #        outfile.write(" ".join([str(t) for t in row]))
-    #        outfile.write("\n")
-    #    outfile.write("\n")
-    #    tmp = m2_rat.tolist()
-    #    for row in tmp:
-    #        outfile.write(" ".join([str(t) for t in row]))
-    #        outfile.write("\n")
+    with open(newfile, 'w') as outfile:
+       outfile.write("%s %s\n\n" % (nrow,ncol))
+       tmp = m1_rat.tolist()
+       for row in tmp:
+           outfile.write(" ".join([str(t) for t in row]))
+           outfile.write("\n")
+       outfile.write("\n")
+       tmp = m2_rat.tolist()
+       for row in tmp:
+           outfile.write(" ".join([str(t) for t in row]))
+           outfile.write("\n")
 
     # system call to lrsnash
-    result = subprocess.check_output([lib_path + '/bin/lrsnash', lib_path + "/tmp/tmp_game.txt"])
+    result = subprocess.check_output([lib_path + '/bin/lrsnash', lib_path + '/tmp/rational_input.txt'])
     result_string = result.decode('utf-8')
     print(result_string)
 
@@ -314,8 +314,8 @@ def solve_game(lib_path):
 
     store, index1, index2, strategies1, strategies2 = process_lrs_output(result_string)
 
-    print(strategies1)
-    print(strategies2)
+    #print(strategies1)
+    #print(strategies2)
 
     store['ncol'] = ncol
     store['nrow'] = nrow
@@ -364,9 +364,9 @@ if __name__ == "__main__":
 
     assert os.path.isfile(args.input_path), "%s is not a file" % args.input_path
 
-    nrow, ncol, m1, m2 = parse_input_game(args.input_path)    
+    nrow, ncol, m1, m2 = parse_input_game(args.input_path)
 
-    
+
     # write the game as a *rational* matrix for use with lrs
     import sympy as sy
     m1_rat = sy.Matrix(m1).applyfunc(sy.Rational)
@@ -385,6 +385,7 @@ if __name__ == "__main__":
             outfile.write("\n")
 
     # system call to lrsnash
+    print(newfile)
     result = subprocess.check_output(['bin/lrsnash', newfile])
     result_string = result.decode('utf-8')
     print(result_string)
@@ -394,18 +395,17 @@ if __name__ == "__main__":
         text_file.write(result_string)
         text_file.close()
 
-    store, index1, index2 = process_lrs_output(result_string)
+    store, index1, index2, s1, s2 = process_lrs_output(result_string)
     store['ncol'] = ncol
     store['nrow'] = nrow
     store['m1'] = m1
     store['m2'] = m2
-    store['clique_output'] = clique_enumeration(store['number_of_extreme_eq'], index1, index2)
+    store['clique_output'] = clique_enumeration(store['number_of_extreme_eq'], index1, index2, "")
 
     # print in original "banach.lse.ac.uk" format
     print_output(store)
-    
+
     # save dictionary to a yaml file
     # TODO: tidy up contents of dictionary (e.g. strings to numbers)
     with open('tmp/out.yaml', 'w') as outfile:
         yaml.safe_dump(store, outfile)
-
