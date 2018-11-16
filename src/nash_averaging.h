@@ -34,8 +34,8 @@ private:
    //Returns two nash matrices - one for each player
    std::vector<Eigen::MatrixXd> read_nash_from_file();
 
-   //const std::string BIMATRIX_LIB_PATH;
-   const std::string GAME_FILE_PATH;
+   const std::string BIMATRIX_LIB_PATH;
+   //const std::string GAME_FILE_PATH;
    const std::string NASH_FILE_PATH;
 
 };

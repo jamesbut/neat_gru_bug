@@ -11,8 +11,8 @@
 #include <python2.7/Python.h>
 
 NashAverager::NashAverager() :
-   GAME_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/tmp_game.txt"),
-   //BIMATRIX_LIB_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver"),
+   //GAME_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/tmp_game.txt"),
+   BIMATRIX_LIB_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver"),
    NASH_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/nash_out_") {}
 
 std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::vector<double> >& vec_scores,
@@ -116,10 +116,10 @@ std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver
 
    // call_bimatrix_solver(-S.transpose());
    // std::vector<Eigen::MatrixXd> nash_S_transpose = read_nash_from_file();
-   // std::cout << "Nashes:" << std::endl;
-   // std::cout << nash_S[0] << std::endl;
-   // std::cout << "---------" << std::endl;
-   // std::cout << nash_S[1] << std::endl;
+   std::cout << "Nashes:" << std::endl;
+   std::cout << nash_S[0] << std::endl;
+   std::cout << "---------" << std::endl;
+   std::cout << nash_S[1] << std::endl;
    // std::cout << "---------" << std::endl;
    // std::cout << nash_S_transpose[0] << std::endl;
    // std::cout << "---------" << std::endl;
@@ -163,7 +163,7 @@ void NashAverager::call_bimatrix_solver(const Eigen::MatrixXd& game) {
 
    //Build args
    PyObject* args = PyTuple_New(1);
-   PyObject* string_arg = PyString_FromString(GAME_FILE_PATH.c_str());
+   PyObject* string_arg = PyString_FromString(BIMATRIX_LIB_PATH.c_str());
 
    PyTuple_SetItem(args, 0, string_arg);
 
@@ -275,7 +275,7 @@ void NashAverager::write_game_to_file(const Eigen::MatrixXd& A) {
 
    //Write game to tmp_file for solvers to read
    std::ofstream game_file;
-   game_file.open(GAME_FILE_PATH);
+   game_file.open(BIMATRIX_LIB_PATH + "/tmp/tmp_game.txt");
 
    game_file << A.rows() << " " << A.cols() << "\n\n";
 
@@ -284,8 +284,8 @@ void NashAverager::write_game_to_file(const Eigen::MatrixXd& A) {
    for(unsigned int i = 0; i < A.rows(); i++) {
 
       for(unsigned int j = 0; j < A.cols(); j++)
-         game_file << A(i,j) << " ";
-         //game_file << A(i,j) * 1e5 << "/" << 1e5 << " ";
+         //game_file << A(i,j) << " ";
+         game_file << A(i,j) * 1e5 << "/" << 1e5 << " ";
 
       game_file << "\n";
 
@@ -297,8 +297,8 @@ void NashAverager::write_game_to_file(const Eigen::MatrixXd& A) {
    for(unsigned int i = 0; i < A.rows(); i++) {
 
       for(unsigned int j = 0; j < A.cols(); j++)
-         game_file << -A(i,j) << " ";
-         //game_file << -A(i,j) * 1e5 << "/" << 1e5 << " ";
+         //game_file << -A(i,j) << " ";
+         game_file << -A(i,j) * 1e5 << "/" << 1e5 << " ";
 
       game_file << "\n";
 
