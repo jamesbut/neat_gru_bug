@@ -47,13 +47,16 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
    }
 
    //Calculate agent skills via nash averaging
+   std::cout << "Solving nash game.." << std::endl;
    std::vector<double> agent_skills = nash_averager.calculate_agent_skills(trial_fitnesses,
                                                                            trial_results.size(),
                                                                            trial_results[0].size());
+   std::cout << "..game solved!" << std::endl;
 
    int maxPopOrg;
    double maxPopScore;
 
+   std::cout << "Mean scores:" << std::endl;
    //Set fitnesses in NEAT
    for(size_t i = 0; i < neatPop->organisms.size(); i++) {
 
@@ -67,7 +70,11 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       double meanTrialFitness = std::accumulate(individual_trial_fitnesses.begin(), individual_trial_fitnesses.end(), 0.0) / individual_trial_fitnesses.size();
       //double sumTrial = std::accumulate(individual_trial_scores.begin(), individual_trial_scores.end(), 0.0);
 
-      neatPop->organisms[i]->fitness = meanTrialFitness;
+      std::cout << meanTrialFitness << " ";
+
+      //Set skills to either uniform average OR nash average
+      //neatPop->organisms[i]->fitness = meanTrialFitness;
+      neatPop->organisms[i]->fitness = agent_skills[i];
 
       //Find best organism in population
       if (i == 0 || neatPop->organisms[i]->fitness > maxPopScore) {
@@ -78,6 +85,8 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       }
 
    }
+
+   std::cout << std::endl;
 
    bool overall_winner_changed = false;
 

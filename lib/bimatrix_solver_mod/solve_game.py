@@ -305,7 +305,7 @@ def solve_game(lib_path):
     # system call to lrsnash
     result = subprocess.check_output([lib_path + '/bin/lrsnash', lib_path + '/tmp/rational_input.txt'])
     result_string = result.decode('utf-8')
-    print(result_string)
+    # print(result_string)
 
     if True:
         text_file = open(lib_path + "/tmp/out", "w")
@@ -324,7 +324,7 @@ def solve_game(lib_path):
     store['clique_output'] = clique_enumeration(store['number_of_extreme_eq'], index1, index2, lib_path)
 
     # print in original "banach.lse.ac.uk" format
-    #print_output(store)
+    # print_output(store)
     # save dictionary to a yaml file
 
     # Write results to file

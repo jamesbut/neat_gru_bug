@@ -19,7 +19,7 @@ private:
    Eigen::MatrixXd calculate_S(const std::vector<std::vector<double> >& vec_scores);
    Eigen::MatrixXd calculate_A(const Eigen::MatrixXd& S);
 
-   Eigen::MatrixXd calculate_nash_gurobi(const Eigen::MatrixXd& S);
+   // Eigen::MatrixXd calculate_nash_gurobi(const Eigen::MatrixXd& S);
    Eigen::MatrixXd calculate_nash_bimatrix_solver_old(const Eigen::MatrixXd& A);
    std::vector<Eigen::VectorXd> calculate_maxent_nash_bimatrix_solver(const Eigen::MatrixXd& A);
 
@@ -33,6 +33,8 @@ private:
 
    //Returns two nash matrices - one for each player
    std::vector<Eigen::MatrixXd> read_nash_from_file();
+
+   Eigen::VectorXd normalise(Eigen::VectorXd vec);
 
    const std::string BIMATRIX_LIB_PATH;
    //const std::string GAME_FILE_PATH;

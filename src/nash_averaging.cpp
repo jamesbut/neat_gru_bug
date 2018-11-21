@@ -5,7 +5,7 @@
 #include <iterator>
 
 //Gurobi
-#include <gurobi_c++.h>
+//#include <gurobi_c++.h>
 
 //C/Python API
 #include <python2.7/Python.h>
@@ -23,11 +23,11 @@ std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::
    //Calculate S
    Eigen::MatrixXd S = calculate_S(vec_scores);
 
-   std::cout << S << std::endl;
-
-   std::cout << "-----------------" << std::endl;
-
-   std::cout << -S.transpose() << std::endl;
+   // std::cout << S << std::endl;
+   //
+   // std::cout << "-----------------" << std::endl;
+   //
+   // std::cout << -S.transpose() << std::endl;
 
    //Calculate A
    Eigen::MatrixXd A = calculate_A(S);
@@ -39,20 +39,24 @@ std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::
 
    /* Find skills of agents */
 
-   //Get p*_e
-   Eigen::VectorXd p_e_nash = nash_eq[0].tail(num_envs);
-   //std::cout << nash_eq[0] << std::endl;
-   //std::cout << nash_eq[1] << std::endl;
-   //std::cout << "p_e_nash: " << std::endl;
-   //std::cout << p_e_nash << std::endl;
-   //std::cout << S << std::endl;
-   Eigen::VectorXd agent_skills = S * p_e_nash;
+   // std::cout << S << std::endl;
+   // std::cout << nash_eq[0] << std::endl;
+   Eigen::VectorXd agent_skills = S * nash_eq[0];
 
-   //std::cout << "Agent skills: " << std::endl;
-   //std::cout << agent_skills << std::endl;
+   // std::cout << "Agent skills: " << std::endl;
+   // std::cout << agent_skills << std::endl;
+
+   Eigen::VectorXd agent_skills_norm = normalise(agent_skills);
+
+   // std::cout << "Agent skills norm: " << std::endl;
+   // std::cout << agent_skills_norm << std::endl;
 
    //Return
-   std::vector<double> agent_skills_vec(vec_scores.size());
+   std::vector<double> agent_skills_vec(agent_skills_norm.size());
+
+   for(unsigned int i = 0; i < agent_skills_vec.size(); i++)
+      agent_skills_vec.at(i) = agent_skills_norm(i);
+
    return agent_skills_vec;
 
 }
@@ -112,22 +116,27 @@ Eigen::MatrixXd NashAverager::calculate_A(const Eigen::MatrixXd& S) {
 
 std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver(const Eigen::MatrixXd& S) {
 
+   //These both seem to get the same nashes
+   //I might just call one of these in future
    call_bimatrix_solver(S);
    std::vector<Eigen::MatrixXd> nash_S = read_nash_from_file();
 
-   // call_bimatrix_solver(-S.transpose());
-   // std::vector<Eigen::MatrixXd> nash_S_transpose = read_nash_from_file();
-   std::cout << "Nashes:" << std::endl;
-   std::cout << nash_S[0] << std::endl;
-   std::cout << "---------" << std::endl;
-   std::cout << nash_S[1] << std::endl;
+   call_bimatrix_solver(-S.transpose());
+   std::vector<Eigen::MatrixXd> nash_S_transpose = read_nash_from_file();
+
+   // std::cout << "Nashes g1:" << std::endl;
+   // std::cout << nash_S[0] << std::endl;
+   // std::cout << "---------" << std::endl;
+   // std::cout << nash_S[1] << std::endl;
+   //
+   // std::cout << "Nashes g2:" << std::endl;
    // std::cout << "---------" << std::endl;
    // std::cout << nash_S_transpose[0] << std::endl;
    // std::cout << "---------" << std::endl;
    // std::cout << nash_S_transpose[1] << std::endl;
 
    //Calculate the nash equilibrium with highest entropy
-   std::vector<Eigen::VectorXd> max_ent_nash = calculate_maxent_nash(nash_S);
+   std::vector<Eigen::VectorXd> max_ent_nash = calculate_maxent_nash(nash_S_transpose);
 
    //std::cout << max_ent_nash[0] << std::endl;
 
@@ -357,137 +366,172 @@ std::vector<Eigen::MatrixXd> NashAverager::read_nash_from_file() {
 
 }
 
-//This is not finished - it only seemed to find one Nash but I needed
-//them all
-Eigen::MatrixXd NashAverager::calculate_nash_gurobi(const Eigen::MatrixXd& S) {
+//Normalise a vector such that all the values are between 0 and 1
+Eigen::VectorXd NashAverager::normalise(Eigen::VectorXd vec) {
 
-   //Example game - Would have to change to S throughout to get it working
-   //in general
-   Eigen::MatrixXd M(3,2);
-   M << 1, -1,
-        -1, 1,
-        -1, 1;
+   //Find smallest value
+   double min;
+   double max;
 
-   try {
+   for(unsigned int i = 0; i < vec.size(); i++) {
 
-      GRBEnv env = GRBEnv();
-
-      /********Row Player************/
-
-      //Construct linear program for row player
-      GRBModel row_model = GRBModel(env);
-
-      //Add variables
-      //TODO: lower and upper bounds need to be looked at here
-      GRBVar z = row_model.addVar(-100.0, 100.0, 0.0, GRB_CONTINUOUS, "z");
-
-      //Add probability variables
-      std::vector<GRBVar> row_probabilities(M.rows());
-
-      for(unsigned int i = 0; i < M.rows(); i++)
-         row_probabilities.at(i) = row_model.addVar(0.0, 1.0, 0.0, GRB_CONTINUOUS, "x_" + std::to_string(i));
-
-      //Add objective
-      row_model.setObjective(GRBLinExpr(z), GRB_MAXIMIZE);
-
-      //Add constraints
-      for(unsigned int i = 0; i < M.cols(); i++) {
-
-         GRBLinExpr lin_exp;
-
-         for(unsigned int j = 0; j < M.rows(); j++)
-            lin_exp += row_probabilities.at(j) * M(j, i) * (-1);
-
-         row_model.addConstr(lin_exp, GRB_GREATER_EQUAL, z);
-
+      if(i == 0) {
+         min = vec(i);
+         max = vec(i);
+         continue;
       }
 
+      if(vec(i) < min)
+         min = vec(i);
 
-      GRBLinExpr sum_to_one_row;
-      for(unsigned int i = 0; i < M.rows(); i++)
-         sum_to_one_row += row_probabilities.at(i);
-
-      row_model.addConstr(sum_to_one_row, GRB_EQUAL, 1);
-
-      for(unsigned int i = 0; i < M.rows(); i++)
-         row_model.addConstr(row_probabilities.at(i) >= 0);
-
-      //Optimise
-      row_model.optimize();
-
-      for(size_t i = 0; i < row_probabilities.size(); i++) {
-         std::cout << row_probabilities.at(i).get(GRB_StringAttr_VarName) << " "
-         << row_probabilities.at(i).get(GRB_DoubleAttr_X) << std::endl;
-      }
-
-      std::cout << "Obj: " << row_model.get(GRB_DoubleAttr_ObjVal) << std::endl;
-
-      /********Column Player************/
-
-      //Construct linear program for row player
-      GRBModel column_model = GRBModel(env);
-
-      //Add variables
-      //TODO: lower and upper bounds need to be looked at here
-      GRBVar w = column_model.addVar(-100.0, 100.0, 0.0, GRB_CONTINUOUS, "w");
-
-      //Add probability variables
-      std::vector<GRBVar> column_probabilities(M.cols());
-
-      for(unsigned int i = 0; i < M.cols(); i++)
-         column_probabilities.at(i) = column_model.addVar(0.0, 1.0, 0.0, GRB_CONTINUOUS, "y_" + std::to_string(i));
-
-      //Add objective
-      column_model.setObjective(GRBLinExpr(w), GRB_MAXIMIZE);
-
-      //Add constraints
-      for(unsigned int i = 0; i < M.rows(); i++) {
-
-         GRBLinExpr lin_exp;
-
-         for(unsigned int j = 0; j < M.cols(); j++)
-            lin_exp += column_probabilities.at(j) * M(i, j);
-
-         column_model.addConstr(lin_exp, GRB_GREATER_EQUAL, w);
-
-      }
-
-
-      GRBLinExpr sum_to_one_col;
-      for(unsigned int i = 0; i < M.cols(); i++)
-         sum_to_one_col += column_probabilities.at(i);
-
-      column_model.addConstr(sum_to_one_col, GRB_EQUAL, 1);
-
-      for(unsigned int i = 0; i < M.cols(); i++)
-         column_model.addConstr(column_probabilities.at(i) >= 0);
-
-      //Optimise
-      column_model.optimize();
-
-      for(size_t i = 0; i < column_probabilities.size(); i++) {
-         std::cout << column_probabilities.at(i).get(GRB_StringAttr_VarName) << " "
-         << column_probabilities.at(i).get(GRB_DoubleAttr_X) << std::endl;
-      }
-
-      std::cout << "Obj: " << column_model.get(GRB_DoubleAttr_ObjVal) << std::endl;
-
-
-   } catch(GRBException e) {
-
-      std::cout << "Error code for Gurobi = " << e.getErrorCode() << std::endl;
-      std::cout << e.getMessage() << std::endl;
-
-   } catch(...) {
-
-      std::cout << "Exception with Gurobi!" << std::endl;
+      if(vec(i) > max)
+         max = vec(i);
 
    }
 
-   Eigen::MatrixXd agent_skills(2, 2);
-   return agent_skills;
+   double range = max - min;
+
+   //Construct normalised vector
+   Eigen::VectorXd normalised_vec(vec.size());
+
+   for(unsigned int i = 0; i < vec.size(); i++)
+      normalised_vec(i) = (vec(i) - min) / range;
+
+   return normalised_vec;
 
 }
+
+//This is not finished - it only seemed to find one Nash but I needed
+//them all
+// Eigen::MatrixXd NashAverager::calculate_nash_gurobi(const Eigen::MatrixXd& S) {
+//
+//    //Example game - Would have to change to S throughout to get it working
+//    //in general
+//    Eigen::MatrixXd M(3,2);
+//    M << 1, -1,
+//         -1, 1,
+//         -1, 1;
+//
+//    try {
+//
+//       GRBEnv env = GRBEnv();
+//
+//       /********Row Player************/
+//
+//       //Construct linear program for row player
+//       GRBModel row_model = GRBModel(env);
+//
+//       //Add variables
+//       //TODO: lower and upper bounds need to be looked at here
+//       GRBVar z = row_model.addVar(-100.0, 100.0, 0.0, GRB_CONTINUOUS, "z");
+//
+//       //Add probability variables
+//       std::vector<GRBVar> row_probabilities(M.rows());
+//
+//       for(unsigned int i = 0; i < M.rows(); i++)
+//          row_probabilities.at(i) = row_model.addVar(0.0, 1.0, 0.0, GRB_CONTINUOUS, "x_" + std::to_string(i));
+//
+//       //Add objective
+//       row_model.setObjective(GRBLinExpr(z), GRB_MAXIMIZE);
+//
+//       //Add constraints
+//       for(unsigned int i = 0; i < M.cols(); i++) {
+//
+//          GRBLinExpr lin_exp;
+//
+//          for(unsigned int j = 0; j < M.rows(); j++)
+//             lin_exp += row_probabilities.at(j) * M(j, i) * (-1);
+//
+//          row_model.addConstr(lin_exp, GRB_GREATER_EQUAL, z);
+//
+//       }
+//
+//
+//       GRBLinExpr sum_to_one_row;
+//       for(unsigned int i = 0; i < M.rows(); i++)
+//          sum_to_one_row += row_probabilities.at(i);
+//
+//       row_model.addConstr(sum_to_one_row, GRB_EQUAL, 1);
+//
+//       for(unsigned int i = 0; i < M.rows(); i++)
+//          row_model.addConstr(row_probabilities.at(i) >= 0);
+//
+//       //Optimise
+//       row_model.optimize();
+//
+//       for(size_t i = 0; i < row_probabilities.size(); i++) {
+//          std::cout << row_probabilities.at(i).get(GRB_StringAttr_VarName) << " "
+//          << row_probabilities.at(i).get(GRB_DoubleAttr_X) << std::endl;
+//       }
+//
+//       std::cout << "Obj: " << row_model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+//
+//       /********Column Player************/
+//
+//       //Construct linear program for row player
+//       GRBModel column_model = GRBModel(env);
+//
+//       //Add variables
+//       //TODO: lower and upper bounds need to be looked at here
+//       GRBVar w = column_model.addVar(-100.0, 100.0, 0.0, GRB_CONTINUOUS, "w");
+//
+//       //Add probability variables
+//       std::vector<GRBVar> column_probabilities(M.cols());
+//
+//       for(unsigned int i = 0; i < M.cols(); i++)
+//          column_probabilities.at(i) = column_model.addVar(0.0, 1.0, 0.0, GRB_CONTINUOUS, "y_" + std::to_string(i));
+//
+//       //Add objective
+//       column_model.setObjective(GRBLinExpr(w), GRB_MAXIMIZE);
+//
+//       //Add constraints
+//       for(unsigned int i = 0; i < M.rows(); i++) {
+//
+//          GRBLinExpr lin_exp;
+//
+//          for(unsigned int j = 0; j < M.cols(); j++)
+//             lin_exp += column_probabilities.at(j) * M(i, j);
+//
+//          column_model.addConstr(lin_exp, GRB_GREATER_EQUAL, w);
+//
+//       }
+//
+//
+//       GRBLinExpr sum_to_one_col;
+//       for(unsigned int i = 0; i < M.cols(); i++)
+//          sum_to_one_col += column_probabilities.at(i);
+//
+//       column_model.addConstr(sum_to_one_col, GRB_EQUAL, 1);
+//
+//       for(unsigned int i = 0; i < M.cols(); i++)
+//          column_model.addConstr(column_probabilities.at(i) >= 0);
+//
+//       //Optimise
+//       column_model.optimize();
+//
+//       for(size_t i = 0; i < column_probabilities.size(); i++) {
+//          std::cout << column_probabilities.at(i).get(GRB_StringAttr_VarName) << " "
+//          << column_probabilities.at(i).get(GRB_DoubleAttr_X) << std::endl;
+//       }
+//
+//       std::cout << "Obj: " << column_model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+//
+//
+//    } catch(GRBException e) {
+//
+//       std::cout << "Error code for Gurobi = " << e.getErrorCode() << std::endl;
+//       std::cout << e.getMessage() << std::endl;
+//
+//    } catch(...) {
+//
+//       std::cout << "Exception with Gurobi!" << std::endl;
+//
+//    }
+//
+//    Eigen::MatrixXd agent_skills(2, 2);
+//    return agent_skills;
+//
+// }
 
 //This method calls the bimatrix solver which is written in python
 //It does so by passing the game as an argument

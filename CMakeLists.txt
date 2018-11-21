@@ -33,8 +33,8 @@ target_link_libraries(${PROJECT_NAME}
    argos_simulation
    rt
    ${Boost_LIBRARIES}
-   /opt/gurobi810/linux64/src/build/libgurobi_c++.a
-   /opt/gurobi810/linux64/lib/libgurobi81.so
+   #/opt/gurobi810/linux64/src/build/libgurobi_c++.a
+   #/opt/gurobi810/linux64/lib/libgurobi81.so
    /usr/lib/python2.7/config-x86_64-linux-gnu/libpython2.7.so
    )
 

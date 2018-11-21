@@ -69,9 +69,9 @@ char *Outfile = NULL;
 int openIO(void) {
   if (!lrs_init("*lrsnash:"))
     return FALSE;
-  fprintf(stderr, "\n");
-  fprintf(stderr, AUTHOR);
-  fprintf(stderr, "\n");
+  //fprintf(stderr, "\n");
+  //fprintf(stderr, AUTHOR);
+  //fprintf(stderr, "\n");
 	if(Outfile != NULL) {
 	  if ((lrs_ofp = fopen(Outfile, "w")) == NULL) {
 	    fprintf(stderr, "\nBad output file name\n");
