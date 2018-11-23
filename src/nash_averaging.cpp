@@ -14,7 +14,8 @@ NashAverager::NashAverager() :
    //GAME_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver/tmp/tmp_game.txt"),
    //BIMATRIX_LIB_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod"),
    BIMATRIX_LIB_PATH("../lib/bimatrix_solver_mod"),
-   NASH_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod/tmp/nash_out_") {}
+   //NASH_FILE_PATH("/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod/tmp/nash_out_") {}
+   NASH_FILE_PATH("../lib/bimatrix_solver_mod/tmp/nash_out_") {}
 
 std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::vector<double> >& vec_scores,
                                                          const unsigned int num_agents,
@@ -43,19 +44,21 @@ std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::
    // std::cout << nash_eq[0] << std::endl;
    Eigen::VectorXd agent_skills = S * nash_eq[0];
 
-   // std::cout << "Agent skills: " << std::endl;
-   // std::cout << agent_skills << std::endl;
+   //std::cout << "Agent skills: " << std::endl;
+   //std::cout << agent_skills << std::endl;
 
-   Eigen::VectorXd agent_skills_norm = normalise(agent_skills);
+   //Eigen::VectorXd agent_skills_norm = normalise(agent_skills);
 
    // std::cout << "Agent skills norm: " << std::endl;
    // std::cout << agent_skills_norm << std::endl;
 
    //Return
-   std::vector<double> agent_skills_vec(agent_skills_norm.size());
+   //std::vector<double> agent_skills_vec(agent_skills_norm.size());
+   std::vector<double> agent_skills_vec(agent_skills.size());
 
    for(unsigned int i = 0; i < agent_skills_vec.size(); i++)
-      agent_skills_vec.at(i) = agent_skills_norm(i);
+      //agent_skills_vec.at(i) = agent_skills_norm(i);
+      agent_skills_vec.at(i) = agent_skills(i);
 
    return agent_skills_vec;
 
@@ -89,7 +92,14 @@ Eigen::MatrixXd NashAverager::calculate_S(const std::vector<std::vector<double> 
    //std::cout << mean_matrix << std::endl;
 
    //Subtract means from scores
-   S = eigen_scores - mean_matrix;
+   // std::cout << eigen_scores << std::endl;
+   // std::cout << "---------" << std::endl;
+   // std::cout << -eigen_scores.transpose() << std::endl;
+   // std::cout << "---------" << std::endl;
+
+   //Take the mean away from S
+   //S = eigen_scores - mean_matrix;
+   S = eigen_scores;
 
    return S;
 
@@ -118,8 +128,8 @@ std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver
 
    //These both seem to get the same nashes
    //I might just call one of these in future
-   call_bimatrix_solver(S);
-   std::vector<Eigen::MatrixXd> nash_S = read_nash_from_file();
+   // call_bimatrix_solver(S);
+   // std::vector<Eigen::MatrixXd> nash_S = read_nash_from_file();
 
    call_bimatrix_solver(-S.transpose());
    std::vector<Eigen::MatrixXd> nash_S_transpose = read_nash_from_file();
@@ -138,6 +148,8 @@ std::vector<Eigen::VectorXd> NashAverager::calculate_maxent_nash_bimatrix_solver
    //Calculate the nash equilibrium with highest entropy
    std::vector<Eigen::VectorXd> max_ent_nash = calculate_maxent_nash(nash_S_transpose);
 
+   //std::cout << S << std::endl;
+   //std::cout << -S.transpose() << std::endl;
    //std::cout << max_ent_nash[0] << std::endl;
 
    return max_ent_nash;
@@ -151,7 +163,8 @@ void NashAverager::call_bimatrix_solver(const Eigen::MatrixXd& game) {
 
    //Initialise python
    Py_Initialize();
-   PyRun_SimpleString("import sys; sys.path.insert(0, '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod')");
+   //PyRun_SimpleString("import sys; sys.path.insert(0, '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/lib/bimatrix_solver_mod')");
+   PyRun_SimpleString("import sys; sys.path.insert(0, '../lib/bimatrix_solver_mod')");
 
    //Get python file
    PyObject* myModuleString = PyString_FromString((char*)"solve_game");

@@ -26,7 +26,6 @@ add_executable(${PROJECT_NAME} src/main.cpp src/ga.cpp src/individual_run.cpp
                                src/data_collection.cpp src/shared_memory.cpp
                                src/nash_averaging.cpp)
 
-#include_directories(${Boost_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME}
    neatGRULib
@@ -43,5 +42,5 @@ set(EXT_LIB_INCLUDES
 
 target_include_directories(${PROJECT_NAME} PUBLIC
    ${EXT_LIB_INCLUDES}
-   /opt/gurobi810/linux64/include/
+   #/opt/gurobi810/linux64/include/
    )
