@@ -16,9 +16,11 @@
 #BOOSTINC = /usr/include
 #BOOSTLIB = /usr/lib
 #mai64 mai12
-BOOSTINC = /usr/include/boost_1_57_0
-BOOSTLIB = /usr/include/boost_1_57_0/stage/lib
+#BOOSTINC = /usr/include/boost_1_57_0
+#BOOSTLIB = /usr/include/boost_1_57_0/stage/lib
 
+BOOSTINC = /usr/include/boost_1_67_0
+BOOSTLIB = /usr/include/boost_1_67_0/stage/lib
 
 #tsubame
 #BOOSTINC = /home/usr9/14ITA199/C/boost/boost_1_57_0

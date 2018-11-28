@@ -668,8 +668,6 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 				//Otherwise we should mate
 			else {
 
-				//std::cout << "MATE!!!!!!!!!!" << std::endl;
-
 				//Choose the random mom
 				orgnum=randint(0,poolsize);
 				curorg=organisms.begin();

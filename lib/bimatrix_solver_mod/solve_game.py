@@ -303,9 +303,10 @@ def solve_game(lib_path):
            outfile.write("\n")
 
     # system call to lrsnash
+    #result = subprocess.check_output([lib_path + '/bin/mplrs', '-np', '4', lib_path + '/tmp/rational_input.txt'])
     result = subprocess.check_output([lib_path + '/bin/lrsnash', lib_path + '/tmp/rational_input.txt'])
     result_string = result.decode('utf-8')
-    # print(result_string)
+    #print(result_string)
 
     if True:
         text_file = open(lib_path + "/tmp/out", "w")

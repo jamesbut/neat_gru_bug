@@ -241,6 +241,7 @@ void NEATGRUFootbotController::ControlStep() {
    //rightSpeed = 10.0;
    // std::cout << leftSpeed << " " << rightSpeed << std::endl;
    // std::cout << "------------" << std::endl;
+   //std::cout << m_net->outputs[0]->activation << " " << m_net->outputs[1]->activation << std::endl;
 
    m_pcWheels->SetLinearVelocity(leftSpeed, rightSpeed);
 

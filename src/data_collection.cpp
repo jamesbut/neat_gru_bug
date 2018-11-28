@@ -21,6 +21,7 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
    NUM_TEST_ENVS(NUM_TEST_ENVS),
    FLUSH_EVERY(FLUSH_EVERY),
    TEST_SET_PATH(TEST_SET_PATH),
+   NASH_AVERAGING(false),
    as(argos_simulation),
    eg() {
 
@@ -46,12 +47,18 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
 
    }
 
-   //Calculate agent skills via nash averaging
-   std::cout << "Solving nash game.." << std::endl;
-   std::vector<double> agent_skills = nash_averager.calculate_agent_skills(trial_fitnesses,
-                                                                           trial_results.size(),
-                                                                           trial_results[0].size());
-   std::cout << "..game solved!" << std::endl;
+   std::vector<double> agent_skills;
+
+   if(NASH_AVERAGING) {
+
+      //Calculate agent skills via nash averaging
+      std::cout << "Solving nash game.." << std::endl;
+      agent_skills = nash_averager.calculate_agent_skills(trial_fitnesses,
+                                                          trial_results.size(),
+                                                          trial_results[0].size());
+      std::cout << "..game solved!" << std::endl;
+
+   }
 
    int maxPopOrg;
    double maxPopScore;
@@ -73,8 +80,8 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       std::cout << meanTrialFitness << " ";
 
       //Set skills to either uniform average OR nash average
-      //neatPop->organisms[i]->fitness = meanTrialFitness;
-      neatPop->organisms[i]->fitness = agent_skills[i];
+      if(NASH_AVERAGING) neatPop->organisms[i]->fitness = agent_skills[i];
+      else neatPop->organisms[i]->fitness = meanTrialFitness;
 
       //Find best organism in population
       if (i == 0 || neatPop->organisms[i]->fitness > maxPopScore) {

@@ -44,6 +44,7 @@ private:
    const int NUM_TEST_ENVS;
    const int FLUSH_EVERY;
    const std::string TEST_SET_PATH;
+   const bool NASH_AVERAGING;
 
    std::unique_ptr<NEAT::Organism> overall_winner;
 

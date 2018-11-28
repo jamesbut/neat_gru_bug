@@ -21,6 +21,10 @@ std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::
                                                          const unsigned int num_agents,
                                                          const unsigned int num_envs) {
 
+   //Delete previous results
+   std::string command = "exec rm " + BIMATRIX_LIB_PATH + "/tmp/*";
+   system(command.c_str());
+
    //Calculate S
    Eigen::MatrixXd S = calculate_S(vec_scores);
 
@@ -40,12 +44,13 @@ std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::
 
    /* Find skills of agents */
 
-   // std::cout << S << std::endl;
+   // std::cout << "Nash:" << std::endl;
    // std::cout << nash_eq[0] << std::endl;
-   Eigen::VectorXd agent_skills = S * nash_eq[0];
 
-   //std::cout << "Agent skills: " << std::endl;
-   //std::cout << agent_skills << std::endl;
+   Eigen::VectorXd agent_skills = S * nash_eq[0];
+   //
+   // std::cout << "Agent skills: " << std::endl;
+   // std::cout << agent_skills << std::endl;
 
    //Eigen::VectorXd agent_skills_norm = normalise(agent_skills);
 

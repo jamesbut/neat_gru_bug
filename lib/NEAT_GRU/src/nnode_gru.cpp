@@ -205,7 +205,7 @@ void NNodeGRU::activate_gru(std::vector<double> inputs) {
 
 	//Reset gate output
 	//Sigmoid seems really narrow here, maybe mess with parameters
-	double update_output = NEAT::fsigmoid(input_sum_u,4.924273,2.4621365);
+	double update_output = NEAT::fsigmoid(input_sum_u,4.92427,2.4621365);
 
 	//std::cout << "Update gate output: " << update_output << std::endl;
 
