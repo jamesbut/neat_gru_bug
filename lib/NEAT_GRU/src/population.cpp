@@ -1067,16 +1067,16 @@ void Population::debug_checks() {
 	if(duplicate_link) std::cout << "There is a duplicate link, the bad organism has been printed" << std::endl;
 
 	//Check to see whether there are any recuflags where there should be
-	for(int i = 0; i < organisms.size(); i++) {
-		for(int j = 0; j < organisms[i]->gnome->genes.size(); j++) {
-			Gene* gene_ptr = organisms[i]->gnome->genes[j];
-			if(gene_ptr->lnk->is_recurrent && (gene_ptr->lnk->in_node->gen_node_label != OUTPUT)) {
-				std::cout << "Weird recur thing in wrong place" << std::endl;
-				std::cout << "Org num: " << i << std::endl;
-				std::cout << gene_ptr->lnk->in_node->node_id << " " << gene_ptr->lnk->out_node->node_id << std::endl;
-				std::exit(0);
-			}
-		}
-	}
+	// for(int i = 0; i < organisms.size(); i++) {
+	// 	for(int j = 0; j < organisms[i]->gnome->genes.size(); j++) {
+	// 		Gene* gene_ptr = organisms[i]->gnome->genes[j];
+	// 		if(gene_ptr->lnk->is_recurrent && (gene_ptr->lnk->in_node->gen_node_label != OUTPUT)) {
+	// 			std::cout << "Weird recur thing in wrong place" << std::endl;
+	// 			std::cout << "Org num: " << i << std::endl;
+	// 			std::cout << gene_ptr->lnk->in_node->node_id << " " << gene_ptr->lnk->out_node->node_id << std::endl;
+	// 			std::exit(0);
+	// 		}
+	// 	}
+	// }
 
 }

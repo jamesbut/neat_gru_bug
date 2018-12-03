@@ -142,7 +142,8 @@ void FitnessScore::PostExperiment() {
 
    //Normalise fitnesses between 0 and 1
    double remaining_dist_norm = 1 / (pow(remaining_distance_from_tower, 0.5) + 0.01);
-   double traj_per_astar_norm = 1 / (pow(traj_per_astar, 0.8) + 0.01);
+   //double traj_per_astar_norm = 1 / (pow(traj_per_astar, 0.8) + 0.01);
+   double traj_per_astar_norm = 1 / (exp(traj_per_astar*3 - 7) + 1);
 
    // std::cout << "Remaining distance from tower: " << remaining_distance_from_tower << std::endl;
    // std::cout << "Remaining distance from tower norm: " << remaining_dist_norm << std::endl;
