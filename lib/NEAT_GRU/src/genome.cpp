@@ -1344,6 +1344,8 @@ void Genome::mutate_link_weights(double power,double rate,mutator mut_type) {
 			//randnum=gaussrand()*powermod;
 			//randnum=gaussrand();
 
+			//std::cout << "Guasspoint: " << gausspoint << std::endl;
+			
 			randnum=randposneg()*randfloat()*power*powermod;
             //std::cout << "RANDOM: " << randnum << " " << randposneg() << " " << randfloat() << " " << power << " " << powermod << std::endl;
 			if (mut_type==GAUSSIAN) {

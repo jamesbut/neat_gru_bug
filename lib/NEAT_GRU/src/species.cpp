@@ -545,7 +545,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 			//If we have a Species champion, just clone it
 		   //else if ((!champ_done)&&				//James - I CHANGED THIS
 			//	(expected_offspring>5)) {		//James - why does this have to be greater than 5?
-			else if (!champ_done) {
+			else if ((!champ_done) && (expected_offspring >= 2)) {
 					//std::cout << "Cloning Species Champion" <<std::endl;			//This is called more often than it crashes
 					mom=thechamp; //Mom is the champ
 
@@ -614,7 +614,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 						mut_struct_baby=true;
 					} else if (randfloat()<NEAT::mutate_add_link_prob) {
 						//std::cout<<"mutate add link"<<std::endl;
-						net_analogue=new_genome->genesis(generation);
+						net_analogue=new_genome->genesis(generation);	//James - Why does genesis have to be called here?
 						new_genome->mutate_add_link(pop->innovations,pop->cur_innov_num,NEAT::newlink_tries);
 						delete net_analogue;
 						mut_struct_baby=true;

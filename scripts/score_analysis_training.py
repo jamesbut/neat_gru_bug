@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 #Read data
 #train_file_data = genfromtxt('../scores/training_scores_1.txt', delimiter=',')
-train_file_data = genfromtxt('../scores/training_scores/training_scores.txt', delimiter=',')
-#train_file_data = genfromtxt('../scores/training_scores/archive_scores/ap_6_f2/ap_6_f2_training_5.txt', delimiter=',')
+#train_file_data = genfromtxt('../scores/training_scores/training_scores.txt', delimiter=',')
+train_file_data = genfromtxt('../scores/training_scores/archive_scores/ap_18_f3_fw/ap_18_f3_fw_training_1.txt', delimiter=',')
 
 #Get data
 train_generations = train_file_data[:,0]
