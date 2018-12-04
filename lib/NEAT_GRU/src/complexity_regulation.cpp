@@ -5,7 +5,7 @@ using namespace NEAT;
 #include "organism.h"
 
 ComplexityRegulation::ComplexityRegulation(ComplexityMode starting_mode) :
-   complexity_ceiling(30),
+   complexity_ceiling(50),
    MIN_SIMPLIFICATION_GENERATIONS(10),
    last_transition_generation(1),
    complexity_accumulator(bt::rolling_window::window_size = 10),

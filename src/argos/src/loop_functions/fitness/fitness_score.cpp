@@ -134,25 +134,38 @@ void FitnessScore::PostExperiment() {
 
    /*   F6   */
    //Calculate remaining distance according to astar
-   CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+   // CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+   //
+   // //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
+   // argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
+   // double remaining_distance_from_tower =  m_env_generator->calculate_remaining_distance_from(bot_pos);
+   //
+   // //Normalise fitnesses between 0 and 1
+   // double remaining_dist_norm = 1 / (pow(remaining_distance_from_tower, 0.5) + 0.01);
+   // //double traj_per_astar_norm = 1 / (pow(traj_per_astar, 0.8) + 0.01);
+   // double traj_per_astar_norm = 1 / (exp(traj_per_astar*3 - 7) + 1);
+   //
+   // // std::cout << "Remaining distance from tower: " << remaining_distance_from_tower << std::endl;
+   // // std::cout << "Remaining distance from tower norm: " << remaining_dist_norm << std::endl;
+   // // std::cout << "Traj per astar: " << traj_per_astar << std::endl;
+   // // std::cout << "Traj per astar norm: " << traj_per_astar_norm << std::endl;
+   //
+   // fitness_score = remaining_dist_norm + traj_per_astar_norm;
+   //
+   // if(no_son_of_mine) fitness_score /= 10;
 
-   //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
-   argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
-   double remaining_distance_from_tower =  m_env_generator->calculate_remaining_distance_from(bot_pos);
 
-   //Normalise fitnesses between 0 and 1
-   double remaining_dist_norm = 1 / (pow(remaining_distance_from_tower, 0.5) + 0.01);
-   //double traj_per_astar_norm = 1 / (pow(traj_per_astar, 0.8) + 0.01);
-   double traj_per_astar_norm = 1 / (exp(traj_per_astar*3 - 7) + 1);
+   /*   F7   */
+   //If the robot hits the target, reward with a function of path length
+   //std::cout << traj_per_astar << std::endl;
+   fitness_score = hit_tower ? (1 / pow(traj_per_astar, 1.5)) : 0;
 
-   // std::cout << "Remaining distance from tower: " << remaining_distance_from_tower << std::endl;
-   // std::cout << "Remaining distance from tower norm: " << remaining_dist_norm << std::endl;
-   // std::cout << "Traj per astar: " << traj_per_astar << std::endl;
-   // std::cout << "Traj per astar norm: " << traj_per_astar_norm << std::endl;
+   //std::cout << "Fitness score: " << fitness_score;
 
-   fitness_score = remaining_dist_norm + traj_per_astar_norm;
+   if(no_son_of_mine)
+      fitness_score /= 10;
 
-   if(no_son_of_mine) fitness_score /= 10;
+   //std::cout << " " << fitness_score << std::endl;
 
    //std::cout << "Max range: " << max_range << std::endl;
    // std::cout << "Robots distance " << robots_distance << std::endl;

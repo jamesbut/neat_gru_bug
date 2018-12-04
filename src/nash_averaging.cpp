@@ -44,8 +44,8 @@ std::vector<double> NashAverager::calculate_agent_skills(const std::vector<std::
 
    /* Find skills of agents */
 
-   // std::cout << "Nash:" << std::endl;
-   // std::cout << nash_eq[0] << std::endl;
+   std::cout << "Nash:" << std::endl;
+   std::cout << nash_eq[0] << std::endl;
 
    Eigen::VectorXd agent_skills = S * nash_eq[0];
    //
