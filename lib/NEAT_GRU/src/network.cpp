@@ -275,7 +275,7 @@ bool Network::activate() {
 					else {
 						//Now run the net activation through an activation function
 						if ((*curnode)->ftype==SIGMOID&&(((*curnode)->type)!=GRU))     /* James - just don't sigmoid here for GRU*/
-							(*curnode)->activation=NEAT::fsigmoid((*curnode)->activesum,4.92427,2.4621365);  //Sigmoidal activation- see comments under fsigmoid
+							(*curnode)->activation=NEAT::fsigmoid((*curnode)->activesum,4.924273,2.4621365);  //Sigmoidal activation- see comments under fsigmoid
                      //(*curnode)->activation=(*curnode)->activesum;
 					}
 
