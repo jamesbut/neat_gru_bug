@@ -22,12 +22,13 @@ void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
 }
 
-void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator) {
+void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator, bool handwritten) {
 
    m_indvRun = indv_run;
    m_testEnvs = test_envs;
    m_envNum = env_num;
    m_env_generator = &env_generator;
+   m_handwritten = handwritten;
 
    CVector3 arena_size = CVector3(m_env_generator->get_env_width(), m_env_generator->get_env_height(), 0.0);
    max_range = arena_size.Length();
@@ -75,6 +76,14 @@ void FitnessScore::PostStep() {
 void FitnessScore::PostExperiment() {
 
    trajectory_loop.PostExperiment();
+
+   //Calculate fitness differently depending on different type of exp
+   if(m_handwritten) calculate_fitness_handwritten();
+   else calculate_fitness();
+
+}
+
+double FitnessScore::calculate_fitness() {
 
    const std::vector<CVector2>& trajectory = trajectory_loop.get_trajectory();
 
@@ -160,6 +169,7 @@ void FitnessScore::PostExperiment() {
    //If the robot hits the target, reward with a function of path length
    //std::cout << "Traj per astar: " << traj_per_astar << std::endl;
    fitness_score = hit_tower ? (1 / pow(traj_per_astar, 0.5)) : 0;
+   //fitness_score = hit_tower ? (-0.25*traj_per_astar + 1.25) : 0;
 
    //std::cout << "Fitness score: " << fitness_score;
 
@@ -174,6 +184,18 @@ void FitnessScore::PostExperiment() {
    //std::cout << "Remaining distance from tower: " << remaining_distance_from_tower << std::endl;
 
    //Capture any fitness that is below 0
+   if (fitness_score < 0) fitness_score = 0;
+
+}
+
+double FitnessScore::calculate_fitness_handwritten() {
+
+   double distance_from_tower = max_range - robots_distance;
+
+   if (no_son_of_mine) distance_from_tower /= 10;
+
+   fitness_score = distance_from_tower;
+
    if (fitness_score < 0) fitness_score = 0;
 
 }

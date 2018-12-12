@@ -24,7 +24,8 @@ public:
    virtual void PostStep();
    virtual void PostExperiment();
 
-   void configure_controller(NEAT::Network &net) {clever_bot_controller->SetNEATNet(net);};
+   void configure_controller(NEAT::Network &net, const bool handwritten) {clever_bot_controller->SetNEATNet(net);
+                                                                          clever_bot_controller->SetHandwritten(handwritten);};
    void set_env_path(std::string env_path) {m_envPath = env_path;};
    void set_env_num(int env_num) {m_envNum = env_num;};
    void set_env_reset(bool reset) {m_reset = reset;};

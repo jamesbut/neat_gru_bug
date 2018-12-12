@@ -3,13 +3,14 @@
 # The purpose of this bash script is to automatically generate neat
 # starting genome files, as it can be monotonous to do, especially with many
 # inputs and outputs
-
+echo $1
+echo $2
 #number of inputs (not including bias)
 #num_inputs=1
-num_inputs=15
+num_inputs=$1
 
 #number of outputs
-num_outputs=2
+num_outputs=$2
 
 GENOME_FILE=../starting_genomes/start_genome
 
@@ -46,3 +47,5 @@ done >> $GENOME_FILE
 
 #End of file
 echo "genomeend 1" >> $GENOME_FILE
+
+echo "Written starting genome file"

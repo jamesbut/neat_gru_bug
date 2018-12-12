@@ -1,9 +1,5 @@
 #include "neat_gru_footbot_controller.h"
 
-#define BEARING_SENSOR_ON true
-#define PROX_SENSOR_ON true
-#define LIN_VEL_ON false
-
 /****************************************/
 /****************************************/
 
@@ -19,6 +15,9 @@ NEATGRUFootbotController::NEATGRUFootbotController() :
       range_tminus1(0),
       range_tminus2(0),
       first_time_step(true),
+      BEARING_SENSOR_ON(true),
+      PROX_SENSOR_ON(true),
+      LIN_VEL_ON(false),
       NET_INPUT_LOWER_BOUND(0.0),
       NET_INPUT_UPPER_BOUND(1.0),
       RANGE_SENSOR_LOWER_BOUND(0.0),
@@ -283,6 +282,32 @@ double NEATGRUFootbotController::mapValueIntoRange(const double input, const dou
 //int count = 0;
 
 void NEATGRUFootbotController::Reset() {
+
+   if(m_handwritten) {
+
+      BEARING_SENSOR_ON = false;
+      PROX_SENSOR_ON = true;
+      LIN_VEL_ON = false;
+
+   } else {
+
+      BEARING_SENSOR_ON = true;
+      PROX_SENSOR_ON = true;
+      LIN_VEL_ON = false;
+
+   }
+
+   net_inputs.resize(m_net->inputs.size());
+   net_outputs.resize(m_net->outputs.size());
+
+   net_inputs[0] = 1.0;                            //Bias node
+
+   m_net->flush();
+
+   //prev_ang_vel = 0;
+
+
+   /* DEBUG STUFF */
    //count = 0;
    // delete neatOrg;
 
@@ -307,15 +332,6 @@ void NEATGRUFootbotController::Reset() {
    //    debug_data.clear();
    // }
    //debug_data.clear();
-
-   net_inputs.resize(m_net->inputs.size());
-   net_outputs.resize(m_net->outputs.size());
-
-   net_inputs[0] = 1.0;                            //Bias node
-
-   m_net->flush();
-
-   //prev_ang_vel = 0;
 
 }
 

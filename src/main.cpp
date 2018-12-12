@@ -14,6 +14,8 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using namespace std::literals::chrono_literals;
 
+const bool HANDWRITTEN_ENVS = false;
+
 int main(int argc, char *argv[]) {
 
    //time_point<Clock> start = Clock::now();
@@ -21,9 +23,6 @@ int main(int argc, char *argv[]) {
 
    // Seed random number generator with time
    srand((unsigned)time(NULL));
-
-   //Generate starting genome file with bash script
-   system("/bin/bash -c ../starting_genomes/generate_start_genome.sh");
 
    if(argv[1] == NULL) {
 
@@ -37,12 +36,12 @@ int main(int argc, char *argv[]) {
 
    if(argString.find(".ne") != std::string::npos) {
 
-      GA ga(argString);
+      GA ga(argString, HANDWRITTEN_ENVS);
       ga.run();
 
    } else {
 
-      IndividualRun ir(argString);
+      IndividualRun ir(argString, HANDWRITTEN_ENVS);
       ir.run();
 
    }

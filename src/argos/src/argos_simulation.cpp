@@ -33,7 +33,7 @@ RunResult ARGoS_simulation::run(NEAT::Organism &org, int env_num, bool reset, bo
 
    MasterLoopFunction& master_loop = dynamic_cast<MasterLoopFunction&>(cSimulator.GetLoopFunctions());
 
-   master_loop.configure_controller(*org.net);
+   master_loop.configure_controller(*org.net, handwritten);
    master_loop.set_env_num(env_num);
    master_loop.set_env_reset(reset);
    master_loop.set_indv_run(indv_run);

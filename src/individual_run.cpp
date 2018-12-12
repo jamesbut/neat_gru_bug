@@ -1,12 +1,12 @@
 #include "individual_run.h"
 
-IndividualRun::IndividualRun(const std::string& gf) :
+IndividualRun::IndividualRun(const std::string& gf, const bool handwritten) :
    ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
    ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
    eg(),
    NUM_RUNS(209),
    RANDOM_ENVS(false),
-   HANDWRITTEN_ENVS(false),
+   HANDWRITTEN_ENVS(handwritten),
    ENV_PATH("../argos_params/environments/kim_envs/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    //ENV_PATH("../argos_params/environments/handwritten_envs/e")
@@ -36,6 +36,7 @@ void IndividualRun::run() {
    double total_score = 0;
 
    std::vector<int> struggling_envs;
+   std::vector<double> scores(NUM_RUNS);
 
    for(int i = 0; i < NUM_RUNS; i++) {
 
@@ -66,6 +67,7 @@ void IndividualRun::run() {
                               HANDWRITTEN_ENVS, test_envs, (i+1), eg);
 
       total_score += rr.fitness;
+      scores[i] = rr.fitness;
 
       std::cout << rr.fitness << std::endl;
 
@@ -76,8 +78,22 @@ void IndividualRun::run() {
 
    std::cout << "Finishes: " << num_finishes << std::endl;
    std::cout << "Runs: " << NUM_RUNS << std::endl;
-   std::cout << "Average score: " << (total_score / NUM_RUNS) << std::endl;
+   double average_score = (total_score / NUM_RUNS);
+   std::cout << "Average score: " << average_score  << std::endl;
 
+   //Calculate variance and S.D.
+   double sum_of_squares = 0.0;
+
+   for(int i = 0; i < scores.size(); i++)
+      sum_of_squares += pow((scores[i] - average_score), 2);
+
+   double variance = sum_of_squares / (double)(scores.size() - 1);
+   std::cout << "Variance: " << variance << std::endl;
+
+   double sd = sqrt(variance);
+   std::cout << "S.D.: " << sd << std::endl;
+
+   //Show environments that the genome struggles with
    std::cout << "Struggling envs: ";
    for(int i = 0; i < struggling_envs.size(); i++)
       std::cout << struggling_envs[i]+1 << ", ";

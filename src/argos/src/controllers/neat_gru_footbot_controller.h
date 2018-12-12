@@ -51,6 +51,7 @@ public:
   virtual void Destroy() {};
 
   void SetNEATNet(NEAT::Network &net);
+  void SetHandwritten(const bool handwritten) {m_handwritten = handwritten;};
 
   std::vector<std::vector<double> > GetDebugData(){return debug_data;};
 
@@ -63,6 +64,12 @@ private:
    double mapHorizontalAngle(double angle);
 
    void ConvertLinVelToWheelSpeed(Real linear_x, Real angular_z);
+
+   bool m_handwritten;
+
+   bool BEARING_SENSOR_ON;
+   bool PROX_SENSOR_ON;
+   bool LIN_VEL_ON;
 
    const double NET_INPUT_LOWER_BOUND;
    const double NET_INPUT_UPPER_BOUND;

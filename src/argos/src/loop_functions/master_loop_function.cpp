@@ -29,7 +29,7 @@ void MasterLoopFunction::Reset() {
    if (m_handwritten)
       SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
 
-   fitness_score_loop.Reset(m_indvRun, m_envNum, m_testEnvs, *m_env_generator);
+   fitness_score_loop.Reset(m_indvRun, m_envNum, m_testEnvs, *m_env_generator, m_handwritten);
 
 }
 

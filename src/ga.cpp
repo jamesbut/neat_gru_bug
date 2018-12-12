@@ -9,20 +9,19 @@
 
 #include "argos/src/loop_functions/environment/environment_generator.h"
 
-GA::GA(std::string neat_param_file) :
+GA::GA(std::string neat_param_file, const bool handwritten) :
    m_unCurrentGeneration(1),
    ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
    ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
    eg(),
-   NUM_FLUSHES(3),   //Currently not used
+   //NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(1),
    INCREMENTAL_EV(false),
    PARALLEL(true),
    //ACCEPTABLE_FITNESS(13.88),
-   HANDWRITTEN_ENVS(false),
+   HANDWRITTEN_ENVS(handwritten),   //This is now set in main.cpp
    RANDOMLY_GENERATED_ENVS(true),
    TEST_EVAL_GEN(25),
-   //TEST_EVAL_GEN(5),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
@@ -33,24 +32,42 @@ GA::GA(std::string neat_param_file) :
    {
 
    if(HANDWRITTEN_ENVS) {
+
+      //Set appropriate start genome
+      const int NUM_INPUTS = 13;
+      const int NUM_OUTPUTS = 2;
+
+      //Generate start genome
+      generate_start_genome(NUM_INPUTS, NUM_OUTPUTS);
+
       as = new ARGoS_simulation(ARGOS_FILE_NAME_10);
       eg.set_argos_config_file(ARGOS_FILE_NAME_10);
+
    } else {
+
+      //Set appropriate start genome
+      const int NUM_INPUTS = 15;
+      const int NUM_OUTPUTS = 2;
+
+      //Generate start genome
+      generate_start_genome(NUM_INPUTS, NUM_OUTPUTS);
+
       as = new ARGoS_simulation(ARGOS_FILE_NAME);
       eg.set_argos_config_file(ARGOS_FILE_NAME);
+
    }
 
    initNEAT(neat_param_file);
 
    //Determine when to flush overall winner to file
-   flush_gens.resize(NUM_FLUSHES);
-
-   for(int i = 0; i < NUM_FLUSHES; i++) {
-
-      flush_gens[i] = (double)(i+1)/(double)NUM_FLUSHES * NEAT::num_gens;
-      //std::cout << flush_gens[i] << std::endl;
-
-   }
+   // flush_gens.resize(NUM_FLUSHES);
+   //
+   // for(int i = 0; i < NUM_FLUSHES; i++) {
+   //
+   //    flush_gens[i] = (double)(i+1)/(double)NUM_FLUSHES * NEAT::num_gens;
+   //    //std::cout << flush_gens[i] << std::endl;
+   //
+   // }
 
    //Create shared memory block for master and slaves
    if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials, "GA");
@@ -73,6 +90,14 @@ GA::~GA() {
    if(PARALLEL) delete shared_mem;
 
    delete as;
+
+}
+
+void GA::generate_start_genome(const int NUM_INPUTS, const int NUM_OUTPUTS) {
+
+   std::string command = "../starting_genomes/generate_start_genome.sh";
+   command += " " + std::to_string(NUM_INPUTS) + " " + std::to_string(NUM_OUTPUTS);
+   system(command.c_str());
 
 }
 

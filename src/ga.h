@@ -15,7 +15,7 @@ class GA {
 
 public:
 
-   GA(std::string neat_param_file);
+   GA(std::string neat_param_file, const bool handwritten);
 
    ~GA();
 
@@ -33,6 +33,8 @@ private:
    void parallel_epoch();
 
    void nextGen();
+
+   void generate_start_genome(const int NUM_INPUTS, const int NUM_OUTPUTS);
 
    // void flush_winners();
 
@@ -64,7 +66,7 @@ private:
 
    std::vector<int> flush_gens;
 
-   const int NUM_FLUSHES;
+   //const int NUM_FLUSHES;
    const int INCREMENTAL_EV;
 
    const int FLUSH_EVERY;

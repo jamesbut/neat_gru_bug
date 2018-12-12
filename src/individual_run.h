@@ -7,7 +7,7 @@ class IndividualRun {
 
 public:
 
-   IndividualRun(const std::string& gf);
+   IndividualRun(const std::string& gf, const bool handwritten);
    ~IndividualRun();
 
    void run();
