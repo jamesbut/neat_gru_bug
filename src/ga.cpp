@@ -34,7 +34,7 @@ GA::GA(std::string neat_param_file, const bool handwritten) :
    if(HANDWRITTEN_ENVS) {
 
       //Set appropriate start genome
-      const int NUM_INPUTS = 13;
+      const int NUM_INPUTS = 1;
       const int NUM_OUTPUTS = 2;
 
       //Generate start genome

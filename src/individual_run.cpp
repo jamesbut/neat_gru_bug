@@ -4,7 +4,7 @@ IndividualRun::IndividualRun(const std::string& gf, const bool handwritten) :
    ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
    ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
    eg(),
-   NUM_RUNS(209),
+   NUM_RUNS(handwritten ? 5 : 209),
    RANDOM_ENVS(false),
    HANDWRITTEN_ENVS(handwritten),
    ENV_PATH("../argos_params/environments/kim_envs/rand_env_")

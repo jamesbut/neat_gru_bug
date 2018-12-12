@@ -20,7 +20,7 @@ private:
 
    ARGoS_simulation* as;
 
-   const int NUM_RUNS;
+   int NUM_RUNS;
    const std::string ENV_PATH;
    const bool RANDOM_ENVS;
    const bool HANDWRITTEN_ENVS;

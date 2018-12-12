@@ -286,7 +286,7 @@ void NEATGRUFootbotController::Reset() {
    if(m_handwritten) {
 
       BEARING_SENSOR_ON = false;
-      PROX_SENSOR_ON = true;
+      PROX_SENSOR_ON = false;
       LIN_VEL_ON = false;
 
    } else {
