@@ -395,7 +395,7 @@ double NNodeGRU::compatibility(NNodeGRU node) {
 
 //TODO: TEST THIS!!
 //Mutate link weights in GRU cell
-void NNodeGRU::mutate(double power) {
+void NNodeGRU::mutate(double power, double rate) {
 
 	double randnum;
 	double randchoice; //Decide what kind of mutation to do on a gene
@@ -418,14 +418,30 @@ void NNodeGRU::mutate(double power) {
 		//represent values above which a random float will signify that kind
 		//of mutation.
 
+		// if (severe) {
+		// 	gausspoint=0.3;
+		// 	coldgausspoint=0.1;
+		// } else {
+		// 	gausspoint=0.7;
+		// 	//gausspoint=0.5;
+		// 	coldgausspoint=0.95;		//This now makes no sense
+		// }
+
 		if (severe) {
 			gausspoint=0.3;
 			coldgausspoint=0.1;
 		} else {
-			gausspoint=0.7;
-			//gausspoint=0.5;
-			coldgausspoint=0.95;		//This now makes no sense
+			//Half the time don't do any cold mutations
+			if (randfloat()>0.5) {
+				gausspoint=1.0-rate;
+				coldgausspoint=1.0-rate-0.1;
+			}
+			else {
+				gausspoint=1.0-rate;
+				coldgausspoint=1.0-rate;
+			}
 		}
+
 
 		randnum=randposneg()*randfloat()*power;
 		//std::cout << randnum << std::endl;

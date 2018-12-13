@@ -31,6 +31,7 @@ namespace NEAT {
 	extern double linktrait_mut_sig;  // Amount that mutation_num changes for a trait change inside a link
 	extern double nodetrait_mut_sig; // Amount a mutation_num changes on a link connecting a node that changed its trait
 	extern double weight_mut_power;  // The power of a linkweight mutation
+	extern double gru_weight_mut_power;
 	extern double recur_prob;        // Prob. that a link mutation which doesn't have to be recurrent will be made recurrent
 
 	// These 3 global coefficients are used to determine the formula for
@@ -56,7 +57,9 @@ namespace NEAT {
 	extern double mutate_link_trait_prob;
 	extern double mutate_node_trait_prob;
 	extern double mutate_link_weights_prob;
+	extern double mutate_gene_rate_prob;
 	extern double mutate_gru_link_weights_prob;
+	extern double mutate_gru_gene_rate_prob;
 	extern double mutate_toggle_enable_prob;
 	extern double mutate_gene_reenable_prob;
 	extern double mutate_add_node_prob;

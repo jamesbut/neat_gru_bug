@@ -1345,7 +1345,7 @@ void Genome::mutate_link_weights(double power,double rate,mutator mut_type) {
 			//randnum=gaussrand();
 
 			//std::cout << "Guasspoint: " << gausspoint << std::endl;
-			
+
 			randnum=randposneg()*randfloat()*power*powermod;
             //std::cout << "RANDOM: " << randnum << " " << randposneg() << " " << randfloat() << " " << power << " " << powermod << std::endl;
 			if (mut_type==GAUSSIAN) {
@@ -1375,7 +1375,7 @@ void Genome::mutate_link_weights(double power,double rate,mutator mut_type) {
 
 }
 
-void Genome::mutate_gru_link_weights(double power) {
+void Genome::mutate_gru_link_weights(double power, double rate) {
 
 	//Get all GRU nodes
 	std::vector<NNodeGRU*> gru_nodes;
@@ -1397,7 +1397,7 @@ void Genome::mutate_gru_link_weights(double power) {
 		int rand_num = rand() % gru_nodes.size();
 
 		//Mutate that GRU node
-		gru_nodes[rand_num]->mutate(power);
+		gru_nodes[rand_num]->mutate(power, rate);
 	}
 
 }

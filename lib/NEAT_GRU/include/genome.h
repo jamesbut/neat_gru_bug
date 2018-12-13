@@ -126,7 +126,7 @@ namespace NEAT {
 		void mutate_link_weights(double power,double rate,mutator mut_type);
 
 		/* James - mutate GRU link weights */
-		void mutate_gru_link_weights(double power);
+		void mutate_gru_link_weights(double power, double rate);
 
 		// toggle genes on or off
 		void mutate_toggle_enable(int times);

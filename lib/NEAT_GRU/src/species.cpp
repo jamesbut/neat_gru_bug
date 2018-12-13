@@ -327,6 +327,7 @@ void Species::adjust_fitness() {
 	//std::cout << "Species: " << id << " num_parents: " << num_parents << std::endl;
 
 	//Mark for death those who are ranked too low to be parents
+	//James - This is truncation selection
 	curorg=organisms.begin();
 	(*curorg)->champion=true;  //Mark the champ as such
 	for(count=1;count<=num_parents;count++) {
@@ -450,6 +451,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 
 	//The weight mutation power is species specific depending on its age
 	double mut_power=NEAT::weight_mut_power;
+	double gru_mut_power=NEAT::gru_weight_mut_power;
 
 	//Roulette wheel variables
 	double total_fitness=0.0;
@@ -509,8 +511,8 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 						(NEAT::mutate_add_link_prob==0.0)) {
 						//ABOVE LINE IS FOR:
 						//Make sure no links get added when the system has link adding disabled
-						new_genome->mutate_link_weights(mut_power,1.0,GAUSSIAN);
-						new_genome->mutate_gru_link_weights(mut_power);		/* James - added */
+						new_genome->mutate_link_weights(mut_power,NEAT::mutate_gene_rate_prob,GAUSSIAN);
+						new_genome->mutate_gru_link_weights(gru_mut_power,NEAT::mutate_gru_gene_rate_prob);		/* James - added */
 					} else {	//James - won't come here if mutate add link is 0
 						//Sometimes we add a link to a superchamp
 						net_analogue=new_genome->genesis(generation);
@@ -645,7 +647,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 						}
 						if (randfloat()<NEAT::mutate_link_weights_prob) {
 							//std::cout<<"mutate_link_weights"<<std::endl;
-							new_genome->mutate_link_weights(mut_power,1.0,GAUSSIAN);
+							new_genome->mutate_link_weights(mut_power,NEAT::mutate_gene_rate_prob,GAUSSIAN);
 						}
 						if (randfloat()<NEAT::mutate_toggle_enable_prob) {
 							//std::cout<<"mutate toggle enable"<<std::endl;
@@ -657,7 +659,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 							new_genome->mutate_gene_reenable();
 						}
 						if (randfloat()<NEAT::mutate_gru_link_weights_prob) {
-							new_genome->mutate_gru_link_weights(mut_power);
+							new_genome->mutate_gru_link_weights(gru_mut_power,NEAT::mutate_gru_gene_rate_prob);
 						}
 					}
 
@@ -818,7 +820,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 							//std::cout<<"mutate_node_trait: "<<new_genome<<std::endl;
 						}
 						if (randfloat()<NEAT::mutate_link_weights_prob) {
-							new_genome->mutate_link_weights(mut_power,1.0,GAUSSIAN);
+							new_genome->mutate_link_weights(mut_power,NEAT::mutate_gene_rate_prob,GAUSSIAN);
 							//std::cout<<"mutate_link_weights: "<<new_genome<<std::endl;
 						}
 						if (randfloat()<NEAT::mutate_toggle_enable_prob) {
@@ -830,7 +832,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 							//std::cout<<"mutate_gene_reenable: "<<new_genome<<std::endl;
 						}
 						if (randfloat()<NEAT::mutate_gru_link_weights_prob) {
-							new_genome->mutate_gru_link_weights(mut_power);
+							new_genome->mutate_gru_link_weights(gru_mut_power,NEAT::mutate_gru_gene_rate_prob);
 						}
 					}
 

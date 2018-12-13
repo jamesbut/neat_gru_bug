@@ -18,6 +18,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstring>
+#include <iostream>
 
 //Variable to determine whether it is an old version of NEAT
 //before I fixed a bug - this obviously has implications for older
@@ -33,6 +34,7 @@ double NEAT::trait_mutation_power = 0; // Power of mutation on a signle trait pa
 double NEAT::linktrait_mut_sig = 0; // Amount that mutation_num changes for a trait change inside a link
 double NEAT::nodetrait_mut_sig = 0; // Amount a mutation_num changes on a link connecting a node that changed its trait
 double NEAT::weight_mut_power = 0; // The power of a linkweight mutation
+double NEAT::gru_weight_mut_power = 0;
 double NEAT::recur_prob = 0; // Prob. that a link mutation which doesn't have to be recurrent will be made recurrent
 double NEAT::disjoint_coeff = 0;
 double NEAT::excess_coeff = 0;
@@ -46,7 +48,9 @@ double NEAT::mutate_random_trait_prob = 0;
 double NEAT::mutate_link_trait_prob = 0;
 double NEAT::mutate_node_trait_prob = 0;
 double NEAT::mutate_link_weights_prob = 0;
+double NEAT::mutate_gene_rate_prob = 0;
 double NEAT::mutate_gru_link_weights_prob = 0;
+double NEAT::mutate_gru_gene_rate_prob = 0;
 double NEAT::mutate_toggle_enable_prob = 0;
 double NEAT::mutate_gene_reenable_prob = 0;
 double NEAT::mutate_add_node_prob = 0;
@@ -182,7 +186,23 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
     paramFile>>NEAT::weight_mut_power;
 
     paramFile>>curword;
-    paramFile>>NEAT::recur_prob;
+    std::string str1(curword);
+
+    if(str1.compare("gru_weight_mut_power") == 0) {
+      paramFile>>NEAT::gru_weight_mut_power;
+
+      paramFile>>curword;
+      paramFile>>NEAT::recur_prob;
+
+   } else {
+      // Set to default before I added this as an input param
+      NEAT::gru_weight_mut_power = NEAT::weight_mut_power;
+
+      paramFile>>NEAT::recur_prob;
+   }
+
+   //  paramFile>>curword;
+   //  paramFile>>NEAT::recur_prob;
 
     paramFile>>curword;
     paramFile>>NEAT::disjoint_coeff;
@@ -220,11 +240,48 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
     paramFile>>curword;
     paramFile>>NEAT::mutate_link_weights_prob;
 
+    // James Added
+    // If mutate_gene_rate_prob is there, then read
+    // and then read another for mutate_gru_link_weights_prob
+    // Otherwise set the value for mutate_gru_link_weights_prob
+    // and carry on as normal.
     paramFile>>curword;
-    paramFile>>NEAT::mutate_gru_link_weights_prob;
+    std::string str2(curword);
 
-    paramFile>>curword;
-    paramFile>>NEAT::mutate_toggle_enable_prob;
+    if(str2.compare("mutate_gene_rate_prob") == 0) {
+      paramFile>>NEAT::mutate_gene_rate_prob;
+
+      paramFile>>curword;
+      paramFile>>NEAT::mutate_gru_link_weights_prob;
+
+   } else {
+      // Set to default before I added this as an input param
+      NEAT::mutate_gene_rate_prob = 1.0;
+
+      paramFile>>NEAT::mutate_gru_link_weights_prob;
+   }
+
+   // paramFile>>curword;
+   // paramFile>>NEAT::mutate_gru_link_weights_prob;
+
+   paramFile>>curword;
+   std::string str3(curword);
+
+   if(str3.compare("mutate_gru_gene_rate_prob") == 0) {
+     paramFile>>NEAT::mutate_gru_gene_rate_prob;
+
+     paramFile>>curword;
+     paramFile>>NEAT::mutate_toggle_enable_prob;
+
+  } else {
+     // Set to default before I added this as an input param
+     NEAT::mutate_gru_gene_rate_prob = 0.3;
+
+     paramFile>>NEAT::mutate_toggle_enable_prob;
+  }
+
+   //  paramFile>>curword;
+   //  paramFile>>NEAT::mutate_toggle_enable_prob;
 
     paramFile>>curword;
     paramFile>>NEAT::mutate_gene_reenable_prob;
@@ -287,6 +344,7 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
 	    printf("linktrait_mut_sig=%f\n",linktrait_mut_sig);
 	    printf("nodetrait_mut_sig=%f\n",nodetrait_mut_sig);
 	    printf("weight_mut_power=%f\n",weight_mut_power);
+       printf("gru_weight_mut_power=%f\n",gru_weight_mut_power);
 	    printf("recur_prob=%f\n",recur_prob);
 	    printf("disjoint_coeff=%f\n",disjoint_coeff);
 	    printf("excess_coeff=%f\n",excess_coeff);
@@ -300,7 +358,9 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
 	    printf("mutate_link_trait_prob=%f\n",mutate_link_trait_prob);
 	    printf("mutate_node_trait_prob=%f\n",mutate_node_trait_prob);
 	    printf("mutate_link_weights_prob=%f\n",mutate_link_weights_prob);
+       printf("mutate_gene_rate_prob=%f\n",mutate_gene_rate_prob);
        printf("mutate_gru_link_weights_prob=%f\n",mutate_gru_link_weights_prob);
+       printf("mutate_gru_gene_rate_prob=%f\n",mutate_gru_gene_rate_prob);
 	    printf("mutate_toggle_enable_prob=%f\n",mutate_toggle_enable_prob);
 	    printf("mutate_gene_reenable_prob=%f\n",mutate_gene_reenable_prob);
 	    printf("mutate_add_node_prob=%f\n",mutate_add_node_prob);
