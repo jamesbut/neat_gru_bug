@@ -15,7 +15,7 @@ class GA {
 
 public:
 
-   GA(std::string neat_param_file, const bool handwritten);
+   GA(std::string neat_param_file, const bool no_bearing);
 
    ~GA();
 
@@ -74,7 +74,7 @@ private:
    const bool PARALLEL;
    const std::string ENV_PATH;
 
-   const bool HANDWRITTEN_ENVS;
+   const bool NO_BEARING;
    const bool RANDOMLY_GENERATED_ENVS;
 
    //const double ACCEPTABLE_FITNESS;

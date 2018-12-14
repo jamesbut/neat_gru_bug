@@ -25,7 +25,7 @@ public:
 
    void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
    // void Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs);
-   void Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator, bool handwritten);
+   void Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator, bool no_bearing);
    void PreStep();
    void PostStep();
    void PostExperiment();
@@ -35,7 +35,7 @@ public:
    double calculate_trajectory_length(const std::vector<CVector2>& traj);
 
    double calculate_fitness();
-   double calculate_fitness_handwritten();
+   double calculate_fitness_no_bearing();
 
 private:
 
@@ -63,7 +63,7 @@ private:
    bool m_testEnvs;
    int m_envNum;
    std::string m_envPath;
-   bool m_handwritten;
+   bool m_noBearing;
 
    const std::string TEST_ENV_LENGTHS_PATH;
    const std::string GENERATED_ENVS_MAP_PATH;

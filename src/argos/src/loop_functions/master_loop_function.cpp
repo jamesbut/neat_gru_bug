@@ -26,10 +26,10 @@ void MasterLoopFunction::Reset() {
    //Build env
    if(m_reset) m_env_builder.build_env(*m_env_generator);
 
-   if (m_handwritten)
+   if (m_noBearing)
       SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
 
-   fitness_score_loop.Reset(m_indvRun, m_envNum, m_testEnvs, *m_env_generator, m_handwritten);
+   fitness_score_loop.Reset(m_indvRun, m_envNum, m_testEnvs, *m_env_generator, m_noBearing);
 
 }
 

@@ -14,7 +14,7 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using namespace std::literals::chrono_literals;
 
-const bool HANDWRITTEN_ENVS = false;
+const bool NO_BEARING = false;
 
 int main(int argc, char *argv[]) {
 
@@ -36,12 +36,12 @@ int main(int argc, char *argv[]) {
 
    if(argString.find(".ne") != std::string::npos) {
 
-      GA ga(argString, HANDWRITTEN_ENVS);
+      GA ga(argString, NO_BEARING);
       ga.run();
 
    } else {
 
-      IndividualRun ir(argString, HANDWRITTEN_ENVS);
+      IndividualRun ir(argString, NO_BEARING);
       ir.run();
 
    }

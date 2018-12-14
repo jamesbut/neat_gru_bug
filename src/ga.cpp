@@ -9,7 +9,7 @@
 
 #include "argos/src/loop_functions/environment/environment_generator.h"
 
-GA::GA(std::string neat_param_file, const bool handwritten) :
+GA::GA(std::string neat_param_file, const bool no_bearing) :
    m_unCurrentGeneration(1),
    ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
    ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
@@ -19,19 +19,19 @@ GA::GA(std::string neat_param_file, const bool handwritten) :
    INCREMENTAL_EV(false),
    PARALLEL(true),
    //ACCEPTABLE_FITNESS(13.88),
-   HANDWRITTEN_ENVS(handwritten),   //This is now set in main.cpp
-   RANDOMLY_GENERATED_ENVS(true),
+   NO_BEARING(no_bearing),   //This is now set in main.cpp
+   RANDOMLY_GENERATED_ENVS(false),
    TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
-   ENV_PATH("../argos_params/environments/rand_envs_14_2_incr_ev/rand_env_")
-   //ENV_PATH("../argos_params/environments/training_set/ts_")
+   //ENV_PATH("../argos_params/environments/rand_envs_14_2_incr_ev/rand_env_")
+   ENV_PATH("../argos_params/environments/training_set/ts_")
    //ENV_PATH("../argos_params/environments/handwritten_envs/e")
    {
 
-   if(HANDWRITTEN_ENVS) {
+   if(NO_BEARING) {
 
       //Set appropriate start genome
       const int NUM_INPUTS = 1;
@@ -73,7 +73,7 @@ GA::GA(std::string neat_param_file, const bool handwritten) :
    if(PARALLEL) shared_mem = new SharedMem(neatPop->organisms.size(), NEAT::num_trials, "GA");
 
    //Data collection
-   data_collection = new DataCollection(RANDOMLY_GENERATED_ENVS, HANDWRITTEN_ENVS,
+   data_collection = new DataCollection(RANDOMLY_GENERATED_ENVS, NO_BEARING,
                                         TEST_EVAL_GEN, NUM_TEST_ENVS, FLUSH_EVERY,
                                         TEST_SET_PATH, as);
 
@@ -209,7 +209,7 @@ void GA::epoch() {
       bool test_envs = false;
 
       //Create file name and env num
-      if(HANDWRITTEN_ENVS) {
+      if(NO_BEARING) {
          file_name = ENV_PATH + "15.png";
          env_num = 15;
       } else if (RANDOMLY_GENERATED_ENVS) {
@@ -231,13 +231,13 @@ void GA::epoch() {
          std::cout << "Organism num: " << j << std::endl;
          std::cout << "Trial num: " << i << std::endl;
 
-         if (j==0 && (!HANDWRITTEN_ENVS)) reset = true;
+         if (j==0 && (!NO_BEARING)) reset = true;
 
          // trial_scores[j][i] = as->run(*(neatPop->organisms[j]), file_name, env_num,
          //                               reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), rand_seed);
 
          trial_scores[j][i] = as->run(*(neatPop->organisms[j]), env_num,
-                                       reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), eg);
+                                       reset, false, NO_BEARING, test_envs, (i+1), eg);
 
          reset = false;
 
@@ -266,7 +266,7 @@ void GA::parallel_epoch() {
       bool test_envs = false;
 
       //Create file name and env num
-      if(HANDWRITTEN_ENVS) {
+      if(NO_BEARING) {
          file_name = ENV_PATH + "15.png";
          env_num = 15;
       } else if (RANDOMLY_GENERATED_ENVS) {
@@ -306,7 +306,7 @@ void GA::parallel_epoch() {
             if(slave_PIDs.back() == 0) {
 
                shared_mem->set_run_result(num_organisms_tested-1, i, as->run(*(neatPop->organisms[num_organisms_tested-1]),
-                                          env_num, reset, false, HANDWRITTEN_ENVS, test_envs, (i+1), eg));
+                                          env_num, reset, false, NO_BEARING, test_envs, (i+1), eg));
 
                //Kill slave with user defined signal
                ::raise(SIGUSR1);

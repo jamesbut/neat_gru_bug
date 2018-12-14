@@ -14,7 +14,7 @@ class DataCollection {
 public:
 
    DataCollection(const bool RANDOMLY_GENERATED_ENVS,
-                  const bool HANDWRITTEN_ENVS,
+                  const bool NO_BEARING,
                   const int TEST_EVAL_GEN,
                   const int NUM_TEST_ENVS,
                   const int FLUSH_EVERY,
@@ -39,7 +39,7 @@ private:
    ARGoS_simulation* as;
 
    const bool RANDOMLY_GENERATED_ENVS;
-   const bool HANDWRITTEN_ENVS;
+   const bool NO_BEARING;
    const int TEST_EVAL_GEN;
    const int NUM_TEST_ENVS;
    const int FLUSH_EVERY;

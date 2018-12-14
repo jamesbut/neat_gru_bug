@@ -22,13 +22,13 @@ void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
 }
 
-void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator, bool handwritten) {
+void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator, bool no_bearing) {
 
    m_indvRun = indv_run;
    m_testEnvs = test_envs;
    m_envNum = env_num;
    m_env_generator = &env_generator;
-   m_handwritten = handwritten;
+   m_noBearing = no_bearing;
 
    CVector3 arena_size = CVector3(m_env_generator->get_env_width(), m_env_generator->get_env_height(), 0.0);
    max_range = arena_size.Length();
@@ -78,7 +78,7 @@ void FitnessScore::PostExperiment() {
    trajectory_loop.PostExperiment();
 
    //Calculate fitness differently depending on different type of exp
-   if(m_handwritten) calculate_fitness_handwritten();
+   if(m_noBearing) calculate_fitness_no_bearing();
    else calculate_fitness();
 
 }
@@ -188,7 +188,7 @@ double FitnessScore::calculate_fitness() {
 
 }
 
-double FitnessScore::calculate_fitness_handwritten() {
+double FitnessScore::calculate_fitness_no_bearing() {
 
    double distance_from_tower = max_range - robots_distance;
 

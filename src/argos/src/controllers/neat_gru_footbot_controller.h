@@ -51,7 +51,7 @@ public:
   virtual void Destroy() {};
 
   void SetNEATNet(NEAT::Network &net);
-  void SetHandwritten(const bool handwritten) {m_handwritten = handwritten;};
+  void SetNoBearing(const bool no_bearing) {m_noBearing = no_bearing;};
 
   std::vector<std::vector<double> > GetDebugData(){return debug_data;};
 
@@ -65,7 +65,7 @@ private:
 
    void ConvertLinVelToWheelSpeed(Real linear_x, Real angular_z);
 
-   bool m_handwritten;
+   bool m_noBearing;
 
    bool BEARING_SENSOR_ON;
    bool PROX_SENSOR_ON;

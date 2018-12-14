@@ -283,7 +283,7 @@ double NEATGRUFootbotController::mapValueIntoRange(const double input, const dou
 
 void NEATGRUFootbotController::Reset() {
 
-   if(m_handwritten) {
+   if(m_noBearing) {
 
       BEARING_SENSOR_ON = false;
       PROX_SENSOR_ON = false;

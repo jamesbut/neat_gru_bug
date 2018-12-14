@@ -24,13 +24,13 @@ public:
    virtual void PostStep();
    virtual void PostExperiment();
 
-   void configure_controller(NEAT::Network &net, const bool handwritten) {clever_bot_controller->SetNEATNet(net);
-                                                                          clever_bot_controller->SetHandwritten(handwritten);};
+   void configure_controller(NEAT::Network &net, const bool no_bearing) {clever_bot_controller->SetNEATNet(net);
+                                                                          clever_bot_controller->SetNoBearing(no_bearing);};
    void set_env_path(std::string env_path) {m_envPath = env_path;};
    void set_env_num(int env_num) {m_envNum = env_num;};
    void set_env_reset(bool reset) {m_reset = reset;};
    void set_indv_run(bool indv_run) {m_indvRun = indv_run;};
-   void set_handwritten_envs(bool handwritten) {m_handwritten = handwritten;};
+   void set_no_bearing(bool no_bearing) {m_noBearing = no_bearing;};
    void set_test_envs(bool test_envs) {m_testEnvs = test_envs;};
    void set_trial_num(int trial_num) {m_trialNum = trial_num;};
    void set_random_seed(int rand_seed) {m_randSeed = rand_seed;};
@@ -54,7 +54,7 @@ private:
    int m_envNum;
    bool m_reset;
    bool m_indvRun;
-   bool m_handwritten;
+   bool m_noBearing;
    bool m_testEnvs;
    int m_trialNum;
    int m_randSeed;

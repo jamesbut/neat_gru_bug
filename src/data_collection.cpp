@@ -9,14 +9,14 @@
 #include <thread>
 
 DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
-                               const bool HANDWRITTEN_ENVS,
+                               const bool NO_BEARING,
                                const int TEST_EVAL_GEN,
                                const int NUM_TEST_ENVS,
                                const int FLUSH_EVERY,
                                const std::string TEST_SET_PATH,
                                ARGoS_simulation* argos_simulation) :
    RANDOMLY_GENERATED_ENVS(RANDOMLY_GENERATED_ENVS),
-   HANDWRITTEN_ENVS(HANDWRITTEN_ENVS),
+   NO_BEARING(NO_BEARING),
    TEST_EVAL_GEN(TEST_EVAL_GEN),
    NUM_TEST_ENVS(NUM_TEST_ENVS),
    FLUSH_EVERY(FLUSH_EVERY),
@@ -113,7 +113,7 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
 
    }
 
-   if(RANDOMLY_GENERATED_ENVS) {
+   //if(RANDOMLY_GENERATED_ENVS) {
 
       //Collect rest of genomes for evaluation on test set
       //Scan through array 3 times choosing the largest and moving down
@@ -183,11 +183,12 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       // std::cout << "gen_n_2 fitness: " << gen_n_2->fitness << std::endl;
       // std::cout << "gen_n_3 fitness: " << gen_n_3->fitness << std::endl;
 
-   }
+   //}
 
    //if(!HANDWRITTEN_ENVS) test_on_training_set(trial_results, current_gen);
    test_on_training_set(trial_results, current_gen);
-   if(!HANDWRITTEN_ENVS) test_on_eval_set(current_gen);
+   //if(!HANDWRITTEN_ENVS) test_on_eval_set(current_gen);
+   if(!NO_BEARING && RANDOMLY_GENERATED_ENVS) test_on_eval_set(current_gen);
 
 }
 
@@ -312,7 +313,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
       //Here I can include overall winner if it has changed
       std::vector<NEAT::Organism*> genomes_to_be_tested;
 
-      if(RANDOMLY_GENERATED_ENVS) {
+      //if(RANDOMLY_GENERATED_ENVS) {
 
          genomes_to_be_tested.push_back(gen_n_1.get());
          genomes_to_be_tested.push_back(gen_n_2.get());
@@ -321,7 +322,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
          genomes_to_be_tested.push_back(gen_nminus1_2.get());
          genomes_to_be_tested.push_back(gen_nminus2_1.get());
 
-      }
+      //}
 
       //Test overall_winner if it has changed
       if (overall_winner_change_since_last_eval) {
@@ -437,7 +438,7 @@ void DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to
             if(slave_PIDs.back() == 0) {
 
                shared_mem->set_run_result(num_organisms_tested-1, i, as->run(*genomes_to_be_tested[num_organisms_tested-1],
-                                          i+1, true, true, HANDWRITTEN_ENVS, true, (i+1), eg));
+                                          i+1, true, true, NO_BEARING, true, (i+1), eg));
 
                //Kill slave with user defined signal
                ::raise(SIGUSR1);

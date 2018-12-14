@@ -491,13 +491,14 @@ bool Population::epoch(int generation) {
 	//Flag the lowest performing species over age 20 every 30 generations
 	//NOTE: THIS IS FOR COMPETITIVE COEVOLUTION STAGNATION DETECTION
 
-	curspecies=sorted_species.end();
-	curspecies--;
-	while((curspecies!=sorted_species.begin())&&
-		((*curspecies)->age<20))
-		--curspecies;
-	if ((generation%30)==0)
-		(*curspecies)->obliterate=true;
+	//James - I took this out
+	// curspecies=sorted_species.end();
+	// curspecies--;
+	// while((curspecies!=sorted_species.begin())&&
+	// 	((*curspecies)->age<20))
+	// 	--curspecies;
+	// if ((generation%30)==0)
+	// 	(*curspecies)->obliterate=true;
 
 
 	std::cout<<"Number of Species: "<<num_species<<std::endl;
@@ -517,6 +518,7 @@ bool Population::epoch(int generation) {
 
 	//Go through the organisms and add up their fitnesses to compute the
 	//overall average
+
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
 		total+=(*curorg)->fitness;
 	}
@@ -524,6 +526,7 @@ bool Population::epoch(int generation) {
 	std::cout<<"Generation "<<generation<<": "<<"overall_average = "<<overall_average<<std::endl;
 
 	//Now compute expected number of offspring for each individual organism
+	//James - pg 130. EvComp De Jong: this looks like roulette wheel selection to me
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
 		(*curorg)->expected_offspring=(((*curorg)->fitness)/overall_average);
 	}

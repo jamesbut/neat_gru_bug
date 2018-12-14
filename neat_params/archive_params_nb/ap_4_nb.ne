@@ -24,7 +24,7 @@ mutate_toggle_enable_prob 0.01
 mutate_gene_reenable_prob 0.01
 mutate_add_node_prob 0.006
 mutate_gru_add_node_prob 0.006
-mutate_add_link_prob 0.02
+mutate_add_link_prob 0.04
 interspecies_mate_rate 0.001
 mate_multipoint_prob 0.6
 mate_multipoint_avg_prob 0.4
@@ -37,5 +37,5 @@ newlink_tries 20
 print_every 199
 babies_stolen 0
 num_runs 1
-num_gens 1000
+num_gens 10000
 num_trials 5
