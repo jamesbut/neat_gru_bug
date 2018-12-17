@@ -194,7 +194,7 @@ double FitnessScore::calculate_fitness_no_bearing() {
 
    if (no_son_of_mine) distance_from_tower /= 10;
 
-   fitness_score = distance_from_tower;
+   fitness_score = pow(distance_from_tower, 3);
 
    if (fitness_score < 0) fitness_score = 0;
 

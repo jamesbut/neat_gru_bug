@@ -527,6 +527,8 @@ bool Population::epoch(int generation) {
 
 	//Now compute expected number of offspring for each individual organism
 	//James - pg 130. EvComp De Jong: this looks like roulette wheel selection to me
+	//But then again is the expected number of offspring is very similar between species
+	//it wont be much selection at all (which is what I have observed)
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
 		(*curorg)->expected_offspring=(((*curorg)->fitness)/overall_average);
 	}

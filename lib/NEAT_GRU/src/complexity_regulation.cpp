@@ -19,7 +19,7 @@ ComplexityRegulation::ComplexityRegulation(ComplexityMode starting_mode) :
    SIMPLIFYING_ADD_NODE_MUT_PROB(0.0),
    SIMPLIFYING_ADD_GRU_NODE_MUT_PROB(0.0),
    SIMPLIFYING_ADD_CONNECTION_MUT_PROB(0.0),
-   SIMPLIFYING_DELETE_CONNECTION_MUT_PROB(0.4) {}
+   SIMPLIFYING_DELETE_CONNECTION_MUT_PROB(0.1) {}
 
 void ComplexityRegulation::evaluate_complexity(const std::vector<Organism*>& organisms, int generation) {
 

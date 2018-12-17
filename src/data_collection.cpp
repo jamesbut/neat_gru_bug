@@ -188,7 +188,7 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
    //if(!HANDWRITTEN_ENVS) test_on_training_set(trial_results, current_gen);
    test_on_training_set(trial_results, current_gen);
    //if(!HANDWRITTEN_ENVS) test_on_eval_set(current_gen);
-   if(!NO_BEARING && RANDOMLY_GENERATED_ENVS) test_on_eval_set(current_gen);
+   if(!NO_BEARING) test_on_eval_set(current_gen);
 
 }
 
