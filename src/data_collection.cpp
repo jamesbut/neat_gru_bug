@@ -70,13 +70,19 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       std::vector<RunResult> individual_trial_run_results = trial_results[i];
       std::vector<double> individual_trial_fitnesses;
 
+      // if(i==10) {
+      //    for(int j = 0; j < trial_fitnesses[10].size(); j++)
+      //       std::cout << trial_fitnesses[10][j] << " " << std::endl;
+      //    std::cout << std::endl;
+      // }
+
       for(int i = 0; i < individual_trial_run_results.size(); i++)
          individual_trial_fitnesses.push_back(individual_trial_run_results[i].fitness);
 
       //double minTrial = *std::min_element(individual_trial_scores.begin(), individual_trial_scores.end());
       double meanTrialFitness = std::accumulate(individual_trial_fitnesses.begin(), individual_trial_fitnesses.end(), 0.0) / individual_trial_fitnesses.size();
       //double sumTrial = std::accumulate(individual_trial_scores.begin(), individual_trial_scores.end(), 0.0);
-
+      //std::cout << i << ": " << meanTrialFitness << std::endl;
       if(NASH_AVERAGING) std::cout << meanTrialFitness << " ";
 
       //Set skills to either uniform average OR nash average

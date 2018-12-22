@@ -90,6 +90,8 @@ void ComplexityRegulation::determine_complexity_mode() {
 
    }
 
+   std::cout << "Complexity Mode: " << complexity_mode << std::endl;
+
 }
 
 //Swap parameters based on complexity mode

@@ -151,6 +151,8 @@ int NEAT::getUnitCount(const char *string, const char *set)
 
 bool NEAT::load_neat_params(const char *filename, bool output) {
 
+   //srand(10);
+
     std::ifstream paramFile (filename); // (filename) is the constructor of instance paramFile
 
     if(!paramFile) {

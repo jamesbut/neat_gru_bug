@@ -389,7 +389,10 @@ double Species::count_offspring(double skim) {
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
 		e_o_intpart=(int) floor((*curorg)->expected_offspring);
 		e_o_fracpart=fmod((*curorg)->expected_offspring,1.0);
-
+		//std::cout << "Org fitness: " << (*curorg)->fitness << std::endl;
+		//std::cout << "Org orig fitness: " << (*curorg)->orig_fitness << std::endl;
+		//std::cout << "EO: " << (*curorg)->expected_offspring << std::endl;
+		//std::cout << e_o_intpart << "." << e_o_fracpart << std::endl;
 		expected_offspring+=e_o_intpart;
 
 		//Skim off the fractional offspring

@@ -119,19 +119,38 @@ void MasterLoopFunction::SetRobotPositionBasedOnMap(int map, int trial_num) {
          switch (trial_num) {
 
             case 1:
+               // clever_bot_x = -5;
+               // clever_bot_y = -5;
+               // dead_bot_x = 6.0;
+               // dead_bot_y = 6.0;
                clever_bot_ori = (CRadians)(0);
                break;
             case 2:
+               // clever_bot_x = 5;
+               // clever_bot_y = -5;
+               // dead_bot_x = 4.0;
+               // dead_bot_y = 4.0;
                clever_bot_ori = (CRadians)(M_PI/2);
-               //clever_bot_ori = (CRadians)(0);
                break;
             case 3:
+               // clever_bot_x = -5;
+               // clever_bot_y = 5;
+               // dead_bot_x = 4.0;
+               // dead_bot_y = 4.0;
                clever_bot_ori = (CRadians)(M_PI);
                break;
             case 4:
+               // clever_bot_x = -1;
+               // clever_bot_y = 2;
+               // dead_bot_x = 4.0;
+               // dead_bot_y = 4.0;
                clever_bot_ori = (CRadians)(3*M_PI/2);
                break;
             case 5:
+               // clever_bot_x = 3;
+               // clever_bot_y = 3;
+               // dead_bot_x = 1;
+               // dead_bot_y = -4;
                clever_bot_ori = (CRadians)(5*M_PI/4);
                break;
             case 6:
