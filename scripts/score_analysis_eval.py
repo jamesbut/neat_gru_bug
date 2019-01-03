@@ -1,4 +1,5 @@
 from numpy import genfromtxt
+import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
@@ -26,7 +27,8 @@ test_mean_scores = test_file_data[:,3]
 #test_mean_scores = np.mean(test_scores, axis=1)
 
 #print(test_scores)
-#print(test_mean_scores)
+print(test_mean_scores)
+print(np.mean(test_mean_scores))
 #print(len(test_mean_scores))
 #print(test_max_scores)
 
