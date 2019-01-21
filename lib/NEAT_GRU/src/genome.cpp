@@ -108,7 +108,7 @@ Genome::Genome(const Genome& genome)
 Genome::Genome(int id, std::ifstream &iFile) {
 
 	char curword[128];  //max word size of 128 characters
-	char curline[1024]; //max line size of 1024 characters
+	char curline[2048]; //max line size of 1024 characters
 	char delimiters[] = " \n";
 
 	int done=0;
@@ -206,8 +206,8 @@ Genome::Genome(int id, std::ifstream &iFile) {
 
 			curwordnum = wordcount + 1;
 
-			char argline[1024];
-			ss.getline(argline, 1024);
+			char argline[2048];
+			ss.getline(argline, 2048);
 
 			newnode = new NNodeGRU(argline,traits);
 
@@ -217,6 +217,7 @@ Genome::Genome(int id, std::ifstream &iFile) {
 
 		//Read in a Gene
 		else if (strcmp(curword,"gene")==0) {
+
 			Gene *newgene;
 
 			char argline[1024];

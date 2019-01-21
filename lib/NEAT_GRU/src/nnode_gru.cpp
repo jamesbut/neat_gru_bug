@@ -44,7 +44,7 @@ NNodeGRU::NNodeGRU(const char *argline, std::vector<Trait*> &traits) : NNode(GRU
 	//Get U_u vector from file
 	ss >> curword >> curword;
 	while (strcmp(curword,"]")!=0) {
-
+		//std::cout << curword << std::endl;
 		U_u.push_back(atof(curword));
 		ss >> curword;
 
