@@ -34,5 +34,5 @@ newlink_tries 20
 print_every 199
 babies_stolen 0
 num_runs 1
-num_gens 500
-num_trials 15
+num_gens 1
+num_trials 1

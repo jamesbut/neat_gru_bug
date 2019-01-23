@@ -20,7 +20,7 @@ ARGoS_simulation::~ARGoS_simulation() {}
 
 RunResult ARGoS_simulation::run(NEAT::Organism &org, int env_num, bool reset, bool indv_run,
                                 bool no_bearing, bool test_envs, int trial_num,
-                                EnvironmentGenerator& env_generator) {
+                                EnvironmentGenerator& env_generator, int org_num) {
 
    // std::cout << env_path << std::endl;
    // std::cout << env_num << std::endl;
@@ -35,6 +35,7 @@ RunResult ARGoS_simulation::run(NEAT::Organism &org, int env_num, bool reset, bo
 
    master_loop.configure_controller(*org.net, no_bearing);
    master_loop.set_env_num(env_num);
+   master_loop.set_org_num(org_num);
    master_loop.set_env_reset(reset);
    master_loop.set_indv_run(indv_run);
    master_loop.set_no_bearing(no_bearing);

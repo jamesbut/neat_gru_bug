@@ -19,7 +19,8 @@ public:
    //    int rand_seed);
    RunResult run(NEAT::Organism &org, int env_num,
                  bool reset, bool indv_run, bool handwritten,
-                 bool test_envs, int trial_num, EnvironmentGenerator& env_generator);
+                 bool test_envs, int trial_num, EnvironmentGenerator& env_generator,
+                 int org_num);
 
 private:
 

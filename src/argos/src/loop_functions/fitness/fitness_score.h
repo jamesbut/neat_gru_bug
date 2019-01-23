@@ -25,7 +25,7 @@ public:
 
    void Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot);
    // void Reset(bool indv_run, CVector3 arena_size, int env_num, std::string env_path, bool test_envs);
-   void Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator, bool no_bearing);
+   void Reset(bool indv_run, int env_num, int org_num, bool test_envs, EnvironmentGenerator& env_generator, bool no_bearing);
    void PreStep();
    void PostStep();
    void PostExperiment();
@@ -62,6 +62,7 @@ private:
    bool m_indvRun;
    bool m_testEnvs;
    int m_envNum;
+   int m_orgNum;
    std::string m_envPath;
    bool m_noBearing;
 

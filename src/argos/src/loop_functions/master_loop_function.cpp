@@ -29,7 +29,8 @@ void MasterLoopFunction::Reset() {
    if (m_noBearing)
       SetRobotPositionBasedOnMap(m_envNum, m_trialNum);
 
-   fitness_score_loop.Reset(m_indvRun, m_envNum, m_testEnvs, *m_env_generator, m_noBearing);
+   fitness_score_loop.Reset(m_indvRun, m_envNum, m_orgNum, m_testEnvs,
+                           *m_env_generator, m_noBearing);
 
 }
 

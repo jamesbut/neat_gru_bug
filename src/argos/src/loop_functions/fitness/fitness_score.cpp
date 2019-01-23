@@ -22,11 +22,12 @@ void FitnessScore::Init(CFootBotEntity* clever_bot, CFootBotEntity* dead_bot) {
 
 }
 
-void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, EnvironmentGenerator& env_generator, bool no_bearing) {
+void FitnessScore::Reset(bool indv_run, int env_num, int org_num, bool test_envs, EnvironmentGenerator& env_generator, bool no_bearing) {
 
    m_indvRun = indv_run;
    m_testEnvs = test_envs;
    m_envNum = env_num;
+   m_orgNum = org_num;
    m_env_generator = &env_generator;
    m_noBearing = no_bearing;
 
@@ -41,7 +42,7 @@ void FitnessScore::Reset(bool indv_run, int env_num, bool test_envs, Environment
    if(indv_run) CLOSE_TO_TOWER = 1.0;
    else CLOSE_TO_TOWER = 0.32;
 
-   trajectory_loop.Reset(env_num);
+   trajectory_loop.Reset(env_num, m_orgNum, m_indvRun);
 
 }
 
@@ -86,6 +87,9 @@ void FitnessScore::PostExperiment() {
 double FitnessScore::calculate_fitness() {
 
    const std::vector<CVector2>& trajectory = trajectory_loop.get_trajectory();
+   //std::cout << "Traj size: " << trajectory.size() << std::endl;
+   // for(int i = 0; i < trajectory.size(); i++)
+   //    std::cout << trajectory[i].GetX() << " " << trajectory[i].GetY() << std::endl;
 
    traj_per_astar = calculate_trajectory_per_optimal_path(trajectory);
 
@@ -167,7 +171,8 @@ double FitnessScore::calculate_fitness() {
    /*   F7   c=1.5 */
    /*   F8   c=0.5 */
    //If the robot hits the target, reward with a function of path length
-   //std::cout << "Traj per astar: " << traj_per_astar << std::endl;
+   std::cout << "Hit tower: " << hit_tower << std::endl;
+   std::cout << "Traj per astar: " << traj_per_astar << std::endl;
    fitness_score = hit_tower ? (1 / pow(traj_per_astar, 0.5)) : 0;
    //fitness_score = hit_tower ? (-0.25*traj_per_astar + 1.25) : 0;
 
@@ -212,9 +217,13 @@ double FitnessScore::calculate_trajectory_per_optimal_path(const std::vector<CVe
 
    double astar_length = m_env_generator->get_environment_optimal_length();
 
+   //std::cout << "astar length: " << astar_length << std::endl;
+
    //Calculate trajectory length
    double trajectory_length = calculate_trajectory_length(trajectory);
    trajectory_length += 1.0;      //Add 1 for the extra 1 meter stopped before the tower
+
+   //std::cout << "Traj length: " << trajectory_length << std::endl;
 
    return (double)trajectory_length / (double)astar_length;
 

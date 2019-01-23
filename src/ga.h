@@ -77,6 +77,8 @@ private:
    const bool NO_BEARING;
    const bool RANDOMLY_GENERATED_ENVS;
 
+   const bool NOVELTY_SEARCH;
+
    //const double ACCEPTABLE_FITNESS;
 
    const int TEST_EVAL_GEN;
@@ -100,6 +102,8 @@ private:
 
    //Slave pid's
    std::vector<pid_t> slave_PIDs;
+
+   NoveltySearch* ns;
 
 };
 

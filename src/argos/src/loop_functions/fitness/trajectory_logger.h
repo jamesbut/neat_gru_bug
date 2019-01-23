@@ -10,7 +10,7 @@ class TrajectoryLogger {
 public:
 
    void Init(CFootBotEntity* clever_bot);
-   void Reset(int env_num);
+   void Reset(int env_num, int org_num, bool indv_run);
    void PostStep();
    void PostExperiment();
 
@@ -23,6 +23,8 @@ private:
    std::vector<CVector2> trajectory;
 
    int m_envNum;
+   int m_orgNum;
+   bool m_indvRun;
 
 };
 

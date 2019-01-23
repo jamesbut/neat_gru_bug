@@ -64,7 +64,7 @@ void IndividualRun::run() {
       eg.generate_env(file_name, env_num);
 
       RunResult rr = as->run(*org, env_num, reset, true,
-                              HANDWRITTEN_ENVS, test_envs, (i+1), eg);
+                              HANDWRITTEN_ENVS, test_envs, (i+1), eg, 0);
 
       total_score += rr.fitness;
       scores[i] = rr.fitness;

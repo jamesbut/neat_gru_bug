@@ -7,6 +7,7 @@
 #include "argos/src/argos_simulation.h"
 #include "shared_memory.h"
 #include "nash_averaging.h"
+#include <NEAT_GRU/include/novelty_search.h>
 
 
 class DataCollection {
@@ -15,6 +16,7 @@ public:
 
    DataCollection(const bool RANDOMLY_GENERATED_ENVS,
                   const bool NO_BEARING,
+                  NoveltySearch* ns,
                   const int TEST_EVAL_GEN,
                   const int NUM_TEST_ENVS,
                   const int FLUSH_EVERY,
@@ -66,6 +68,8 @@ private:
    std::vector<pid_t> slave_PIDs;
 
    NashAverager nash_averager;
+
+   NoveltySearch* m_ns;
 
 };
 

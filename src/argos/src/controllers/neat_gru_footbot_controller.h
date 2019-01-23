@@ -129,6 +129,7 @@ private:
   //std::ofstream debug_file;
   //std::vector<double> debug_data;
   std::vector<std::vector<double> > debug_data;
+  int count = 0;
 
 };
 

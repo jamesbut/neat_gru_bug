@@ -10,6 +10,7 @@
 
 DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
                                const bool NO_BEARING,
+                               NoveltySearch* ns,
                                const int TEST_EVAL_GEN,
                                const int NUM_TEST_ENVS,
                                const int FLUSH_EVERY,
@@ -17,6 +18,7 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
                                ARGoS_simulation* argos_simulation) :
    RANDOMLY_GENERATED_ENVS(RANDOMLY_GENERATED_ENVS),
    NO_BEARING(NO_BEARING),
+   m_ns(ns),
    TEST_EVAL_GEN(TEST_EVAL_GEN),
    NUM_TEST_ENVS(NUM_TEST_ENVS),
    FLUSH_EVERY(FLUSH_EVERY),
@@ -444,7 +446,7 @@ void DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to
             if(slave_PIDs.back() == 0) {
 
                shared_mem->set_run_result(num_organisms_tested-1, i, as->run(*genomes_to_be_tested[num_organisms_tested-1],
-                                          i+1, true, true, NO_BEARING, true, (i+1), eg));
+                                          i+1, true, true, NO_BEARING, true, (i+1), eg, num_organisms_tested-1));
 
                //Kill slave with user defined signal
                ::raise(SIGUSR1);

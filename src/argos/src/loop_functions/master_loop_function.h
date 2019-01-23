@@ -28,6 +28,7 @@ public:
                                                                           clever_bot_controller->SetNoBearing(no_bearing);};
    void set_env_path(std::string env_path) {m_envPath = env_path;};
    void set_env_num(int env_num) {m_envNum = env_num;};
+   void set_org_num(int org_num) {m_orgNum = org_num;};
    void set_env_reset(bool reset) {m_reset = reset;};
    void set_indv_run(bool indv_run) {m_indvRun = indv_run;};
    void set_no_bearing(bool no_bearing) {m_noBearing = no_bearing;};
@@ -52,6 +53,7 @@ private:
 
    std::string m_envPath;
    int m_envNum;
+   int m_orgNum;
    bool m_reset;
    bool m_indvRun;
    bool m_noBearing;
