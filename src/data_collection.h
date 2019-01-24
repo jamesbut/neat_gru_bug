@@ -36,8 +36,8 @@ private:
                              int current_gen);
    void test_on_eval_set(int current_gen);
 
-   void parallel_eval(const std::vector<NEAT::Organism*>);
-   void serial_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested);
+   std::vector<std::vector <RunResult> > parallel_eval(const std::vector<NEAT::Organism*>);
+   std::vector<std::vector <RunResult> > serial_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested);
 
    ARGoS_simulation* as;
 

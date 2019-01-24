@@ -11,21 +11,22 @@
 
 GA::GA(std::string neat_param_file, const bool no_bearing) :
    m_unCurrentGeneration(1),
-   ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
+   ARGOS_FILE_NAME("../argos_params/no_walls_vis.argos"),
    ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
    eg(),
    //NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(1),
    INCREMENTAL_EV(false),
-   PARALLEL(true),
+   PARALLEL(false),
    //ACCEPTABLE_FITNESS(13.88),
    NO_BEARING(no_bearing),   //This is now set in main.cpp
    RANDOMLY_GENERATED_ENVS(false),
    NOVELTY_SEARCH(true),
    ns(NULL),
    TEST_EVAL_GEN(1),
-   TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
-   NUM_TEST_ENVS(3),
+   //TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
+   TEST_SET_PATH("../argos_params/environments/training_set/ts_"),
+   NUM_TEST_ENVS(2),
    //NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")

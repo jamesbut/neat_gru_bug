@@ -351,6 +351,8 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
       }
 
+      //TODO: Possibly remove this for NS
+
       //Test overall_winner if it has changed
       if (overall_winner_change_since_last_eval) {
 
@@ -360,20 +362,21 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
       }
 
-      serial_eval(genomes_to_be_tested);
+      std::vector<std::vector <RunResult> > trial_results = serial_eval(genomes_to_be_tested);
+      //std::vector<std::vector <RunResult> > trial_results = parallel_eval(genomes_to_be_tested);
 
       //Collect results from shared memory
-      std::vector<std::vector <RunResult> > trial_results;
-
-      for(size_t i = 0; i < genomes_to_be_tested.size(); i++) {
-         trial_results.push_back(shared_mem->get_run_result(i));
-
-         // for(size_t j = 0; j < trial_results[i].size(); j++) {
-         //
-         //    std::cout << "Org: " << i << " trial: " << j << " fitness: " << trial_results[i][j].fitness << std::endl;
-         //
-         // }
-      }
+      // std::vector<std::vector <RunResult> > trial_results;
+      //
+      // for(size_t i = 0; i < genomes_to_be_tested.size(); i++) {
+      //    trial_results.push_back(shared_mem->get_run_result(i));
+      //
+      //    // for(size_t j = 0; j < trial_results[i].size(); j++) {
+      //    //
+      //    //    std::cout << "Org: " << i << " trial: " << j << " fitness: " << trial_results[i][j].fitness << std::endl;
+      //    //
+      //    // }
+      // }
 
       //Collect data for each run
       for(int i = 0; i < trial_results.size(); i++) {
@@ -389,7 +392,11 @@ void DataCollection::test_on_eval_set(int current_gen) {
             //Record traj_per_astar
             total_traj_per_astar += trial_results[i][j].traj_per_astar;
 
+            //std::cout << "Traj per astar: " << trial_results[i][j].traj_per_astar << std::endl;
+
          }
+
+         //std::cout << "----------" << std::endl;
 
          double mean_traj_per_astar = total_traj_per_astar / trial_results[i].size();
 
@@ -428,7 +435,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
 }
 
-void DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested) {
+std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested) {
 
    std::cout << "Evaluating on test set.." << std::endl;
 
@@ -519,19 +526,44 @@ void DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to
 
    }
 
+   //Collect results from shared memory
+   std::vector<std::vector <RunResult> > trial_results;
+
+   for(size_t i = 0; i < genomes_to_be_tested.size(); i++) {
+      trial_results.push_back(shared_mem->get_run_result(i));
+
+      // for(size_t j = 0; j < trial_results[i].size(); j++) {
+      //
+      //    std::cout << "Org: " << i << " trial: " << j << " fitness: " << trial_results[i][j].fitness << std::endl;
+      //
+      // }
+   }
+
    std::cout << "..finished evaluating on test set" << std::endl;
+
+   return trial_results;
 
 }
 
-void DataCollection::serial_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested) {
+std::vector<std::vector <RunResult> > DataCollection::serial_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested) {
 
    std::cout << "Evaluating on test set.." << std::endl;
+
+   //std::vector<std::vector <RunResult> > trial_results(genomes_to_be_tested.size(), NUM_TEST_ENVS, RunResult());
+   std::vector<std::vector <RunResult> > trial_results;
+
+   //Size the vector
+   trial_results.resize(genomes_to_be_tested.size());
+   for(unsigned int i = 0; i < trial_results.size(); i++)
+      trial_results[i].resize(NUM_TEST_ENVS);
+
+   std::cout << "Genomes to be tested size: " << genomes_to_be_tested.size() << std::endl;
 
    for(int i = 0; i < NUM_TEST_ENVS; i++) {
 
       bool reset = false;
 
-      if((i+1) % 25 == 0)
+      //if((i+1) % 25 == 0)
          std::cout << "Evaluating genomes on test env: " << i+1 << std::endl;
 
       std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
@@ -544,10 +576,13 @@ void DataCollection::serial_eval(const std::vector<NEAT::Organism*> genomes_to_b
          // if((j+1) % 25 == 0)
          //    std::cout << "   Organisms tested: " << j << std::endl;
 
+         std::cout << "   Org genome ID: " << genomes_to_be_tested[j]->gnome->genome_id << std::endl;
+         //std::cout << "Org genome ID: " << genomes_to_be_tested[j]->gnome->genome_id << std::endl;
+
          if (j==0 && (!NO_BEARING)) reset = true;
 
-         as->run(*genomes_to_be_tested[j], i,
-                 reset, true, NO_BEARING, true, (i+1), eg, j);
+         trial_results[j][i] = as->run(*genomes_to_be_tested[j], i,
+                                       reset, true, NO_BEARING, true, (i+1), eg, j);
 
          reset = false;
 
@@ -556,6 +591,8 @@ void DataCollection::serial_eval(const std::vector<NEAT::Organism*> genomes_to_b
    }
 
    std::cout << "..finished evaluating on test set" << std::endl;
+
+   return trial_results;
 
 }
 

@@ -8,13 +8,8 @@
 typedef std::vector<std::vector<std::vector<double> > > vec3d;
 typedef std::vector<std::vector<double> > vec2d;
 
-//struct NoveltyArchive {};
 struct NoveltyItem {
 
-   //We can keep track of genotype & phenotype of novel item
-   //TODO: Surely the underlying data structure gets deleted
-   //after generation ends so I might have to store a copy
-   //of these here
    NEAT::Organism* org;
 
    std::vector<double> bc;

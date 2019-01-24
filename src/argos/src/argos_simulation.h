@@ -14,9 +14,6 @@ public:
    ~ARGoS_simulation();
 
    //Runs the experiment and returns the fitness score
-   // RunResult run(NEAT::Organism &org, std::string env_path, int env_num,
-   //    bool reset, bool indv_run, bool handwritten, bool test_envs, int trial_num,
-   //    int rand_seed);
    RunResult run(NEAT::Organism &org, int env_num,
                  bool reset, bool indv_run, bool handwritten,
                  bool test_envs, int trial_num, EnvironmentGenerator& env_generator,
