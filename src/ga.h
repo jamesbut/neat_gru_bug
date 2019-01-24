@@ -36,11 +36,6 @@ private:
 
    void generate_start_genome(const int NUM_INPUTS, const int NUM_OUTPUTS);
 
-   // void flush_winners();
-
-   // void test_on_training_set(std::vector<std::vector<RunResult> > gen_results);
-   // void test_on_eval_set();
-
    /** Current generation */
    int m_unCurrentGeneration;
 
@@ -48,21 +43,6 @@ private:
    NEAT::Population* neatPop;
 
    ARGoS_simulation* as;
-
-   //Keep track of overall winner over all generations.
-   //I do this because it is often the case that the winner of the final
-   //generation is not the overall winner of all the generations.
-   //NEAT::Organism* overall_winner;
-   //int overall_winner_num_finishes;
-   //std::vector<RunResult> m_overall_winner_results;
-
-   //Also keep track of other winners for test set evaluations
-   // NEAT::Organism* gen_n_1;
-   // NEAT::Organism* gen_n_2;
-   // NEAT::Organism* gen_n_3;
-   // NEAT::Organism* gen_nminus1_1;
-   // NEAT::Organism* gen_nminus1_2;
-   // NEAT::Organism* gen_nminus2_1;
 
    std::vector<int> flush_gens;
 
@@ -87,10 +67,6 @@ private:
 
    const std::string ARGOS_FILE_NAME;
    const std::string ARGOS_FILE_NAME_10;
-
-   // int eval_set_finishes_overall_winner;
-   // std::vector<RunResult> eval_set_results_overall_winner;
-   //bool overall_winner_change_since_last_eval;
 
    //Data collection
    DataCollection* data_collection;

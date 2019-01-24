@@ -217,20 +217,20 @@ void NEATGRUFootbotController::ControlStep() {
    }
 
 
-   std::vector<double> debug_vec;
-
-   for(int i = 0; i < net_inputs.size(); i++) {
-      debug_vec.push_back(net_inputs[i]);
-      if(i>3) {
-         debug_vec.push_back(tProxReads[i-4].Value);
-      }
-   }
-   debug_vec.push_back(m_net->outputs[0]->activation);
-   debug_vec.push_back(m_net->outputs[1]->activation);
-   debug_vec.push_back(leftSpeed);
-   debug_vec.push_back(rightSpeed);
-
-   debug_data.push_back(debug_vec);
+   // std::vector<double> debug_vec;
+   //
+   // for(int i = 0; i < net_inputs.size(); i++) {
+   //    debug_vec.push_back(net_inputs[i]);
+   //    if(i>3) {
+   //       debug_vec.push_back(tProxReads[i-4].Value);
+   //    }
+   // }
+   // debug_vec.push_back(m_net->outputs[0]->activation);
+   // debug_vec.push_back(m_net->outputs[1]->activation);
+   // debug_vec.push_back(leftSpeed);
+   // debug_vec.push_back(rightSpeed);
+   //
+   // debug_data.push_back(debug_vec);
 
    // debug_data.push_back(net_inputs[1]);
    // debug_data.push_back(m_net->outputs[0]->activation);
@@ -311,30 +311,30 @@ void NEATGRUFootbotController::Reset() {
 
 
    /* DEBUG STUFF */
-   //int count = 0;
+
    // delete neatOrg;
 
    //std::cout << "debug data size: " << debug_data.size() << std::endl;
 
-   if(debug_data.size() != 0) {
-
-      std::ofstream debug_file;
-      std::stringstream file_name;
-      file_name << "../debug/debug"<<count<<".txt";
-      debug_file.open(file_name.str());
-
-      for(int i = 0; i < debug_data.size(); i++) {
-         for(int j = 0; j < debug_data[i].size(); j++) {
-               debug_file << debug_data[i][j] << ",";
-         }
-         debug_file << "\n";
-      }
-      std::cout << "Printed to: " << file_name.str() << std::endl;
-      debug_file.close();
-      count++;
-      debug_data.clear();
-   }
-   debug_data.clear();
+   // if(debug_data.size() != 0) {
+   //
+   //    std::ofstream debug_file;
+   //    std::stringstream file_name;
+   //    file_name << "../debug/debug"<<count<<".txt";
+   //    debug_file.open(file_name.str());
+   //
+   //    for(int i = 0; i < debug_data.size(); i++) {
+   //       for(int j = 0; j < debug_data[i].size(); j++) {
+   //             debug_file << debug_data[i][j] << ",";
+   //       }
+   //       debug_file << "\n";
+   //    }
+   //    std::cout << "Printed to: " << file_name.str() << std::endl;
+   //    debug_file.close();
+   //    count++;
+   //    debug_data.clear();
+   // }
+   // debug_data.clear();
 
 }
 

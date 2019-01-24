@@ -17,15 +17,16 @@ GA::GA(std::string neat_param_file, const bool no_bearing) :
    //NUM_FLUSHES(3),   //Currently not used
    FLUSH_EVERY(1),
    INCREMENTAL_EV(false),
-   PARALLEL(false),
+   PARALLEL(true),
    //ACCEPTABLE_FITNESS(13.88),
    NO_BEARING(no_bearing),   //This is now set in main.cpp
-   RANDOMLY_GENERATED_ENVS(true),
+   RANDOMLY_GENERATED_ENVS(false),
    NOVELTY_SEARCH(true),
    ns(NULL),
-   TEST_EVAL_GEN(25),
+   TEST_EVAL_GEN(1),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
-   NUM_TEST_ENVS(209),
+   NUM_TEST_ENVS(3),
+   //NUM_TEST_ENVS(209),
    //ENV_PATH("../argos_params/environments/rand_envs_14_3/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2/rand_env_")
    //ENV_PATH("../argos_params/environments/rand_envs_14_2_incr_ev/rand_env_")
@@ -259,15 +260,11 @@ void GA::epoch() {
 
    }
 
-   if(NOVELTY_SEARCH) ns->calculate_behaviour_characteristics();
-   std::cout << "Finished Novelty Search!" << std::endl;
+   if(NOVELTY_SEARCH) ns->evaluate_population(*neatPop);
 
-   // collect_scores(trial_scores);
    data_collection->collect_scores(trial_scores, neatPop, m_unCurrentGeneration);
 
    data_collection->flush_winners(m_unCurrentGeneration);
-
-   //if(!HANDWRITTEN_ENVS) test_on_eval_set(true);
 
 }
 
@@ -398,7 +395,7 @@ void GA::parallel_epoch() {
 
    /*--------------------------------------------------*/
 
-   if(NOVELTY_SEARCH) ns->calculate_behaviour_characteristics();
+   if(NOVELTY_SEARCH) ns->evaluate_population(*neatPop);
 
    data_collection->collect_scores(trial_results, neatPop, m_unCurrentGeneration);
 

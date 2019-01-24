@@ -66,6 +66,7 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
    double maxPopScore;
 
    if(NASH_AVERAGING) std::cout << "Mean scores:" << std::endl;
+
    //Set fitnesses in NEAT
    for(size_t i = 0; i < neatPop->organisms.size(); i++) {
 
@@ -87,8 +88,9 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       //std::cout << i << ": " << meanTrialFitness << std::endl;
       if(NASH_AVERAGING) std::cout << meanTrialFitness << " ";
 
-      //Set skills to either uniform average OR nash average
+      //Set skills to either uniform average OR nash average OR novelty
       if(NASH_AVERAGING) neatPop->organisms[i]->fitness = agent_skills[i];
+      else if(m_ns != NULL) neatPop->organisms[i]->fitness = m_ns->get_gen_novelty(i);
       else neatPop->organisms[i]->fitness = meanTrialFitness;
 
       //Find best organism in population
@@ -121,7 +123,7 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
 
    }
 
-   //if(RANDOMLY_GENERATED_ENVS) {
+   if(m_ns == NULL) {
 
       //Collect rest of genomes for evaluation on test set
       //Scan through array 3 times choosing the largest and moving down
@@ -169,6 +171,7 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
          //Set appropriate genomes
          NEAT::Genome* new_genome = neatPop->organisms[top_genome]->gnome->duplicate(1);
 
+         //TODO: Should all of these take in top_genome_fitness?
          switch(i) {
 
             case 0:
@@ -191,11 +194,12 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
       // std::cout << "gen_n_2 fitness: " << gen_n_2->fitness << std::endl;
       // std::cout << "gen_n_3 fitness: " << gen_n_3->fitness << std::endl;
 
-   //}
+   }
 
-   //if(!HANDWRITTEN_ENVS) test_on_training_set(trial_results, current_gen);
+   //Get training scores together
    test_on_training_set(trial_results, current_gen);
-   //if(!HANDWRITTEN_ENVS) test_on_eval_set(current_gen);
+
+   //Test on test set
    if(!NO_BEARING) test_on_eval_set(current_gen);
 
 }
@@ -321,7 +325,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
       //Here I can include overall winner if it has changed
       std::vector<NEAT::Organism*> genomes_to_be_tested;
 
-      //if(RANDOMLY_GENERATED_ENVS) {
+      if(m_ns == NULL) {
 
          genomes_to_be_tested.push_back(gen_n_1.get());
          genomes_to_be_tested.push_back(gen_n_2.get());
@@ -330,7 +334,22 @@ void DataCollection::test_on_eval_set(int current_gen) {
          genomes_to_be_tested.push_back(gen_nminus1_2.get());
          genomes_to_be_tested.push_back(gen_nminus2_1.get());
 
-      //}
+      } else {
+
+         //For novelty search, test all organisms from the archive that have
+         //not been tested yet
+         std::vector<NoveltyItem>& novelty_archive = m_ns->get_novelty_archive();
+
+         for(unsigned int i = 0; i < novelty_archive.size(); i++) {
+
+            if(!novelty_archive[i].tested_on_eval_set) {
+               genomes_to_be_tested.push_back(novelty_archive[i].org);
+               m_ns->set_tested(i);
+            }
+
+         }
+
+      }
 
       //Test overall_winner if it has changed
       if (overall_winner_change_since_last_eval) {
@@ -341,7 +360,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
       }
 
-      parallel_eval(genomes_to_be_tested);
+      serial_eval(genomes_to_be_tested);
 
       //Collect results from shared memory
       std::vector<std::vector <RunResult> > trial_results;
@@ -355,8 +374,6 @@ void DataCollection::test_on_eval_set(int current_gen) {
          //
          // }
       }
-
-
 
       //Collect data for each run
       for(int i = 0; i < trial_results.size(); i++) {
@@ -429,7 +446,8 @@ void DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to
 
       while(num_organisms_tested < genomes_to_be_tested.size()) {
 
-         //std::cout << "Organisms tested: " << num_organisms_tested << std::endl;
+         if((num_organisms_tested+1) % 25 == 0)
+            std::cout << "   Organisms tested: " << num_organisms_tested << std::endl;
 
          unsigned int num_organisms_left = genomes_to_be_tested.size() - num_organisms_tested;
          unsigned int num_threads_to_spawn = std::min(num_organisms_left, concurentThreadsSupported);
@@ -505,6 +523,42 @@ void DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to
 
 }
 
+void DataCollection::serial_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested) {
+
+   std::cout << "Evaluating on test set.." << std::endl;
+
+   for(int i = 0; i < NUM_TEST_ENVS; i++) {
+
+      bool reset = false;
+
+      if((i+1) % 25 == 0)
+         std::cout << "Evaluating genomes on test env: " << i+1 << std::endl;
+
+      std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
+
+      eg.generate_env(file_name, i+1);
+
+      for(unsigned int j = 0; j < genomes_to_be_tested.size(); j++) {
+
+         std::cout << "   Testing org: " << j << std::endl;
+         // if((j+1) % 25 == 0)
+         //    std::cout << "   Organisms tested: " << j << std::endl;
+
+         if (j==0 && (!NO_BEARING)) reset = true;
+
+         as->run(*genomes_to_be_tested[j], i,
+                 reset, true, NO_BEARING, true, (i+1), eg, j);
+
+         reset = false;
+
+      }
+
+   }
+
+   std::cout << "..finished evaluating on test set" << std::endl;
+
+}
+
 void DataCollection::flush_winners(int current_gen) {
 
    //Flush overall winner every 1/3 of the way through a run with different name
@@ -554,24 +608,48 @@ void DataCollection::flush_winners(int current_gen) {
    //Print out eval winners every time they are evaluated
    if(current_gen % TEST_EVAL_GEN == 0) {
 
-      std::vector<NEAT::Organism*> genomes_to_be_printed;
+      if(m_ns == NULL) {
 
-      genomes_to_be_printed.push_back(gen_n_1.get());
-      genomes_to_be_printed.push_back(gen_n_2.get());
-      genomes_to_be_printed.push_back(gen_n_3.get());
-      genomes_to_be_printed.push_back(gen_nminus1_1.get());
-      genomes_to_be_printed.push_back(gen_nminus1_2.get());
-      genomes_to_be_printed.push_back(gen_nminus2_1.get());
+         std::vector<NEAT::Organism*> genomes_to_be_printed;
 
-      for(int i = 0; i < genomes_to_be_printed.size(); i++) {
+         genomes_to_be_printed.push_back(gen_n_1.get());
+         genomes_to_be_printed.push_back(gen_n_2.get());
+         genomes_to_be_printed.push_back(gen_n_3.get());
+         genomes_to_be_printed.push_back(gen_nminus1_1.get());
+         genomes_to_be_printed.push_back(gen_nminus1_2.get());
+         genomes_to_be_printed.push_back(gen_nminus2_1.get());
 
-         std::stringstream outfile, outfileOrg;
+         for(int i = 0; i < genomes_to_be_printed.size(); i++) {
 
-         outfile << "../winners/eval_winners/eval_winner_" << i << "_at_gen_" << current_gen;
-         outfileOrg << "../winners/eval_winners/eval_winner_org_" << i << "_at_gen_" << current_gen;
+            std::stringstream outfile, outfileOrg;
 
-         genomes_to_be_printed[i]->gnome->print_to_filename(outfile.str().c_str());
-         genomes_to_be_printed[i]->print_to_file(outfileOrg.str().c_str());
+            outfile << "../winners/eval_winners/eval_winner_" << i << "_at_gen_" << current_gen;
+            outfileOrg << "../winners/eval_winners/eval_winner_org_" << i << "_at_gen_" << current_gen;
+
+            genomes_to_be_printed[i]->gnome->print_to_filename(outfile.str().c_str());
+            genomes_to_be_printed[i]->print_to_file(outfileOrg.str().c_str());
+
+         }
+
+      } else {
+
+         std::vector<NoveltyItem>& novelty_archive = m_ns->get_novelty_archive();
+
+         for(unsigned int i = 0; i < novelty_archive.size(); i++) {
+
+            if(!novelty_archive[i].printed) {
+
+               std::stringstream outfile, outfileOrg;
+
+               outfile << "../winners/eval_winners/eval_winner_ns_" << i << "_at_gen_" << current_gen;
+               outfileOrg << "../winners/eval_winners/eval_winner_org_ns_" << i << "_at_gen_" << current_gen;
+
+               novelty_archive[i].org->gnome->print_to_filename(outfile.str().c_str());
+               novelty_archive[i].org->print_to_file(outfileOrg.str().c_str());
+
+            }
+
+         }
 
       }
 
