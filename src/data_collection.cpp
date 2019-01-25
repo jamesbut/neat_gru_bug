@@ -351,10 +351,8 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
       }
 
-      //TODO: Possibly remove this for NS
-
       //Test overall_winner if it has changed
-      if (overall_winner_change_since_last_eval) {
+      if (overall_winner_change_since_last_eval && m_ns == NULL) {
 
          /*Add it to be tested*/
          genomes_to_be_tested.push_back(overall_winner.get());
@@ -451,10 +449,12 @@ std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::v
       unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
       unsigned int num_organisms_tested = 0;
 
+      std::cout << "Genomes to be tested: " << genomes_to_be_tested.size() << std::endl;
+
       while(num_organisms_tested < genomes_to_be_tested.size()) {
 
          if((num_organisms_tested+1) % 25 == 0)
-            std::cout << "   Organisms tested: " << num_organisms_tested << std::endl;
+            std::cout << "   Organisms tested: " << num_organisms_tested+1 << std::endl;
 
          unsigned int num_organisms_left = genomes_to_be_tested.size() - num_organisms_tested;
          unsigned int num_threads_to_spawn = std::min(num_organisms_left, concurentThreadsSupported);
@@ -464,6 +464,8 @@ std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::v
          for(size_t k = 0; k < num_threads_to_spawn; k++) {
 
             num_organisms_tested++;
+
+            std::cout << "Num orgs tested: " << num_organisms_tested-1 << std::endl;
 
             //Spawn slaves
             slave_PIDs.push_back(::fork());
@@ -563,7 +565,7 @@ std::vector<std::vector <RunResult> > DataCollection::serial_eval(const std::vec
 
       bool reset = false;
 
-      //if((i+1) % 25 == 0)
+      if((i) % 10 == 0)
          std::cout << "Evaluating genomes on test env: " << i+1 << std::endl;
 
       std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
@@ -572,11 +574,10 @@ std::vector<std::vector <RunResult> > DataCollection::serial_eval(const std::vec
 
       for(unsigned int j = 0; j < genomes_to_be_tested.size(); j++) {
 
-         std::cout << "   Testing org: " << j << std::endl;
          // if((j+1) % 25 == 0)
-         //    std::cout << "   Organisms tested: " << j << std::endl;
+         //    std::cout << "   Organisms tested: " << j+1 << std::endl;
 
-         std::cout << "   Org genome ID: " << genomes_to_be_tested[j]->gnome->genome_id << std::endl;
+         //std::cout << "   Org genome ID: " << genomes_to_be_tested[j]->gnome->genome_id << std::endl;
          //std::cout << "Org genome ID: " << genomes_to_be_tested[j]->gnome->genome_id << std::endl;
 
          if (j==0 && (!NO_BEARING)) reset = true;

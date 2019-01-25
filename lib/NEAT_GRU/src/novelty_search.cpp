@@ -48,7 +48,7 @@ void NoveltySearch::evaluate_population(NEAT::Population& pop) {
    //    // for(unsigned int j = 0; j < bcs[i].size(); j++) {
    //    //    std::cout << bcs[i][j] << ", " << std::endl;
    //    // }
-   //    std::cout << novelties[i] << std::endl;
+   //    std::cout << gen_novelties[i] << std::endl;
    //    std::cout << "----------" << std::endl;
    // }
 
@@ -231,6 +231,7 @@ void NoveltySearch::add_to_archive(NEAT::Organism& org, double novelty, std::vec
    NoveltyItem new_item;
 
    new_item.org = new NEAT::Organism(org);
+   new_item.org->update_phenotype();
    new_item.bc = bc;
    new_item.novelty = novelty;
    new_item.tested_on_eval_set = false;
@@ -245,6 +246,7 @@ void NoveltySearch::add_to_archive(NEAT::Organism& org, std::vector<double> bc) 
    NoveltyItem new_item;
 
    new_item.org = new NEAT::Organism(org);
+   new_item.org->update_phenotype();
    new_item.bc = bc;
    new_item.novelty = -1.0;
    new_item.tested_on_eval_set = false;

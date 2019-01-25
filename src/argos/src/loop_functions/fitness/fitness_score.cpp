@@ -172,7 +172,7 @@ double FitnessScore::calculate_fitness() {
    /*   F8   c=0.5 */
    //If the robot hits the target, reward with a function of path length
    // std::cout << "Hit tower: " << hit_tower << std::endl;
-   std::cout << "Traj per astar: " << traj_per_astar << std::endl;
+   //std::cout << "Traj per astar: " << traj_per_astar << std::endl;
    fitness_score = hit_tower ? (1 / pow(traj_per_astar, 0.5)) : 0;
    //fitness_score = hit_tower ? (-0.25*traj_per_astar + 1.25) : 0;
 
