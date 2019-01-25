@@ -230,8 +230,11 @@ void NoveltySearch::add_to_archive(NEAT::Organism& org, double novelty, std::vec
 
    NoveltyItem new_item;
 
-   new_item.org = new NEAT::Organism(org);
-   new_item.org->update_phenotype();
+   NEAT::Genome* new_genome = org.gnome->duplicate(org.gnome->genome_id);
+   new_item.org = new NEAT::Organism(org.fitness, new_genome, 1);
+
+   //new_item.org = new NEAT::Organism(org);
+   //new_item.org->update_phenotype();
    new_item.bc = bc;
    new_item.novelty = novelty;
    new_item.tested_on_eval_set = false;
@@ -245,8 +248,11 @@ void NoveltySearch::add_to_archive(NEAT::Organism& org, std::vector<double> bc) 
 
    NoveltyItem new_item;
 
-   new_item.org = new NEAT::Organism(org);
-   new_item.org->update_phenotype();
+   NEAT::Genome* new_genome = org.gnome->duplicate(org.gnome->genome_id);
+   new_item.org = new NEAT::Organism(org.fitness, new_genome, 1);
+
+   // new_item.org = new NEAT::Organism(org);
+   // new_item.org->update_phenotype();
    new_item.bc = bc;
    new_item.novelty = -1.0;
    new_item.tested_on_eval_set = false;
