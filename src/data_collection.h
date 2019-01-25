@@ -21,7 +21,8 @@ public:
                   const int NUM_TEST_ENVS,
                   const int FLUSH_EVERY,
                   const std::string TEST_SET_PATH,
-                  ARGoS_simulation* argos_simulation);
+                  ARGoS_simulation* argos_simulation,
+                  const int POP_SIZE);
 
    void collect_scores(const std::vector<std::vector <RunResult> >& trial_results,
                        NEAT::Population* neatPop,
@@ -48,6 +49,7 @@ private:
    const int FLUSH_EVERY;
    const std::string TEST_SET_PATH;
    const bool NASH_AVERAGING;
+   const int POP_SIZE;
 
    std::unique_ptr<NEAT::Organism> overall_winner;
 

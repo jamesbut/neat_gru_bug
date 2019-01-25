@@ -91,7 +91,7 @@ GA::GA(std::string neat_param_file, const bool no_bearing) :
    //Data collection
    data_collection = new DataCollection(RANDOMLY_GENERATED_ENVS, NO_BEARING, ns,
                                         TEST_EVAL_GEN, NUM_TEST_ENVS, FLUSH_EVERY,
-                                        TEST_SET_PATH, as);
+                                        TEST_SET_PATH, as, neatPop->organisms.size());
 
    //Remove all score files
    system("exec rm ../scores/eval_scores/*");

@@ -15,7 +15,8 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
                                const int NUM_TEST_ENVS,
                                const int FLUSH_EVERY,
                                const std::string TEST_SET_PATH,
-                               ARGoS_simulation* argos_simulation) :
+                               ARGoS_simulation* argos_simulation,
+                               const int POP_SIZE) :
    RANDOMLY_GENERATED_ENVS(RANDOMLY_GENERATED_ENVS),
    NO_BEARING(NO_BEARING),
    m_ns(ns),
@@ -24,11 +25,17 @@ DataCollection::DataCollection(const bool RANDOMLY_GENERATED_ENVS,
    FLUSH_EVERY(FLUSH_EVERY),
    TEST_SET_PATH(TEST_SET_PATH),
    NASH_AVERAGING(false),
+   POP_SIZE(POP_SIZE),
    as(argos_simulation),
    eg() {
 
       //Create shared memory block for master and slaves
-      const int MAX_NUM_GENOMES_TO_TEST = 7;
+      int MAX_NUM_GENOMES_TO_TEST;
+
+      if(m_ns == NULL) MAX_NUM_GENOMES_TO_TEST = 7;
+      else MAX_NUM_GENOMES_TO_TEST = POP_SIZE;    //NS will never test more than POP_SIZE
+                                                  //amount at any one time
+
       shared_mem = new SharedMem(MAX_NUM_GENOMES_TO_TEST, NUM_TEST_ENVS, "DC");
 
    }
@@ -360,8 +367,8 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
       }
 
-      std::vector<std::vector <RunResult> > trial_results = serial_eval(genomes_to_be_tested);
-      //std::vector<std::vector <RunResult> > trial_results = parallel_eval(genomes_to_be_tested);
+      //std::vector<std::vector <RunResult> > trial_results = serial_eval(genomes_to_be_tested);
+      std::vector<std::vector <RunResult> > trial_results = parallel_eval(genomes_to_be_tested);
 
       //Collect results from shared memory
       // std::vector<std::vector <RunResult> > trial_results;
@@ -439,7 +446,7 @@ std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::v
 
    for(int i = 0; i < NUM_TEST_ENVS; i++) {
 
-      if((i+1) % 25 == 0)
+      if((i) % 10 == 0)
          std::cout << "Evaluating genomes on test env: " << i+1 << std::endl;
 
       std::string file_name = TEST_SET_PATH + std::to_string(i+1) + ".png";
@@ -449,12 +456,18 @@ std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::v
       unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
       unsigned int num_organisms_tested = 0;
 
-      std::cout << "Genomes to be tested: " << genomes_to_be_tested.size() << std::endl;
+      //std::cout << "Genomes to be tested: " << genomes_to_be_tested.size() << std::endl;
+
+      //Shared memory won't be big enough if this is the case
+      if(genomes_to_be_tested.size() > POP_SIZE) {
+         std::cout << "Shared mem not large enough for eval set! " << std::endl;
+         exit(EXIT_FAILURE);
+      }
 
       while(num_organisms_tested < genomes_to_be_tested.size()) {
 
-         if((num_organisms_tested+1) % 25 == 0)
-            std::cout << "   Organisms tested: " << num_organisms_tested+1 << std::endl;
+         //if((num_organisms_tested+1) % 25 == 0)
+            //std::cout << "   Organisms tested: " << num_organisms_tested+1 << std::endl;
 
          unsigned int num_organisms_left = genomes_to_be_tested.size() - num_organisms_tested;
          unsigned int num_threads_to_spawn = std::min(num_organisms_left, concurentThreadsSupported);
@@ -464,8 +477,6 @@ std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::v
          for(size_t k = 0; k < num_threads_to_spawn; k++) {
 
             num_organisms_tested++;
-
-            std::cout << "Num orgs tested: " << num_organisms_tested-1 << std::endl;
 
             //Spawn slaves
             slave_PIDs.push_back(::fork());
