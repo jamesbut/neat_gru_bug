@@ -36,6 +36,7 @@ public:
    inline std::vector<NoveltyItem>& get_novelty_archive() {return novelty_archive;};
    inline double get_gen_novelty(int org_num) {return gen_novelties[org_num];};
    inline void set_tested(int archive_num) {novelty_archive[archive_num].tested_on_eval_set = true;};
+   inline void set_printed(int archive_num) {novelty_archive[archive_num].printed = true;}; 
 
 private:
 

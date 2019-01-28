@@ -351,7 +351,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
             if(!novelty_archive[i].tested_on_eval_set) {
                genomes_to_be_tested.push_back(novelty_archive[i].org);
-               m_ns->set_tested(i);
+               //m_ns->set_tested(i);
             }
 
          }
@@ -409,7 +409,33 @@ void DataCollection::test_on_eval_set(int current_gen) {
          std::ofstream outfile;
 
          std::stringstream file_name;
-         file_name << "../scores/eval_scores/eval_scores_" << i << ".txt";
+
+         if(m_ns == NULL) {
+
+            file_name << "../scores/eval_scores/eval_scores_" << i << ".txt";
+
+         } else {
+
+            //Need to see what genomes have just been tested so the file can
+            //be named appropriately
+
+            std::vector<NoveltyItem>& novelty_archive = m_ns->get_novelty_archive();
+
+            for(unsigned int j = 0; j < novelty_archive.size(); j++) {
+
+               if(!novelty_archive[j].tested_on_eval_set) {
+
+                  file_name << "../scores/eval_scores/eval_scores_" << j << ".txt";
+                  m_ns->set_tested(j);
+                  break;
+
+               }
+
+            }
+
+         }
+
+         std::cout << mean_traj_per_astar << std::endl;
 
          outfile.open(file_name.str(), std::ios_base::app);
          outfile << current_gen << "," << num_finishes << "," << mean_traj_per_astar;
@@ -424,12 +450,6 @@ void DataCollection::test_on_eval_set(int current_gen) {
          double mean_indv_fitness = std::accumulate(indv_fitnesses.begin(), indv_fitnesses.end(), 0.0) / indv_fitnesses.size();
 
          outfile << "," << mean_indv_fitness;
-
-         // for(int j = 0; j < trial_results[i].size(); j++) {
-         //
-         //    outfile << "," << trial_results[i][j].fitness;
-         //
-         // }
 
          outfile << "\n";
          outfile.close();
@@ -695,6 +715,8 @@ void DataCollection::flush_winners(int current_gen) {
 
                novelty_archive[i].org->gnome->print_to_filename(outfile.str().c_str());
                novelty_archive[i].org->print_to_file(outfileOrg.str().c_str());
+
+               m_ns->set_printed(i);
 
             }
 
