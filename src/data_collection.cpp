@@ -435,7 +435,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
 
          }
 
-         std::cout << mean_traj_per_astar << std::endl;
+         //std::cout << mean_traj_per_astar << std::endl;
 
          outfile.open(file_name.str(), std::ios_base::app);
          outfile << current_gen << "," << num_finishes << "," << mean_traj_per_astar;
@@ -463,6 +463,7 @@ void DataCollection::test_on_eval_set(int current_gen) {
 std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested) {
 
    std::cout << "Evaluating on test set.." << std::endl;
+   std::cout << "Genomes to be tested: " << genomes_to_be_tested.size() << std::endl;
 
    for(int i = 0; i < NUM_TEST_ENVS; i++) {
 
@@ -475,8 +476,6 @@ std::vector<std::vector <RunResult> > DataCollection::parallel_eval(const std::v
 
       unsigned concurentThreadsSupported = std::thread::hardware_concurrency();
       unsigned int num_organisms_tested = 0;
-
-      //std::cout << "Genomes to be tested: " << genomes_to_be_tested.size() << std::endl;
 
       //Shared memory won't be big enough if this is the case
       if(genomes_to_be_tested.size() > POP_SIZE) {

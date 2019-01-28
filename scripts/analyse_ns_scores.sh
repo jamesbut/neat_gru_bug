@@ -18,7 +18,7 @@ for file_name in $EVAL_DIR; do
       #    echo $i
       # done
       #echo "-----"
-      
+
       gen_num=${LINE[0]}
       num_finishes=${LINE[1]}
       mean_traj_per_astar=${LINE[2]}
@@ -28,7 +28,7 @@ for file_name in $EVAL_DIR; do
       #echo "-----"
 
       if [[ $num_finishes -gt 0 ]]; then
-         echo $file_num
+         echo 'File num: '$file_num' Num finishes: '$num_finishes
       fi
 
    fi
