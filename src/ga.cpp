@@ -23,7 +23,7 @@ GA::GA(std::string neat_param_file, const bool no_bearing) :
    RANDOMLY_GENERATED_ENVS(false),
    NOVELTY_SEARCH(false),
    ns(NULL),
-   TEST_EVAL_GEN(1),
+   TEST_EVAL_GEN(25),
    TEST_SET_PATH("../argos_params/environments/kim_envs/rand_env_"),
    //TEST_SET_PATH("../argos_params/environments/training_set/ts_"),
    //NUM_TEST_ENVS(2),
