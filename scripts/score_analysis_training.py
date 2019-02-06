@@ -36,8 +36,8 @@ DPI = 96
 
 #Save figure to file
 figure.set_size_inches(pixel_width/DPI, pixel_height/DPI)
-plt.savefig('../scores/training_scores/archive_graphs/' + dir_name + '/' + dir_name + '_scores_' + file_num + '.png', bbox_inches='tight')
-#plt.show()
+#plt.savefig('../scores/training_scores/archive_graphs/' + dir_name + '/' + dir_name + '_scores_' + file_num + '.png', bbox_inches='tight')
+plt.show()
 
 plt.gcf().clear()
 
@@ -47,5 +47,5 @@ plt.ylabel('Num Finishes')
 
 #Save figure to file
 figure.set_size_inches(pixel_width/DPI, pixel_height/DPI)
-plt.savefig('../scores/training_scores/archive_graphs/' + dir_name + '/' + dir_name + '_numfinishes_' + file_num + '.png', bbox_inches='tight')
-#plt.show()
+#plt.savefig('../scores/training_scores/archive_graphs/' + dir_name + '/' + dir_name + '_numfinishes_' + file_num + '.png', bbox_inches='tight')
+plt.show()
