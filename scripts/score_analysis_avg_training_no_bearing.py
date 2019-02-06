@@ -8,9 +8,9 @@ import pylab
 dir_name_gru = 'ap_4_nb'
 dir_name_non_gru = 'ap_5_nb'
 file_num_start_gru = 1
-file_num_end_gru = 10
+file_num_end_gru = 11
 file_num_start_non_gru = 1
-file_num_end_non_gru = 2
+file_num_end_non_gru = 11
 
 train_file_data_gru = []
 
