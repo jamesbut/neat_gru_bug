@@ -491,7 +491,7 @@ bool Population::epoch(int generation) {
 	//Flag the lowest performing species over age 20 every 30 generations
 	//NOTE: THIS IS FOR COMPETITIVE COEVOLUTION STAGNATION DETECTION
 
-	//James - I took this out
+	//Me - I took this out
 	// curspecies=sorted_species.end();
 	// curspecies--;
 	// while((curspecies!=sorted_species.begin())&&
@@ -526,7 +526,7 @@ bool Population::epoch(int generation) {
 	std::cout<<"Generation "<<generation<<": "<<"overall_average = "<<overall_average<<std::endl;
 
 	//Now compute expected number of offspring for each individual organism
-	//James - pg 130. EvComp De Jong: this looks like roulette wheel selection to me
+	//Me - pg 130. EvComp De Jong: this looks like roulette wheel selection to me
 	//But then again is the expected number of offspring is very similar between species
 	//it wont be much selection at all (which is what I have observed)
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
@@ -567,7 +567,7 @@ bool Population::epoch(int generation) {
 		//Then the whole population plummets in fitness
 		//If the average fitness is allowed to hit 0, then we no longer have
 		//an average we can use to assign offspring.
-		//James - I think this is rare.
+		//Me - I think this is rare.
 		if (final_expected<total_organisms) {
 			std::cout<<"Population died!"<<std::endl;
 			//cin>>pause;
@@ -608,10 +608,10 @@ bool Population::epoch(int generation) {
 
 	//Check for stagnation- if there is stagnation, perform delta-coding
 	//This is were the half population comes from
-	/* James - It can perform delta coding without crashing, but more often than not it crashes
+	/* Me - It can perform delta coding without crashing, but more often than not it crashes
 	   It is also fine when the GRU cell is a hidden node just not when it is an output node */
-	/* James - it seems here that all but the 2 best species are killed off */
-	// James - turned off delta coding for now.
+	/* Me - it seems here that all but the 2 best species are killed off */
+	// Me - turned off delta coding for now.
 	if (highest_last_changed>=NEAT::dropoff_age+5 && false) {
 
 		std::cout<<"PERFORMING DELTA CODING"<<std::endl;
@@ -625,13 +625,13 @@ bool Population::epoch(int generation) {
 		//Species sorted by maximum fitness
 		curspecies=sorted_species.begin();
 
-		(*(((*curspecies)->organisms).begin()))->super_champ_offspring=half_pop;	//James - I am assuming best organism of best species
+		(*(((*curspecies)->organisms).begin()))->super_champ_offspring=half_pop;	//Me - I am assuming best organism of best species
 		(*curspecies)->expected_offspring=half_pop;
 		(*curspecies)->age_of_last_improvement=(*curspecies)->age;
 
-		++curspecies;	//James - Second best species?
+		++curspecies;	//Me - Second best species?
 
-		if (curspecies!=sorted_species.end()) {   //James - Assuming there is more than 2 species?
+		if (curspecies!=sorted_species.end()) {   //Me - Assuming there is more than 2 species?
 	      //Always seems to go here
 			(*(((*curspecies)->organisms).begin()))->super_champ_offspring=NEAT::pop_size-half_pop;
 			(*curspecies)->expected_offspring=NEAT::pop_size-half_pop;
@@ -655,7 +655,7 @@ bool Population::epoch(int generation) {
 	//STOLEN BABIES:  The system can take expected offspring away from
 	//  worse species and give them to superior species depending on
 	//  the system parameter babies_stolen (when babies_stolen > 0)
-	/* James - I don't have any stolen babies so this is never called */
+	/* Me - I don't have any stolen babies so this is never called */
 	else if (NEAT::babies_stolen>0) {
 		//Take away a constant number of expected offspring from the worst few species
 		std::cout << "STEALING BABIES" << std::endl;

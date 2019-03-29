@@ -230,7 +230,7 @@ void NNode::flushback() {
 			last_activation=0;
 			last_activation2=0;
 
-			active_flag = false; //JAMES - ADDED BY ME!
+			active_flag = false; //Me - ADDED BY ME!
 		}
 
 		//Flush back recursively
@@ -248,7 +248,7 @@ void NNode::flushback() {
 		last_activation=0;
 		last_activation2=0;
 
-		active_flag = false; //JAMES - ADDED BY ME!
+		active_flag = false; //Me - ADDED BY ME!
 
 	}
 
@@ -425,13 +425,13 @@ int NNode::depth(int d, Network *mynet) {
   else {
 
     for(curlink=innodes.begin();curlink!=innodes.end();++curlink) {
-		if((*curlink)->is_recurrent==false) {          /* James - I added this to deal with networks with loops, seems to work, might cause prblems later though  */
+		if((*curlink)->is_recurrent==false) {          /* Me - I added this to deal with networks with loops, seems to work, might cause prblems later though  */
       	cur_depth=((*curlink)->in_node)->depth(d+1,mynet);
       	if (cur_depth>max) max=cur_depth;
 		}
     }
 	// 	curlink=innodes.begin()+2;
-	//   if((*curlink)->is_recurrent==false) {          /* James - I added this to deal with networks with loops, seems to work, might cause problems later though  */
+	//   if((*curlink)->is_recurrent==false) {          /* Me - I added this to deal with networks with loops, seems to work, might cause problems later though  */
 	// 	  cur_depth=((*curlink)->in_node)->depth(d+1,mynet);
 	// 	  if (cur_depth>max) max=cur_depth;
 	//   }

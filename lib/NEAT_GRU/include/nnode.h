@@ -181,7 +181,7 @@ namespace NEAT {
 		//Find the greatest depth starting from this neuron at depth d
 		int depth(int d,Network *mynet);
 
-		/* James - Used to activate GRU method in subclass */
+		/* Me - Used to activate GRU method in subclass */
 		virtual void activate_gru(std::vector<double> inputs) {std::cout << "Orig node acitvated.. :(" << std::endl;};
 		virtual void activate_gru_old(std::vector<double> inputs) {std::cout << "Orig node acitvated.. :(" << std::endl;};
 

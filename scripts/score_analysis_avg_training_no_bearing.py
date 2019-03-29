@@ -12,6 +12,8 @@ file_num_end_gru = 11
 file_num_start_non_gru = 1
 file_num_end_non_gru = 11
 
+NUM_GENS_DISP = 3000
+
 train_file_data_gru = []
 
 for i in range(file_num_start_gru, file_num_end_gru):
@@ -23,26 +25,26 @@ for i in range(file_num_start_non_gru, file_num_end_non_gru):
     train_file_data_non_gru.append(genfromtxt('../scores/training_scores/' + dir_name_non_gru + '/t_' + str(i) + '.txt', delimiter=','))
 
 #Get data
-train_generations = numpy.arange(1,5001)
+train_generations = numpy.arange(1,NUM_GENS_DISP+1)
 
 mod_train_file_data_gru = []
 
 #Append final number on those that never reached 5000 generations
 for i in range(0, len(train_file_data_gru)):
-    zero = numpy.zeros((5000, 7))
-    zero[:min(5000, len(train_file_data_gru[i])),:] = train_file_data_gru[i][:min(5000, len(train_file_data_gru[i])),:]
+    zero = numpy.zeros((NUM_GENS_DISP, 7))
+    zero[:min(NUM_GENS_DISP, len(train_file_data_gru[i])),:] = train_file_data_gru[i][:min(NUM_GENS_DISP, len(train_file_data_gru[i])),:]
     last = train_file_data_gru[i][-1]
-    for j in range(len(train_file_data_gru[i]), 5000):
+    for j in range(len(train_file_data_gru[i]), NUM_GENS_DISP):
         zero[j,:] = last
     mod_train_file_data_gru.append(zero)
 
 mod_train_file_data_non_gru = []
 
 for i in range(0, len(train_file_data_non_gru)):
-    zero = numpy.zeros((5000, 7))
-    zero[:min(5000, len(train_file_data_non_gru[i])),:] = train_file_data_non_gru[i][:min(5000, len(train_file_data_non_gru[i])),:]
+    zero = numpy.zeros((NUM_GENS_DISP, 7))
+    zero[:min(NUM_GENS_DISP, len(train_file_data_non_gru[i])),:] = train_file_data_non_gru[i][:min(NUM_GENS_DISP, len(train_file_data_non_gru[i])),:]
     last = train_file_data_non_gru[i][-1]
-    for j in range(len(train_file_data_non_gru[i]), 5000):
+    for j in range(len(train_file_data_non_gru[i]), NUM_GENS_DISP):
         zero[j,:] = last
     mod_train_file_data_non_gru.append(zero)
 
@@ -132,11 +134,11 @@ for i in range(0, len(max_scores_data_non_gru[0])):
 #
 #     avg_mean_scores_non_gru.append(sum(max_scores_per_gen) / len(max_scores_per_gen))
 
-plt.rcParams.update({'font.size': 22})
-plt.rc('legend', fontsize=20)
+plt.rcParams.update({'font.size': 26})
+plt.rc('legend', fontsize=24)
 
-plt.plot(train_generations, avg_max_scores_gru, label='Max scores GRU')
-plt.plot(train_generations, avg_max_scores_non_gru, label='Max scores non-GRU')
+plt.plot(train_generations, avg_max_scores_gru, label='Max scores GRU', linewidth=3)
+plt.plot(train_generations, avg_max_scores_non_gru, label='Max scores non-GRU', linewidth=3)
 # plt.plot(train_generations, avg_mean_scores_gru, label='Mean scores GRU')
 # # plt.plot(train_generations, avg_mean_scores_non_gru, label='Mean scores non-GRU')
 pylab.legend(loc='upper left')

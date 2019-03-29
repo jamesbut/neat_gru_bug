@@ -153,7 +153,7 @@ void Gene::print_to_file(std::ofstream &outFile) {
    // }
 	//std::cout << lnk->weight << std::endl;
 
-  //James - added to preserve precision when printing to file
+  //Me - added to preserve precision when printing to file
   if(!PRE_PRECISION_VERSION)
   	outFile<<std::setprecision(std::numeric_limits<double>::max_digits10);
 
@@ -173,7 +173,7 @@ void Gene::print_to_file(std::ofstream &outFile) {
 
 void Gene::print_to_file(std::ostream &outFile) {
 
-	//James - added to preserve precision when printing to file
+	//Me - added to preserve precision when printing to file
    if(!PRE_PRECISION_VERSION)
    	outFile<<std::setprecision(std::numeric_limits<double>::max_digits10);
 

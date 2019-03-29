@@ -125,7 +125,7 @@ namespace NEAT {
 		// Add Gaussian noise to linkweights either GAUSSIAN or COLDGAUSSIAN (from zero)
 		void mutate_link_weights(double power,double rate,mutator mut_type);
 
-		/* James - mutate GRU link weights */
+		/* Me - mutate GRU link weights */
 		void mutate_gru_link_weights(double power, double rate);
 
 		// toggle genes on or off
@@ -142,7 +142,7 @@ namespace NEAT {
 		// Mutate genome by adding a node respresentation
 		bool mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,double &curinnov);
 
-		/* James - Mutate in a GRU node */
+		/* Me - Mutate in a GRU node */
 		bool mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_id,double &curinnov);
 
 		// Mutate the genome by adding a new link between 2 random NNodes

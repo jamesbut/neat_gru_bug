@@ -100,6 +100,14 @@ end
 
 %Turn back on when doing individual runs analyses again
 
+fid = fopen('ibug_lengths','wt');
+
+if fid > 0
+    fprintf(fid, '%f\n' ,path_percentages);
+    fclose(fid)
+end
+
+disp(path_percentages)
 disp(mean(path_percentages))
 disp(median(path_percentages))
 

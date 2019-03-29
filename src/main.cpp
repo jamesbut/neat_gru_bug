@@ -14,7 +14,7 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using namespace std::literals::chrono_literals;
 
-const bool NO_BEARING = true;
+const bool NO_BEARING = false;
 
 int main(int argc, char *argv[]) {
 

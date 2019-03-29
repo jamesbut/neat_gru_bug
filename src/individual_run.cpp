@@ -2,7 +2,7 @@
 
 IndividualRun::IndividualRun(const std::string& gf, const bool handwritten) :
    ARGOS_FILE_NAME("../argos_params/no_walls.argos"),
-   ARGOS_FILE_NAME_10("../argos_params/no_walls_10.argos"),
+   ARGOS_FILE_NAME_10("../argos_params/no_walls_10_vis.argos"),
    eg(),
    NUM_RUNS(handwritten ? 5 : 209),
    RANDOM_ENVS(false),

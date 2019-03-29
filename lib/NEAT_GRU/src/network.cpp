@@ -125,7 +125,7 @@ void Network::flush_check() {
 
 // If all output are not active then return true
 /*
-   James - This tests that the activation count is not zero.
+   Me - This tests that the activation count is not zero.
    However this is never really the case, even for output nodes
    that the input has not travelled to yet - I think.
    Which means the network ALWAYS travels time step by time step,
@@ -184,7 +184,7 @@ bool Network::activate() {
 
 	onetime=false;
    //std::cout << "Outputs Off: " << outputsoff() << std::endl;
-   /* James - outputs are never off according to their metric */
+   /* Me - outputs are never off according to their metric */
 	while(outputsoff()||!onetime) {
       //std::cout << "Outputs Off: " << outputsoff() << std::endl;
 		++abortcount;
@@ -232,7 +232,7 @@ bool Network::activate() {
             std::vector<double> link_inputs;
             //std::cout << "Incoming links: " << (*curnode)->incoming.size() << std::endl;         //Incoming links is 1
             for(curlink=((*curnode)->incoming).begin();curlink!=((*curnode)->incoming).end();++curlink) {
-					//Handle possible time delays     *James - keep this in because I don't know what it does :/
+					//Handle possible time delays     *Me - keep this in because I don't know what it does :/
 					if (!((*curlink)->time_delay)) {
 						link_inputs.push_back(((*curlink)->in_node)->get_active_out());
                   //std::cout << "GRU: " << (*curlink)->weight << " * " << ((*curlink)->in_node)->get_active_out() << std::endl;
@@ -274,7 +274,7 @@ bool Network::activate() {
 					}
 					else {
 						//Now run the net activation through an activation function
-						if ((*curnode)->ftype==SIGMOID&&(((*curnode)->type)!=GRU))     /* James - just don't sigmoid here for GRU*/
+						if ((*curnode)->ftype==SIGMOID&&(((*curnode)->type)!=GRU))     /* Me - just don't sigmoid here for GRU*/
 							(*curnode)->activation=NEAT::fsigmoid((*curnode)->activesum,4.924273,2.4621365);  //Sigmoidal activation- see comments under fsigmoid
                      //(*curnode)->activation=(*curnode)->activesum;
 					}

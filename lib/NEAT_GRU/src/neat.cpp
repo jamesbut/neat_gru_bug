@@ -242,7 +242,7 @@ bool NEAT::load_neat_params(const char *filename, bool output) {
     paramFile>>curword;
     paramFile>>NEAT::mutate_link_weights_prob;
 
-    // James Added
+    // Me Added
     // If mutate_gene_rate_prob is there, then read
     // and then read another for mutate_gru_link_weights_prob
     // Otherwise set the value for mutate_gru_link_weights_prob

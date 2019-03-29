@@ -653,7 +653,7 @@ Genome::~Genome() {
 
 }
 
-/* James - I don't know why creating new nodes and links in this method is necessary */
+/* Me - I don't know why creating new nodes and links in this method is necessary */
 Network *Genome::genesis(int id) {
 	std::vector<NNode*>::iterator curnode;
 	std::vector<Gene*>::iterator curgene;
@@ -1082,7 +1082,7 @@ Genome *Genome::duplicate(int new_id) {
 	return newgenome;
 
 }
-/* James - I assume all these trait methods are redundant given that Ken didn't
+/* Me - I assume all these trait methods are redundant given that Ken didn't
 	use them in the end */
 void Genome::mutate_random_trait() {
 	std::vector<Trait*>::iterator thetrait; //Trait to be mutated
@@ -1528,7 +1528,7 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 			//This old totally random selection is bad- splitting
 			//inside something recently splitted adds little power
 			//to the system (should use a gaussian if doing it this way)
-			genenum=randint(0,genes.size()-1);		/* James - choose random gene to split */
+			genenum=randint(0,genes.size()-1);		/* Me - choose random gene to split */
 
 			//find the gene
 			thegene=genes.begin();
@@ -1678,7 +1678,7 @@ bool Genome::mutate_add_node(std::vector<Innovation*> &innovs,int &curnode_id,do
 
 }
 
-/* James - Mutate in a GRU node */
+/* Me - Mutate in a GRU node */
 //TODO: TEST THIS!!
 bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_id,double &curinnov) {
 	std::vector<Gene*>::iterator thegene;  //random gene containing the original link
@@ -1710,7 +1710,7 @@ bool Genome::mutate_add_gru_node(std::vector<Innovation*> &innovs,int &curnode_i
 	//add node method but I removed all the commented out code)
 	while ((trycount<20)&&(!found)) {
 
-		genenum=randint(0,genes.size()-1);		/* James - choose random gene to split */
+		genenum=randint(0,genes.size()-1);		/* Me - choose random gene to split */
 
 		//find the gene
 		thegene=genes.begin();
@@ -1930,7 +1930,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 
 			}
 			else {
-				// James - this seems to me completely like not recursion at all,
+				// Me - this seems to me completely like not recursion at all,
 				// I wonder why this just isn't in the else of if(do_recur).
 
 				//Choose random nodenums
@@ -2051,7 +2051,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 					count=0;
 					recurflag=phenotype->is_recur(nodep1->analogue,nodep2->analogue,count,thresh);
 
-					/* Right James - you are about to change the integrity of NEAT here
+					/* Right Me - you are about to change the integrity of NEAT here
 					   The nodes below should not refer to 'type' but 'gen_node_label'
 						Also if you are checking that outputs don't come OUT of a output
 						node, then you don't need to check the out node of the link as well */
@@ -2091,7 +2091,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 		theinnov=innovs.begin();
 
 		//If it was supposed to be recurrent, make sure it gets labeled that way
-		// James - it should be...
+		// Me - it should be...
 		if (do_recur) recurflag=1;
 
 		done=false;
@@ -2163,7 +2163,7 @@ bool Genome::mutate_add_link(std::vector<Innovation*> &innovs,double &curinnov,i
 					newgene=new Gene(((thetrait[(*theinnov)->new_traitnum])),(*theinnov)->new_weight,nodep1,nodep2,recurflag,(*theinnov)->innovation_num1,0);
 					//std::cout << "Innov:" << std::endl;
 					//std::cout << "Added gene: " << nodep1->node_id << " " << nodep2->node_id << std::endl;
-					/* James - check to make sure that if the link is going into a GRU
+					/* Me - check to make sure that if the link is going into a GRU
 					   that GRU is notified */
 					if(nodep2->type == GRU) {
 						NNodeGRU* gru_ptr = dynamic_cast<NNodeGRU*>(nodep2);

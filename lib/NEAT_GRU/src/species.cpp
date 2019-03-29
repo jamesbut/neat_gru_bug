@@ -327,7 +327,7 @@ void Species::adjust_fitness() {
 	//std::cout << "Species: " << id << " num_parents: " << num_parents << std::endl;
 
 	//Mark for death those who are ranked too low to be parents
-	//James - This is truncation selection
+	//Me - This is truncation selection
 	curorg=organisms.begin();
 	(*curorg)->champion=true;  //Mark the champ as such
 	for(count=1;count<=num_parents;count++) {
@@ -483,21 +483,21 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 		//std::cout << "Species: " << id << " Expected: " << expected_offspring << std::endl;
 		//Create the designated number of offspring for the Species
 		//one at a time
-		for (count=0;count<expected_offspring;count++) {		/* James - if this is 0, no offspring created */
+		for (count=0;count<expected_offspring;count++) {		/* Me - if this is 0, no offspring created */
 
 			mut_struct_baby=false;
 			mate_baby=false;
 
 			outside=false;
 
-			//Debug Trap: James - doesn't seem to happen
+			//Debug Trap: Me - doesn't seem to happen
 			if (expected_offspring>NEAT::pop_size) {
 				//      std::cout<<"ALERT: EXPECTED OFFSPRING = "<<expected_offspring<<std::endl;
 				//      cin>>pause;
 			}
 
 			//If we have a super_champ (Population champion), finish off some special clones
-			/* James - this is only the case when we perform delta coding*/
+			/* Me - this is only the case when we perform delta coding*/
 			if ((thechamp->super_champ_offspring) > 0) {
 				//std::cout << "WE HAVE SUPER CHAMP" <<std::endl;
 				mom=thechamp;
@@ -515,8 +515,8 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 						//ABOVE LINE IS FOR:
 						//Make sure no links get added when the system has link adding disabled
 						new_genome->mutate_link_weights(mut_power,NEAT::mutate_gene_rate_prob,GAUSSIAN);
-						new_genome->mutate_gru_link_weights(gru_mut_power,NEAT::mutate_gru_gene_rate_prob);		/* James - added */
-					} else {	//James - won't come here if mutate add link is 0
+						new_genome->mutate_gru_link_weights(gru_mut_power,NEAT::mutate_gru_gene_rate_prob);		/* Me - added */
+					} else {	//Me - won't come here if mutate add link is 0
 						//Sometimes we add a link to a superchamp
 						net_analogue=new_genome->genesis(generation);
 						new_genome->mutate_add_link(pop->innovations,pop->cur_innov_num,NEAT::newlink_tries);
@@ -527,7 +527,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 
 				baby=new Organism(0.0,new_genome,generation);
 
-				// James - The problem lies here when baby->high_fit is set
+				// Me - The problem lies here when baby->high_fit is set
 				// If I remove this, the ALERT goes away
 				if ((thechamp->super_champ_offspring) == 1) {
 					if (thechamp->pop_champ) {
@@ -537,7 +537,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 						//std::cout << "Moms orig fitness: " << mom->orig_fitness << std::endl;
 						//std::cout << "Moms current fitness: " << mom->fitness << std::endl;	This is just very low, assuming 0
 						//mom->gnome->print_to_filename("file_dump/mom_gnome");
-						//baby->gnome->print_to_filename("file_dump/baby_gnome"); //James - they seem to have the same weights
+						//baby->gnome->print_to_filename("file_dump/baby_gnome"); //Me - they seem to have the same weights
 																				 					 //But they no longer have GRU nodes!! But
 																				 				 	 //they do when you just print their genomes
 						//mom->print_to_file("file_dump/mom_org");
@@ -548,8 +548,8 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 				thechamp->super_champ_offspring--;
 			}
 			//If we have a Species champion, just clone it
-		   //else if ((!champ_done)&&				//James - I CHANGED THIS
-			//	(expected_offspring>5)) {		//James - why does this have to be greater than 5?
+		   //else if ((!champ_done)&&				//Me - I CHANGED THIS
+			//	(expected_offspring>5)) {		//Me - why does this have to be greater than 5?
 			else if ((!champ_done) && (expected_offspring >= 2)) {
 					//std::cout << "Cloning Species Champion" <<std::endl;			//This is called more often than it crashes
 					mom=thechamp; //Mom is the champ
@@ -563,7 +563,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 
 					champ_done=true;
 
-					//baby->pop_champ_child=true;						//James - I added this to compare other duplication
+					//baby->pop_champ_child=true;						//Me - I added this to compare other duplication
 					//baby->high_fit=mom->orig_fitness;
 
 					//std::cout << "Moms orig fitness: " << mom->orig_fitness << std::endl;
@@ -619,7 +619,7 @@ bool Species::reproduce(int generation, Population *pop,std::vector<Species*> &s
 						mut_struct_baby=true;
 					} else if (randfloat()<NEAT::mutate_add_link_prob) {
 						//std::cout<<"mutate add link"<<std::endl;
-						net_analogue=new_genome->genesis(generation);	//James - Why does genesis have to be called here?
+						net_analogue=new_genome->genesis(generation);	//Me - Why does genesis have to be called here?
 						new_genome->mutate_add_link(pop->innovations,pop->cur_innov_num,NEAT::newlink_tries);
 						delete net_analogue;
 						mut_struct_baby=true;
