@@ -64,13 +64,24 @@ for i in range(0, len(train_file_data_non_gru[0])):
 
     avg_mean_scores_non_gru.append(sum(max_scores_per_gen) / len(max_scores_per_gen))
 
-plt.rcParams.update({'font.size': 22})
-plt.rc('legend', fontsize=16)
 
-plt.plot(train_generations, avg_max_scores_gru, label='Max scores GRU')
-plt.plot(train_generations, avg_max_scores_non_gru, label='Max scores non-GRU')
-plt.plot(train_generations, avg_mean_scores_gru, label='Mean scores GRU')
-plt.plot(train_generations, avg_mean_scores_non_gru, label='Mean scores non-GRU')
+plt.rcParams.update({'font.size': 26})
+#Old
+#plt.rc('legend', fontsize=16)
+#Mod
+plt.rc('legend', fontsize=20)
+
+
+#Old graph
+#plt.plot(train_generations, avg_max_scores_gru, label='Max scores GRU')
+#plt.plot(train_generations, avg_max_scores_non_gru, label='Max scores non-GRU')
+#plt.plot(train_generations, avg_mean_scores_gru, label='Mean scores GRU')
+#plt.plot(train_generations, avg_mean_scores_non_gru, label='Mean scores non-GRU')
+
+#New mod graph for presentation
+plt.plot(train_generations, avg_mean_scores_gru, label='Average population scores: GRU')
+plt.plot(train_generations, avg_mean_scores_non_gru, label='Average population scores: non-GRU')
+
 pylab.legend(loc='upper left')
 plt.ylabel('Agent fitness')
 plt.xlabel('Generation')

@@ -1,6 +1,7 @@
 clear all, clc
 
 path_to_trajectories = '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/trajectories_temp/';
+%path_to_trajectories = '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/trajectories_temp/i_bug_2_trajectories/';
 path_to_envs = '/home/james/Documents/PhD/researchPrograms/ARGoS/neat_gru_bug/argos_params/environments/kim_envs/';
 num_of_envs = 209;
 %num_of_envs = 5;
@@ -100,14 +101,14 @@ end
 
 %Turn back on when doing individual runs analyses again
 
-fid = fopen('ibug_lengths','wt');
+%fid = fopen('ibug_lengths','wt');
 
-if fid > 0
-    fprintf(fid, '%f\n' ,path_percentages);
-    fclose(fid)
-end
+%if fid > 0
+%    fprintf(fid, '%f\n' ,path_percentages);
+%    fclose(fid)
+%end
 
-disp(path_percentages)
+%disp(path_percentages)
 disp(mean(path_percentages))
 disp(median(path_percentages))
 

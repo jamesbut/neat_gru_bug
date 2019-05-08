@@ -12,7 +12,7 @@ file_num_end_gru = 11
 file_num_start_non_gru = 1
 file_num_end_non_gru = 11
 
-NUM_GENS_DISP = 3000
+NUM_GENS_DISP = 5000
 
 train_file_data_gru = []
 
@@ -135,7 +135,7 @@ for i in range(0, len(max_scores_data_non_gru[0])):
 #     avg_mean_scores_non_gru.append(sum(max_scores_per_gen) / len(max_scores_per_gen))
 
 plt.rcParams.update({'font.size': 26})
-plt.rc('legend', fontsize=24)
+plt.rc('legend', fontsize=21)
 
 plt.plot(train_generations, avg_max_scores_gru, label='Max scores GRU', linewidth=3)
 plt.plot(train_generations, avg_max_scores_non_gru, label='Max scores non-GRU', linewidth=3)
