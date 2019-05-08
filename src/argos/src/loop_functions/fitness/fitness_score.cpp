@@ -173,10 +173,29 @@ double FitnessScore::calculate_fitness() {
    //If the robot hits the target, reward with a function of path length
    // std::cout << "Hit tower: " << hit_tower << std::endl;
    //std::cout << "Traj per astar: " << traj_per_astar << std::endl;
-   fitness_score = hit_tower ? (1 / pow(traj_per_astar, 0.5)) : 0;
    //fitness_score = hit_tower ? (-0.25*traj_per_astar + 1.25) : 0;
 
-   //std::cout << "Fitness score: " << fitness_score;
+   // fitness_score = hit_tower ? (1 / pow(traj_per_astar, 0.5)) : 0;
+
+   // if(no_son_of_mine)
+   //    fitness_score /= 10;
+
+   /*   F9   */
+   //Calculate remaining distance according to astar
+   CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+
+   //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
+   argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
+   double remaining_astar_distance =  m_env_generator->calculate_remaining_distance_from(bot_pos);
+
+   double astar_length = m_env_generator->get_environment_optimal_length();
+
+   //Normalise with Astar length from start
+   //And it is inversely proportional to the remaining astar distance
+   const double ALPHA = 0.25;
+   double bounded_remaining_dist = tanh(ALPHA*(astar_length / remaining_astar_distance));
+
+   fitness_score = hit_tower ? ((1 / pow(traj_per_astar, 0.5)) + 1) : bounded_remaining_dist;
 
    if(no_son_of_mine)
       fitness_score /= 10;
