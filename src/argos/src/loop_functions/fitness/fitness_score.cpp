@@ -180,7 +180,8 @@ double FitnessScore::calculate_fitness() {
    // if(no_son_of_mine)
    //    fitness_score /= 10;
 
-   /*   F9   */
+   /*   F9   - alpha=0.25*/
+   /*   F10   - alpha=0.5*/
    //Calculate remaining distance according to astar
    CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
 
@@ -192,7 +193,8 @@ double FitnessScore::calculate_fitness() {
 
    //Normalise with Astar length from start
    //And it is inversely proportional to the remaining astar distance
-   const double ALPHA = 0.25;
+   //const double ALPHA = 0.25;
+   const double ALPHA = 0.5;
    double bounded_remaining_dist = tanh(ALPHA*(astar_length / remaining_astar_distance));
 
    fitness_score = hit_tower ? ((1 / pow(traj_per_astar, 0.5)) + 1) : bounded_remaining_dist;
