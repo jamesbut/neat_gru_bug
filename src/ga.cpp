@@ -20,7 +20,7 @@ GA::GA(std::string neat_param_file, const bool no_bearing) :
    PARALLEL(true),
    //ACCEPTABLE_FITNESS(13.88),
    NO_BEARING(no_bearing),   //This is now set in main.cpp
-   RANDOMLY_GENERATED_ENVS(false),
+   RANDOMLY_GENERATED_ENVS(true),
    NOVELTY_SEARCH(false),
    ns(NULL),
    TEST_EVAL_GEN(25),

@@ -180,8 +180,9 @@ double FitnessScore::calculate_fitness() {
    // if(no_son_of_mine)
    //    fitness_score /= 10;
 
-   /*   F9   - alpha=0.25*/
-   /*   F10   - alpha=0.5*/
+   /*   F9   - alpha=0.25,  K=1   */
+   /*   F10   - alpha=0.5,  K=1   */
+   /*   F11  - alpha=0.25,  K=2   */
    //Calculate remaining distance according to astar
    CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
 
@@ -193,11 +194,21 @@ double FitnessScore::calculate_fitness() {
 
    //Normalise with Astar length from start
    //And it is inversely proportional to the remaining astar distance
-   //const double ALPHA = 0.25;
-   const double ALPHA = 0.5;
+   const double ALPHA = 0.25;
+   //const double ALPHA = 0.5;
+   const double K = 1;
+   //const double K = 2;
    double bounded_remaining_dist = tanh(ALPHA*(astar_length / remaining_astar_distance));
 
-   fitness_score = hit_tower ? ((1 / pow(traj_per_astar, 0.5)) + 1) : bounded_remaining_dist;
+   //std::cout << "A star length: " << astar_length << std::endl;
+   //std::cout << "remaining_astar_distance: " << remaining_astar_distance << std::endl;
+   //std::cout << "Bounded remaining distance: " << bounded_remaining_dist << std::endl;
+
+   fitness_score = hit_tower ? ((1 / pow(traj_per_astar, 0.5)) + K) : bounded_remaining_dist;
+
+   //std::cout << (1 / pow(traj_per_astar, 0.5)) + K << std::endl;
+
+   //std::cout << "Fitness: " << fitness_score << std::endl;
 
    if(no_son_of_mine)
       fitness_score /= 10;
