@@ -183,6 +183,7 @@ double FitnessScore::calculate_fitness() {
    /*   F9   - alpha=0.25,  K=1   */
    /*   F10   - alpha=0.5,  K=1   */
    /*   F11  - alpha=0.25,  K=2   */
+   /*   F12  - alpha=0.5,  K=2   */
    //Calculate remaining distance according to astar
    CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
 
@@ -194,10 +195,10 @@ double FitnessScore::calculate_fitness() {
 
    //Normalise with Astar length from start
    //And it is inversely proportional to the remaining astar distance
-   const double ALPHA = 0.25;
-   //const double ALPHA = 0.5;
-   const double K = 1;
-   //const double K = 2;
+   //const double ALPHA = 0.25;
+   const double ALPHA = 0.5;
+   //const double K = 1;
+   const double K = 2;
    double bounded_remaining_dist = tanh(ALPHA*(astar_length / remaining_astar_distance));
 
    //std::cout << "A star length: " << astar_length << std::endl;
