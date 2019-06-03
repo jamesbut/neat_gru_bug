@@ -522,7 +522,11 @@ bool Population::epoch(int generation) {
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
 		total+=(*curorg)->fitness;
 	}
+	if(total <= 0.000001)
+		overall_average = 0;
+	else
 	overall_average=total/total_organisms;
+
 	std::cout<<"Generation "<<generation<<": "<<"overall_average = "<<overall_average<<std::endl;
 
 	//Now compute expected number of offspring for each individual organism
@@ -530,7 +534,10 @@ bool Population::epoch(int generation) {
 	//But then again is the expected number of offspring is very similar between species
 	//it wont be much selection at all (which is what I have observed)
 	for(curorg=organisms.begin();curorg!=organisms.end();++curorg) {
-		(*curorg)->expected_offspring=(((*curorg)->fitness)/overall_average);
+		if(overall_average <= 0.000001 || (*curorg)->fitness <= 0.000001)	//James added because of problems dividing by zero
+			(*curorg)->expected_offspring=0;
+		else
+			(*curorg)->expected_offspring=(((*curorg)->fitness)/overall_average);
 	}
 
 	//Now add those offspring up within each Species to get the number of
