@@ -90,15 +90,17 @@ void DataCollection::collect_scores(const std::vector<std::vector <RunResult> >&
          individual_trial_fitnesses.push_back(individual_trial_run_results[i].fitness);
 
       //double minTrial = *std::min_element(individual_trial_scores.begin(), individual_trial_scores.end());
-      double meanTrialFitness = std::accumulate(individual_trial_fitnesses.begin(), individual_trial_fitnesses.end(), 0.0) / individual_trial_fitnesses.size();
+      //double meanTrialFitness = std::accumulate(individual_trial_fitnesses.begin(), individual_trial_fitnesses.end(), 0.0) / individual_trial_fitnesses.size();
       //double sumTrial = std::accumulate(individual_trial_scores.begin(), individual_trial_scores.end(), 0.0);
-      //std::cout << i << ": " << meanTrialFitness << std::endl;
-      if(NASH_AVERAGING) std::cout << meanTrialFitness << " ";
+      double medianTrialFitness = find_median(individual_trial_fitnesses);
+
+      //if(NASH_AVERAGING) std::cout << meanTrialFitness << " ";
 
       //Set skills to either uniform average OR nash average OR novelty
       if(NASH_AVERAGING) neatPop->organisms[i]->fitness = agent_skills[i];
       else if(m_ns != NULL) neatPop->organisms[i]->fitness = m_ns->get_gen_novelty(i);
-      else neatPop->organisms[i]->fitness = meanTrialFitness;
+      //else neatPop->organisms[i]->fitness = meanTrialFitness;
+      else neatPop->organisms[i]->fitness = medianTrialFitness;
 
       //Find best organism in population
       if (i == 0 || neatPop->organisms[i]->fitness > maxPopScore) {
@@ -724,5 +726,30 @@ void DataCollection::flush_winners(int current_gen) {
       }
 
    }
+
+}
+
+double DataCollection::find_median(std::vector<double>& vec) {
+
+    if (vec.size() % 2 == 0) {
+
+        const auto median_it1 = vec.begin() + vec.size() / 2 - 1;
+        const auto median_it2 = vec.begin() + vec.size() / 2;
+
+        std::nth_element(vec.begin(), median_it1 , vec.end());
+        const auto e1 = *median_it1;
+
+        std::nth_element(vec.begin(), median_it2 , vec.end());
+        const auto e2 = *median_it2;
+
+        return (e1 + e2) / 2;
+
+    } else {
+
+        const auto median_it = vec.begin() + vec.size() / 2;
+        std::nth_element(vec.begin(), median_it , vec.end());
+        return *median_it;
+
+    }
 
 }

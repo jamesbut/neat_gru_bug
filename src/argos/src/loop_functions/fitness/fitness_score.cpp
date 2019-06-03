@@ -175,10 +175,10 @@ double FitnessScore::calculate_fitness() {
    //std::cout << "Traj per astar: " << traj_per_astar << std::endl;
    //fitness_score = hit_tower ? (-0.25*traj_per_astar + 1.25) : 0;
 
-   // fitness_score = hit_tower ? (1 / pow(traj_per_astar, 0.5)) : 0;
+   fitness_score = hit_tower ? (1 / pow(traj_per_astar, 0.5)) : 0;
 
-   // if(no_son_of_mine)
-   //    fitness_score /= 10;
+   if(no_son_of_mine)
+      fitness_score /= 10;
 
    /*   F9   - alpha=0.25,  K=1   */
    /*   F10   - alpha=0.5,  K=1   */
@@ -187,34 +187,34 @@ double FitnessScore::calculate_fitness() {
    /*   F13  - alpha=0.5,  K=3   */
    /*   F14  - alpha=0.5,  K=10  */
    //Calculate remaining distance according to astar
-   CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
-
-   //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
-   argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
-   double remaining_astar_distance =  m_env_generator->calculate_remaining_distance_from(bot_pos);
-
-   double astar_length = m_env_generator->get_environment_optimal_length();
-
-   //Normalise with Astar length from start
-   //And it is inversely proportional to the remaining astar distance
-   //const double ALPHA = 0.25;
-   const double ALPHA = 0.5;
-   //const double K = 1;
-   const double K = 10;
-   double bounded_remaining_dist = tanh(ALPHA*(astar_length / remaining_astar_distance));
-
-   //std::cout << "A star length: " << astar_length << std::endl;
-   //std::cout << "remaining_astar_distance: " << remaining_astar_distance << std::endl;
-   //std::cout << "Bounded remaining distance: " << bounded_remaining_dist << std::endl;
-
-   fitness_score = hit_tower ? ((1 / pow(traj_per_astar, 0.5)) + K) : bounded_remaining_dist;
+   // CVector3 clever_bot_pos = m_clever_bot->GetEmbodiedEntity().GetOriginAnchor().Position;
+   //
+   // //The 7 and 10 here is switching from the simulation coordinates to the search coordinates
+   // argos::CVector2 bot_pos = argos::CVector2((clever_bot_pos.GetX()+7) * 10, (clever_bot_pos.GetY()+7) * 10);
+   // double remaining_astar_distance =  m_env_generator->calculate_remaining_distance_from(bot_pos);
+   //
+   // double astar_length = m_env_generator->get_environment_optimal_length();
+   //
+   // //Normalise with Astar length from start
+   // //And it is inversely proportional to the remaining astar distance
+   // //const double ALPHA = 0.25;
+   // const double ALPHA = 0.5;
+   // //const double K = 1;
+   // const double K = 10;
+   // double bounded_remaining_dist = tanh(ALPHA*(astar_length / remaining_astar_distance));
+   //
+   // //std::cout << "A star length: " << astar_length << std::endl;
+   // //std::cout << "remaining_astar_distance: " << remaining_astar_distance << std::endl;
+   // //std::cout << "Bounded remaining distance: " << bounded_remaining_dist << std::endl;
+   //
+   // fitness_score = hit_tower ? ((1 / pow(traj_per_astar, 0.5)) + K) : bounded_remaining_dist;
 
    //std::cout << (1 / pow(traj_per_astar, 0.5)) + K << std::endl;
 
    //std::cout << "Fitness: " << fitness_score << std::endl;
 
-   if(no_son_of_mine)
-      fitness_score /= 10;
+   // if(no_son_of_mine)
+   //    fitness_score /= 10;
 
    //std::cout << " " << fitness_score << std::endl;
 

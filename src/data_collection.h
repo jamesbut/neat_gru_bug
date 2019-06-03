@@ -40,6 +40,8 @@ private:
    std::vector<std::vector <RunResult> > parallel_eval(const std::vector<NEAT::Organism*>);
    std::vector<std::vector <RunResult> > serial_eval(const std::vector<NEAT::Organism*> genomes_to_be_tested);
 
+   double find_median(std::vector<double>& vec);
+
    ARGoS_simulation* as;
 
    const bool RANDOMLY_GENERATED_ENVS;
