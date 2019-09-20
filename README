@@ -1,0 +1,35 @@
+This directory should contain everything needed to run the experiments in the paper entitled: "Evolving Indoor Navigational Strategies Using Gated Recurrent Units In NEAT"
+
+There are a significant number of dependencies and the setup is quite convoluted.
+
+Dependencies:
+
+ARGoS simulator: https://github.com/knmcguire/argos3 Branch: argos3mod_bug
+Boost 1.67.0
+OpenCV: https://github.com/opencv/opencv Branch: 3.3.1
+eigen
+
+To build:
+
+Enter neat_gru_bug_code/
+mkdir build
+cd build
+cmake ..
+make
+
+There are also a number of handwritten file paths in the code
+that one needs to change to the directory of the user
+
+Once build one can run experiments by running:
+
+./neat_gru_bug archive_params_fixed_training_set/ap_35.ne (GRU exps bearing)
+./neat_gru_bug archive_params/ap_39.ne (non-GRU exps bearing)
+
+For the bearing exps one must set NO_BEARING = false in main.cpp
+and RANDOMLY_GENERATED_ENVS = true in ga.cpp
+
+./neat_gru_bug archive_params_nb/ap_4_nb.ne (GRU exps non-bearing)
+./neat_gru_bug archive_params_nb/ap_5_nb.ne (non-GRU exps non-bearing)
+
+For the bearing exps one must set NO_BEARING = true in main.cpp
+and RANDOMLY_GENERATED_ENVS = false in ga.cpp

@@ -46,41 +46,52 @@ for i in range(0, len(train_file_data_non_gru[0])):
 
 #GRU mean scores averaged
 avg_mean_scores_gru = []
+max_mean_scores_gru = []
+min_mean_scores_gru = []
 
 for i in range(0, len(train_file_data_gru[0])):
-    max_scores_per_gen = []
+    mean_scores_per_gen = []
     for j in range(0, len(train_file_data_gru)):
-        max_scores_per_gen.append(train_file_data_gru[j][i][2])
+        mean_scores_per_gen.append(train_file_data_gru[j][i][2])
 
-    avg_mean_scores_gru.append(sum(max_scores_per_gen) / len(max_scores_per_gen))
+    avg_mean_scores_gru.append(sum(mean_scores_per_gen) / len(mean_scores_per_gen))
+    max_mean_scores_gru.append(max(mean_scores_per_gen))
+    min_mean_scores_gru.append(min(mean_scores_per_gen))
 
 #non-GRU mean scores averaged
 avg_mean_scores_non_gru = []
+max_mean_scores = []
+min_mean_scores = []
 
 for i in range(0, len(train_file_data_non_gru[0])):
-    max_scores_per_gen = []
+    mean_scores_per_gen = []
     for j in range(0, len(train_file_data_non_gru)):
-        max_scores_per_gen.append(train_file_data_non_gru[j][i][2])
+        mean_scores_per_gen.append(train_file_data_non_gru[j][i][2])
 
-    avg_mean_scores_non_gru.append(sum(max_scores_per_gen) / len(max_scores_per_gen))
+    avg_mean_scores_non_gru.append(sum(mean_scores_per_gen) / len(mean_scores_per_gen))
+    max_mean_scores.append(max(mean_scores_per_gen))
+    min_mean_scores.append(min(mean_scores_per_gen))
 
 
 plt.rcParams.update({'font.size': 26})
 #Old
-plt.rc('legend', fontsize=16)
+#plt.rc('legend', fontsize=16)
 #Mod
-#plt.rc('legend', fontsize=20)
+plt.rc('legend', fontsize=20)
 
 
 #Old graph
-plt.plot(train_generations, avg_max_scores_gru, label='Max scores GRU')
-plt.plot(train_generations, avg_max_scores_non_gru, label='Max scores non-GRU')
-plt.plot(train_generations, avg_mean_scores_gru, label='Mean scores GRU')
-plt.plot(train_generations, avg_mean_scores_non_gru, label='Mean scores non-GRU')
+#plt.plot(train_generations, avg_max_scores_gru, label='Max scores GRU')
+#plt.plot(train_generations, avg_max_scores_non_gru, label='Max scores non-GRU')
+#plt.plot(train_generations, avg_mean_scores_gru, label='Mean scores GRU')
+#plt.plot(train_generations, avg_mean_scores_non_gru, label='Mean scores non-GRU')
 
 #New mod graph for presentation
-#plt.plot(train_generations, avg_mean_scores_gru, label='Average population scores: GRU')
-#plt.plot(train_generations, avg_mean_scores_non_gru, label='Average population scores: non-GRU')
+plt.plot(train_generations, avg_mean_scores_gru, label='Average population scores: GRU')
+plt.plot(train_generations, avg_mean_scores_non_gru, label='Average population scores: non-GRU')
+
+#plt.fill_between(train_generations, min_mean_scores_gru, max_mean_scores_gru)
+#plt.fill_between(train_generations, min_mean_scores, max_mean_scores)
 
 pylab.legend(loc='upper left')
 plt.ylabel('Agent fitness')
